@@ -39,7 +39,7 @@ const Footer = () => {
         clipPath: 'polygon(0 0, 100% 80px, 100% 100%, 0 100%)'
       }}
     >
-      <div className="max-w-7xl mx-auto relative z-10">
+      <div className="max-w-7xl mx-auto relative z-12">
 
         {/* Main Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-14 lg:gap-[0.9em] mb-[45px] items-start">
@@ -129,7 +129,7 @@ const Footer = () => {
             onClick={scrollToTop}
             className="flex items-center lg:relative lg:start-6 gap-2 text-sm hover:text-[#3457DC] transition-colors duration-300 order-1 md:order-2 cursor-pointer"
           >
-            Go Up <HiOutlineArrowNarrowUp size={20} />
+            Go Up <HiOutlineArrowNarrowUp size={18} />
           </button>
 
           <div className="flex items-center text-[12px] md:text-[13px] gap-[28px] md:gap-[57px] order-2 md:order-3 font-normal text-white">
