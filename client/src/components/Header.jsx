@@ -193,7 +193,7 @@ const Header = () => {
 
           {/* Login Button */}
           <Link 
-            to="/userdashboard"
+            to="/login"
             className="hidden sm:flex content-stretch items-center justify-center relative shrink-0 border border-[#3457dc] border-solid rounded-[16px] bg-white/[0.01] hover:bg-accent/10 transition-all"
             style={{
               paddingLeft: '1.39vw', 
@@ -240,7 +240,7 @@ const Header = () => {
               <Link to="/support" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-medium text-white">Support</Link>
             </nav>
             <div className="mt-auto pt-6 border-t border-card-border">
-              <Link to="/userdashboard" className="block w-full py-4 text-center bg-accent text-white rounded-xl font-bold">Log in / Sign up</Link>
+              <Link to="/login" className="block w-full py-4 text-center bg-accent text-white rounded-xl font-bold">Log in / Sign up</Link>
             </div>
           </aside>
         </div>

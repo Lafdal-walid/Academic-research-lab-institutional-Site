@@ -13,6 +13,7 @@
   --color-label: #373735;
   --color-input-bg: #121217;
   --font-poppins: "Poppins", sans-serif;
+  --font-gilroy: "Gilroy", sans-serif;
 }
 
 /* Tajawal Font */
@@ -104,4 +105,40 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--color-background-main);
   color: white;
+}
+
+/* تخصيص الـ Scrollbar للمتصفحات التي تدعم Webkit (Chrome, Edge, Safari) */
+
+/* 1. عرض الشريط بالكامل */
+::-webkit-scrollbar {
+  width: 8px; /* عرض الشريط الرأسي */
+  height: 8px; /* ارتفاع الشريط الأفقي */
+}
+
+/* 2. خلفية المسار (Track) */
+::-webkit-scrollbar-track {
+  background: var(--color-background-main); /* لون خلفية المسار (نفس لون خلفية الموقع) */
+}
+
+/* 3. الجزء المتحرك (Thumb) */
+::-webkit-scrollbar-thumb {
+  background: var(--color-accent); /* لون الشريط نفسه (أزرق دائماً) */
+  border-radius: 10px; /* جعل الحواف دائرية */
+  border: 2px solid var(--color-background-main); /* إضافة مسافة حول الشريط */
+}
+
+/* 4. عند تمرير الماوس فوق الشريط */
+::-webkit-scrollbar-thumb:hover {
+  filter: brightness(1.2); /* تفتيح بسيط عند اللمس */
+}
+
+/* منع تغير لون الخلفية عند الإكمال التلقائي (Autofill) */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #151519 inset !important; /* لون خلفية الكارد */
+  -webkit-text-fill-color: white !important;
+  caret-color: white;
+  transition: background-color 5000s ease-in-out 0s;
 }
