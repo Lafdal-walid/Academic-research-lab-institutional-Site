@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import ColorBends from '../../components/ui/ColorBends';
 
 // SVG Paths
@@ -40,7 +40,6 @@ function Exclamation() {
 
 const Confirmforget: React.FC = () => {
     const navigate = useNavigate();
-    const location = useLocation();
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showNewPassword, setShowNewPassword] = useState(false);
@@ -106,12 +105,6 @@ const Confirmforget: React.FC = () => {
                 <ColorBends colors={["#3457dc"]} rotation={0} speed={0.2} scale={1.7} frequency={1} warpStrength={1} transparent />
             </div>
 
-            {/* Logo Area - Absolute top to stay centered visually */}
-            <div className="absolute top-10 w-full flex justify-center z-10 animate-fade-in shrink-0">
-                <Link to="/" className="block">
-                    <img src="/Saad Dahlab white.png" alt="Logo" className="h-16 w-auto drop-shadow-2xl" />
-                </Link>
-            </div>
 
             <div className={`w-full ${isSuccess ? 'max-w-[400px]' : 'max-w-[543px]'} z-10 relative flex flex-col items-center transition-all duration-500`}>
                 <div className={`bg-[#151519] border border-white/5 px-8 pt-5 pb-10 rounded-[16px] shadow-2xl backdrop-blur-md w-full ${isSuccess ? 'min-h-[300px]' : 'min-h-[400px]'} flex flex-col justify-center transition-all duration-500 relative overflow-visible scale-in`}>

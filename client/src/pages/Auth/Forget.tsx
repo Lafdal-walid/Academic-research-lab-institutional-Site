@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import ColorBends from '../../components/ui/ColorBends';
 
 // Modular Components
@@ -62,15 +61,9 @@ const Forget: React.FC = () => {
                 <ColorBends colors={["#3457dc"]} rotation={0} speed={0.2} scale={1.7} frequency={1} warpStrength={1} transparent />
             </div>
 
-            {/* Logo Area */}
-            <div className="absolute top-10 w-full flex justify-center z-10 animate-fade-in shrink-0">
-                <Link to="/" className="block">
-                    <img src="/Saad Dahlab white.png" alt="Logo" className="h-16 w-auto drop-shadow-2xl" />
-                </Link>
-            </div>
 
             <div className="w-full max-w-[543px] z-10 relative flex flex-col items-center justify-center">
-                <div className="bg-[#151519] border border-white/5 px-8 pt-10 pb-[3vh] rounded-[16px] shadow-2xl backdrop-blur-md w-full flex flex-col justify-start transition-all duration-500 scale-in relative overflow-visible">
+                <div className="bg-[#151519] border border-white/5 px-8 pt-10 pb-[4.5vh] rounded-[16px] shadow-2xl backdrop-blur-md w-full flex flex-col justify-start transition-all duration-500 scale-in relative overflow-visible">
                     
                     {step === 1 ? (
                         <RequestForm 

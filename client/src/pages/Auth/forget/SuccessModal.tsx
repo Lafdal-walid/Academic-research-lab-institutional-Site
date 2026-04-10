@@ -24,7 +24,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ onClose }) => {
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/70 backdrop-blur-md animate-fade-in">
-            <div className="bg-[#151519] flex flex-col gap-[24px] items-center justify-center pb-[32px] pt-[24px] px-[24px] relative rounded-[16px] max-w-[560px] w-full animate-scale-in border border-white/5">
+            <div className="bg-[#151519] flex flex-col gap-[24px] items-center justify-center pb-[48px] pt-[24px] px-[24px] relative rounded-[16px] max-w-[560px] w-full animate-scale-in border border-white/5">
                 <div aria-hidden="true" className="absolute border border-[#1e1d22] border-solid inset-0 pointer-events-none rounded-[16px]" />
                 
                 {/* Close Button Area */}
