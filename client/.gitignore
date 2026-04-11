@@ -1,9 +1,3 @@
 node_modules/
-dist/
-dist-ssr/
-*.log
-.env
-.local
-.DS_Store
-.vscode/
-.idea/
+
+

@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import checkIconPath from '../../../assets/svg/auth/check.svg';
-import crossIconPath from '../../../assets/svg/auth/cross.svg';
+import { CheckIcon, CrossIcon } from './Icons';
 
 interface SuccessModalProps {
     onClose: () => void;
@@ -13,9 +12,6 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ onClose }) => {
     useEffect(() => {
         // Auto-redirect after 4 seconds
         const timer = setTimeout(() => {
-            // "Where we were before" - navigate(-1) goes back to Login, 
-            // but usually we want to return to the site. 
-            // We'll use home as a safe default or -2 to skip the Login page.
             navigate('/'); 
         }, 4000);
 
@@ -34,7 +30,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ onClose }) => {
                             onClick={onClose}
                             className="bg-[#1e1e24] p-[4px] relative rounded-[400px] shrink-0 hover:brightness-125 transition-all z-20"
                         >
-                            <img src={crossIconPath} alt="Close" className="size-[20px]" />
+                            <CrossIcon className="size-[20px] text-accent" />
                         </button>
                     </div>
                 </div>
@@ -42,7 +38,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ onClose }) => {
                 {/* Success Icon Area */}
                 <div className="bg-[rgba(52,87,220,0.2)] content-stretch flex items-center p-[12px] relative rounded-[400px] shrink-0">
                     <div className="bg-[rgba(52,87,220,0.6)] content-stretch flex items-end p-[16px] relative rounded-[400px] shrink-0 transform hover:scale-110 transition-transform duration-500">
-                        <img src={checkIconPath} alt="Success" className="size-[32px]" />
+                        <CheckIcon className="size-[32px] text-white" />
                     </div>
                 </div>
 

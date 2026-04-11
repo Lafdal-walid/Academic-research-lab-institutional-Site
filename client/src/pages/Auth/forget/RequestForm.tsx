@@ -1,8 +1,6 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { AngleSmallDown } from './Icons';
-import checkIconPath from '../../../assets/svg/auth/check.svg';
-import exclamationIconPath from '../../../assets/svg/auth/exclamation.svg';
+import { AngleSmallDown, CheckIcon, ExclamationIcon } from './Icons';
 
 interface RequestFormProps {
     email: string;
@@ -49,7 +47,7 @@ const RequestForm: React.FC<RequestFormProps> = ({
                     </div>
                     {error && (
                         <div className="flex items-center gap-1.5 mt-1 text-[#C5432D]">
-                            <img src={exclamationIconPath} alt="Error" className="size-[16px]" />
+                            <ExclamationIcon className="size-[16px]" />
                             <p className="text-[11px] font-medium">{error}</p>
                         </div>
                     )}
@@ -64,7 +62,7 @@ const RequestForm: React.FC<RequestFormProps> = ({
                         {isLinkSent ? "Link Sent" : isSubmitting ? "Sending..." : "Send Reset Link"}
                     </span>
                     {isLinkSent && (
-                        <img src={checkIconPath} alt="Check" className="size-[18px]" />
+                        <CheckIcon className="size-[18px] text-white" />
                     )}
                 </button>
             </form>

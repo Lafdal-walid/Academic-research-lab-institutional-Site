@@ -1,22 +1,6 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
-interface ColorBendsProps {
-    className?: string;
-    style?: React.CSSProperties;
-    rotation?: number;
-    speed?: number;
-    colors?: string[];
-    transparent?: boolean;
-    autoRotate?: number;
-    scale?: number;
-    frequency?: number;
-    warpStrength?: number;
-    mouseInfluence?: number;
-    parallax?: number;
-    noise?: number;
-}
-
 const MAX_COLORS = 8;
 
 const frag = `
@@ -125,12 +109,12 @@ export default function ColorBends({
     mouseInfluence = 1,
     parallax = 0.5,
     noise = 0.1
-}: ColorBendsProps) {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
-    const rafRef = useRef<number | null>(null);
-    const materialRef = useRef<THREE.ShaderMaterial | null>(null);
-    const resizeObserverRef = useRef<ResizeObserver | null>(null);
+}) {
+    const containerRef = useRef(null);
+    const rendererRef = useRef(null);
+    const rafRef = useRef(null);
+    const materialRef = useRef(null);
+    const resizeObserverRef = useRef(null);
     const rotationRef = useRef(rotation);
     const autoRotateRef = useRef(autoRotate);
     const pointerTargetRef = useRef(new THREE.Vector2(0, 0));
@@ -141,7 +125,6 @@ export default function ColorBends({
         const container = containerRef.current;
         if (!container) return;
 
-        // Check WebGL availability first
         const isWebGLAvailable = () => {
             try {
                 const canvas = document.createElement('canvas');
@@ -156,7 +139,7 @@ export default function ColorBends({
             return;
         }
 
-        let renderer: THREE.WebGLRenderer;
+        let renderer;
         try {
             renderer = new THREE.WebGLRenderer({
                 antialias: false,
@@ -276,7 +259,7 @@ export default function ColorBends({
         material.uniforms.uParallax.value = parallax;
         material.uniforms.uNoise.value = noise;
 
-        const toVec3 = (hex: string): THREE.Vector3 => {
+        const toVec3 = (hex) => {
             const h = hex.replace('#', '').trim();
             const v =
                 h.length === 3
@@ -314,7 +297,7 @@ export default function ColorBends({
         const container = containerRef.current;
         if (!material || !container) return;
 
-        const handlePointerMove = (e: PointerEvent) => {
+        const handlePointerMove = (e) => {
             const rect = container.getBoundingClientRect();
             const x = ((e.clientX - rect.left) / (rect.width || 1)) * 2 - 1;
             const y = -(((e.clientY - rect.top) / (rect.height || 1)) * 2 - 1);

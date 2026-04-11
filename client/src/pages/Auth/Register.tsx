@@ -146,6 +146,7 @@ const Register: React.FC = () => {
                             onOtpKeyDown={handleOtpKeyDown} 
                             onSubmit={handlePhoneVerify} 
                             onBack={() => setStep(2)} 
+                            onResend={() => {}}
                             isSubmitting={isSubmitting} 
                             buttonText="Verify Phone" 
                         />
@@ -160,6 +161,7 @@ const Register: React.FC = () => {
                             onOtpKeyDown={handleOtpKeyDown} 
                             onSubmit={handleEmailVerify} 
                             onBack={() => setStep(3)} 
+                            onResend={() => {}}
                             isSubmitting={isSubmitting} 
                             buttonText="Verify Email" 
                         />
