@@ -1,0 +1,106 @@
+import React from 'react';
+import { useLocation, Link } from 'react-router-dom';
+import { useTranslation } from '@/hooks/useTranslation';
+import { useLanguage } from '@/contexts/LanguageContext';
+import Leavereviewlink from '@/ui/user/Leavereviewlink';
+import { RiArrowRightSLine } from "react-icons/ri";
+
+const SidebarCommon = ({ items, isSidebarOpen = true, className = "" }) => {
+    const { t } = useTranslation('sidebar');
+    const { direction } = useLanguage();
+    const location = useLocation();
+
+    const currentPath = location.pathname;
+
+    return (
+        <aside
+            className={`sidebar border-r-[0.05vw] border-solid border-[#2a2a30]/70 w-[15.8vw] shrink-0 min-h-screen flex flex-col pr-[3.2vw] transition-all duration-300 ${!isSidebarOpen ? '-translate-x-full absolute' : 'translate-x-0'} ${className}`}
+            style={{ backgroundColor: '#0A070E' }}
+            dir={direction}
+        >
+            <Link to="/" className="h-[11vh] flex items-center justify-center ml-[0.75vw] shrink-0 mt-[0.5vh] mb-[2.2vh]">
+                <img
+                    src="/Saad Dahlab white.png"
+                    alt="Saad Dahlab Logo"
+                    className="h-[9vh] w-auto object-contain"
+                />
+            </Link>
+
+            <nav className="nav-links flex-1 px-[0.9vw] flex flex-col gap-[1.5vh]">
+                {items.map((item) => {
+                    const isActive = currentPath === item.path ||
+                        (item.path === '/admin' && currentPath === '/admin/overview') ||
+                        (item.path === '/support' && currentPath === '/support/overview') ||
+                        (currentPath.startsWith(item.path) && item.path !== '/admin' && item.path !== '/support' && item.path !== '/' && item.path !== '/usersdashboard');
+
+                    return (
+                        <React.Fragment key={item.id}>
+                            <Link
+                                to={item.path}
+                                className={`nav-link flex items-center gap-[0.8vw] pl-[0.85vw] py-[1.3vh] ml-[0.8vw] rounded-[0.7vw] group pr-[2vw] mr-[-1.3vw] ${isActive ? 'active-nav bg-[#3457DC] text-white' : 'text-white hover:bg-white/9'
+                                    }`}
+                            >
+                                <div className="nav-link-content flex items-center gap-[0.8vw]">
+                                    <div className={`nav-icon flex shrink-0 ${direction === 'rtl' ? 'rotate-180' : ''}`}>
+                                        {React.isValidElement(item.icon) ? React.cloneElement(item.icon, { width: '0.9vw', height: '0.9vw' }) : item.icon}
+                                    </div>
+                                    <span className="nav-text whitespace-nowrap text-[1.1vw] font-[500]">
+                                        {item.label || t(item.id)}
+                                    </span>
+                                </div>
+                            </Link>
+
+                            {/* Collapsible Submenu for Admin Tools (if ID is admintools) */}
+                            {item.id === 'admintools' && currentPath.startsWith('/admin/tools') && (
+                                <div className={`flex flex-col w-full ${direction === 'rtl' ? 'pr-[0.6vw]' : 'pl-[0.6vw]'} mt-[1.1vh] mb-[1.1vh]`}>
+                                    <Link
+                                        to="/admin/tools/support"
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            width: '100%',
+                                            paddingTop: '0.6vh',
+                                            paddingBottom: '0.6vh',
+                                            paddingLeft: direction === 'rtl' ? '0vw' : '0.25vw',
+                                            paddingRight: direction === 'rtl' ? '0.25vw' : '0vw',
+                                            transition: 'all 0.3s ease',
+                                            color: currentPath.startsWith('/admin/tools/support') ? '#3457DC' : '#ffffff',
+                                            fontWeight: 500,
+                                            textDecoration: 'none',
+                                            gap: '0.25vw'
+                                        }}
+                                    >
+                                        <div style={{
+                                            transform: direction === 'rtl' ? 'rotate(180deg)' : 'none',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            opacity: currentPath.startsWith('/admin/tools/support') ? 1 : 0.7,
+                                            transition: 'opacity 0.3s ease',
+                                            fontSize: '1.05vw'
+                                        }}>
+                                            <RiArrowRightSLine />
+                                        </div>
+                                        <span className="whitespace-nowrap" style={{
+                                            fontSize: '0.9vw',
+                                            fontFamily: 'Poppins, sans-serif'
+                                        }}>
+                                            {t('supportteam')}
+                                        </span>
+                                    </Link>
+                                </div>
+                            )}
+                        </React.Fragment>
+                    );
+                })}
+            </nav>
+
+            {!currentPath.startsWith('/admin') && (
+                <div className="review-section px-[0.8vw] pb-[3vh] mt-auto flex justify-center">
+                    <Leavereviewlink />
+                </div>
+            )}
+        </aside>
+    );
+};
+
+export default React.memo(SidebarCommon);
