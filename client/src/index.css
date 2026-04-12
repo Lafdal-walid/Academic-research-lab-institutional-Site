@@ -142,3 +142,78 @@ input:-webkit-autofill:active {
   caret-color: white;
   transition: background-color 5000s ease-in-out 0s;
 }
+
+/* Last Optimization Session Styles */
+.chart-box {
+  background-color: #151519;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 1.5vw;
+  padding: 1.8vw;
+  font-family: "Poppins", sans-serif;
+  height: 100%;
+}
+
+.last-optimization-head {
+  font-size: 1.1vw;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 1.5vw;
+  padding-bottom: 1vw;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.last-optimization-body {
+  display: flex;
+  gap: 1.5vw;
+  align-items: center;
+}
+
+.last-optimization-body-left img {
+  border-radius: 0.5vw;
+  object-fit: cover;
+}
+
+.last-optimization-body-right {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8vw;
+}
+
+.last-optimization-body-right > div {
+  display: flex;
+  align-items: center;
+  gap: 0.8vw;
+  flex-wrap: wrap;
+}
+
+.last-optimization-body-right span {
+  font-size: 0.9vw;
+  color: #A5A5B2;
+}
+
+.last-optimization-body-right b {
+  font-size: 1.1vw;
+  font-weight: 600;
+  color: white;
+}
+
+.last-optimization-body-right small {
+  font-size: 0.8vw;
+  color: #6a6a75;
+}
+
+.b-success {
+  color: #01CBB1 !important;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+.flex-1 {
+  flex: 1;
+}
