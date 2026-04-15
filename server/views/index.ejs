@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Lab - Articles</title>
+</head>
+<body>
+    <h1>Articles List</h1>
+    <% if (locals.allarticles) { %>
+        <ul>
+            <% allarticles.forEach(article => { %>
+                <li>
+                    <h3><%= article.title %></h3>
+                    <p><%= article.content %></p>
+                    <p><strong>Author:</strong> <%= article.author %></p>
+                    <hr>
+                </li>
+            <% }) %>
+        </ul>
+    <% } %>
+
+    <% if (locals.name) { %>
+        <p>Value of a: <%= name %></p>
+    <% } %>
+</body>
+</html>

@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import SidebarCommon from './SidebarCommon';
-import { Notifications } from '@/icons';
 
 import iconOverview from '@/assets/svg/leftbaruser/chart-pie-alt (1) 1.svg';
 import iconTracker from '@/assets/svg/leftbaruser/credit-card 1.svg';

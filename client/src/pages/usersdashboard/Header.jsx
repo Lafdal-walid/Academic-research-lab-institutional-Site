@@ -1,11 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
 import { ChevronDown, X, Menu } from 'lucide-react';
-import {
-    Discord2, Account, Billing, Support, Signout, English, Arabic,
-    Overview, Invite, Giveaways, Coupons, Notifications,
-    Logoicon, LogoText, MobileMenuBurger, Product, Users, Referrals,
-    Content, Legal, Chatbot, Settings
-} from '@/icons';
 import { useTranslation } from "@/hooks/useTranslation";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -17,6 +11,55 @@ import ArabicIcon from "@/assets/svg/mainheader/ArabicIcon";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
+
+// Icons moved from src/icons
+const Logoicon = ({ width = '2.25rem', height = '1.625rem', className = '', alt = '' }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 36 26" fill="none" className={className} aria-label={alt}>
+        <path d="M5.41737 7.82739V24.8195H4.29748C2.43871 24.8195 0.931641 23.0138 0.931641 20.7875V7.82739H5.41737Z" fill="#3457DC" />
+        <path d="M36 22.3192C34.1389 23.8972 32.2162 24.8528 31.087 24.8528C30.7253 24.8528 30.4453 24.7543 30.2741 24.5479C30.2741 24.5479 24.5991 17.7734 23.8008 16.6098C25.7513 17.6162 30.3234 20.6042 31.3863 21.3362C30.5548 20.4072 26.0066 16.3079 24.8744 15.2327C32.4082 16.6504 35.9993 22.3192 35.9993 22.3192H36Z" fill="#3457DC" />
+    </svg>
+);
+
+const Overview = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" />
+    </svg>
+);
+
+const Notifications = ({ className }) => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+        <path d="M10.0129 14.4079C9.67689 15.3359 8.78889 15.9999 7.74889 15.9999C7.11689 15.9999 6.49289 15.7439 6.05289 15.2879C5.79689 15.0479 5.60489 14.7279 5.49289 14.3999C5.59689 14.4159 5.70089 14.4239 5.81289 14.4399C5.99689 14.4639 6.18889 14.4879 6.38089 14.5039C6.83689 14.5439 7.30089 14.5679 7.76489 14.5679C8.22089 14.5679 8.67689 14.5439 9.12489 14.5039C9.29289 14.4879 9.46089 14.4799 9.62089 14.4559C9.74889 14.4399 9.87689 14.4239 10.0129 14.4079Z" fill="white"/>
+    </svg>
+);
+
+const Settings = ({ className }) => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+        <path d="M14 8C13.9998 7.63218 13.9664 7.26512 13.9 6.90333L15.9287 5.73333L13.9287 2.26667L11.8993 3.43933C11.339 2.95995 10.6952 2.58796 10 2.342V0H6V2.342C5.30484 2.58796 4.66097 2.95995 4.10067 3.43933L2.07133 2.26667L0.0713348 5.73333L2.1 6.90333C1.96674 7.62837 1.96674 8.37163 2.1 9.09667L0.0713348 10.2667L2.07133 13.7333L4.10067 12.5613C4.66102 13.0405 5.30489 13.4122 6 13.658V16H10V13.658C10.6952 13.412 11.339 13.04 11.8993 12.5607L13.9287 13.7333L15.9287 10.2667L13.9 9.09667C13.9664 8.73488 13.9998 8.36782 14 8ZM10 8C10 8.39556 9.8827 8.78224 9.66294 9.11114C9.44318 9.44004 9.13082 9.69638 8.76537 9.84776C8.39992 9.99914 7.99778 10.0387 7.60982 9.96157C7.22186 9.8844 6.86549 9.69392 6.58579 9.41421C6.30608 9.13451 6.1156 8.77814 6.03843 8.39018C5.96126 8.00222 6.00087 7.60009 6.15224 7.23463C6.30362 6.86918 6.55996 6.55682 6.88886 6.33706C7.21776 6.1173 7.60444 6 8 6C8.53043 6 9.03914 6.21071 9.41421 6.58579C9.78929 6.96086 10 7.46957 10 8Z" fill="white"/>
+    </svg>
+);
+
+const Discord2 = () => <span>D</span>;
+const Account = () => <span>A</span>;
+const Billing = () => <span>B</span>;
+const Support = () => <span>SP</span>;
+const Signout = () => <span>S</span>;
+const English = () => <span>EN</span>;
+const Arabic = () => <span>AR</span>;
+const Invite = () => <span>I</span>;
+const Giveaways = () => <span>G</span>;
+const Coupons = () => <span>CP</span>;
+const LogoText = () => <span className="font-bold text-lg text-white">OPTIMIZER</span>;
+const MobileMenuBurger = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" />
+    </svg>
+);
+const Product = () => <span>P</span>;
+const Users = () => <span>U</span>;
+const Referrals = () => <span>R</span>;
+const Content = () => <span>C</span>;
+const Legal = () => <span>L</span>;
+const Chatbot = () => <span>CB</span>;
 
 function useOnClickOutside(refs, handler) {
     useEffect(() => {
