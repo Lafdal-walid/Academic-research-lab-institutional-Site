@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
 import EnglishIcon from '../assets/svg/mainheader/EnglishIcon';
 import ArabicIcon from '../assets/svg/mainheader/ArabicIcon';
 
@@ -13,7 +14,8 @@ const svgPaths = {
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
-  const [lang, setLang] = useState('En');
+  const { language, setLanguage } = useLanguage();
+  const lang = language === 'en' ? 'En' : 'Ar';
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#0A070E] border-b border-solid border-[#2a2a30] transition-all duration-300">
@@ -164,14 +166,14 @@ const Header = () => {
             {isLangOpen && (
               <div className="absolute top-full right-0 mt-2 w-32 bg-dashboard-card border border-card-border rounded-xl p-1 shadow-2xl z-[70] overflow-hidden">
                 <button 
-                  onClick={() => { setLang('En'); setIsLangOpen(false); }} 
+                  onClick={() => { setLanguage('en'); setIsLangOpen(false); }} 
                   className="w-full text-left px-4 py-2 text-[13px] text-neutral-grey hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2"
                 >
                   <EnglishIcon />
                   English
                 </button>
                 <button 
-                  onClick={() => { setLang('Ar'); setIsLangOpen(false); }} 
+                  onClick={() => { setLanguage('ar'); setIsLangOpen(false); }} 
                   className="w-full text-left px-4 py-2 text-[13px] text-neutral-grey hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2 border-t border-card-border/50"
                 >
                   <ArabicIcon />

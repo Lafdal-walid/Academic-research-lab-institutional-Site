@@ -255,6 +255,7 @@ const Header = ({ onToggleSidebar, title, navItems }) => {
 
     const isAdmin = location.pathname.includes('/admin');
     const isSupport = location.pathname.startsWith('/support');
+    const isUsersDashboard = location.pathname.includes('/usersdashboard');
 
     const mobileNavItems = navItems || (isAdmin
         ? [
@@ -281,16 +282,26 @@ const Header = ({ onToggleSidebar, title, navItems }) => {
                 { id: 'notifications', path: `/support/notifications`, label: t('notifications') || 'Notifications', icon: <Notifications /> },
                 { id: 'my_account', path: `/support/account`, label: t('my_account') || 'My account', icon: <Settings /> },
             ]
-            : [
-                { id: 'overview', path: `/${language}/user/overview`, label: t('overview') || 'Overview', icon: <Overview /> },
-                { id: 'billing', path: `/${language}/user/billing`, label: t('billingPlan') || 'Billing', icon: <Billing /> },
-                { id: 'invite-earn', path: `/${language}/user/invite`, label: t('inviteAndEarn') || 'Invite & Earn', icon: <Invite /> },
-                { id: 'giveaways', path: `/${language}/user/giveaways`, label: t('giveaways') || 'Giveaways', icon: <Giveaways /> },
-                { id: 'coupons', path: `/${language}/user/coupons`, label: t('coupons') || 'Coupons', icon: <Coupons /> },
-                { id: 'notifications', path: `/${language}/user/notifications`, label: t('recentNotifications') || 'Notifications', icon: <Notifications /> },
-                { id: 'support', path: `/${language}/user/support`, label: t('support') || 'Support', icon: <Support /> },
-                { id: 'account', path: `/${language}/user/account/profile`, label: t('myAccount') || 'My Account', icon: <Account /> },
-            ]);
+            : isUsersDashboard 
+                ? [
+                    { id: 'overview', path: `/usersdashboard/overview`, label: 'Overview', icon: <Overview /> },
+                    { id: 'phd-tracker', path: `/usersdashboard/phd-tracker`, label: 'PhD Tracker', icon: <Billing /> },
+                    { id: 'publications', path: `/usersdashboard/my-publications`, label: 'Publications', icon: <Product /> },
+                    { id: 'progress', path: `/usersdashboard/progress`, label: 'Progress', icon: <Billing /> },
+                    { id: 'notifications', path: `/usersdashboard/notifications`, label: 'Notifications', icon: <Notifications /> },
+                    { id: 'team-contact', path: `/usersdashboard/team-contact`, label: 'Team Contact', icon: <Support /> },
+                    { id: 'account', path: `/usersdashboard/account/profile`, label: 'My Account', icon: <Account /> },
+                ]
+                : [
+                    { id: 'overview', path: `/${language}/user/overview`, label: t('overview') || 'Overview', icon: <Overview /> },
+                    { id: 'billing', path: `/${language}/user/billing`, label: t('billingPlan') || 'Billing', icon: <Billing /> },
+                    { id: 'invite-earn', path: `/${language}/user/invite`, label: t('inviteAndEarn') || 'Invite & Earn', icon: <Invite /> },
+                    { id: 'giveaways', path: `/${language}/user/giveaways`, label: t('giveaways') || 'Giveaways', icon: <Giveaways /> },
+                    { id: 'coupons', path: `/${language}/user/coupons`, label: t('coupons') || 'Coupons', icon: <Coupons /> },
+                    { id: 'notifications', path: `/${language}/user/notifications`, label: t('recentNotifications') || 'Notifications', icon: <Notifications /> },
+                    { id: 'support', path: `/${language}/user/support`, label: t('support') || 'Support', icon: <Support /> },
+                    { id: 'account', path: `/${language}/user/account/profile`, label: t('myAccount') || 'My Account', icon: <Account /> },
+                ]);
 
     return (
         <>
