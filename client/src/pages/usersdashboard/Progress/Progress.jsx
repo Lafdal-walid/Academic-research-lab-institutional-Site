@@ -24,21 +24,34 @@ const ProjectsTable = () => {
     );
   
     return (
-      <div className="bg-[#151519] flex flex-col p-[1.8vw] relative rounded-[1vw] border border-white/5 w-full shadow-2xl">
-        <div aria-hidden="true" className="absolute border border-[#1e1d22] border-solid inset-0 pointer-events-none rounded-[16px]" />
+      <div className="bg-[#151519] flex flex-col relative w-full shadow-2xl" 
+           style={{ 
+             padding: '1.8vw', 
+             borderRadius: '1vw', 
+             border: '1px solid rgba(255,255,255,0.05)' 
+           }}>
+        <div aria-hidden="true" 
+             className="absolute border border-solid inset-0 pointer-events-none" 
+             style={{ borderColor: '#1e1d22', borderRadius: '1vw' }} 
+        />
         
-        <div className="flex justify-between items-center mb-[3vh] relative z-10">
-          <h2 className="font-bold text-[1.15vw] text-white m-0" style={{ fontFamily: 'Gilroy, Poppins, sans-serif' }}>Projects</h2>
-          <div className="bg-[#1e1e24] rounded-[0.8vw] w-[16vw] px-[1.2vw] py-[1vh] flex items-center justify-between border border-transparent focus-within:border-[#3457dc] transition-all">
+        <div className="flex justify-between items-center relative z-10" style={{ marginBottom: '3vh' }}>
+          <h2 className="font-bold text-white m-0" style={{ fontSize: '1.15vw', fontFamily: 'Gilroy, Poppins, sans-serif' }}>Projects</h2>
+          <div className="bg-[#1e1e24] flex items-center justify-between border border-transparent focus-within:border-[#3457dc] transition-all"
+               style={{ 
+                 borderRadius: '0.8vw', 
+                 width: '16vw', 
+                 padding: '0.8vh 1.2vw' 
+               }}>
             <input 
                 type="text"
                 placeholder="Search /"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-transparent border-none outline-none text-white text-[0.85vw] w-full placeholder-[#a5a5b2]"
-                style={{ fontFamily: 'Poppins, sans-serif' }}
+                className="bg-transparent border-none outline-none text-white placeholder-[#a5a5b2]"
+                style={{ fontSize: '0.85vw', width: '100%', fontFamily: 'Poppins, sans-serif' }}
             />
-            <div className="relative size-[1.2vw] shrink-0">
+            <div className="relative shrink-0" style={{ width: '1.2vw', height: '1.2vw' }}>
                 <svg className="absolute block inset-0 size-full" fill="none" viewBox="0 0 20 20">
                     <path d="M9.58333 17.5C13.9556 17.5 17.5 13.9556 17.5 9.58333C17.5 5.21108 13.9556 1.66667 9.58333 1.66667C5.21108 1.66667 1.66667 5.21108 1.66667 9.58333C1.66667 13.9556 5.21108 17.5 9.58333 17.5Z" stroke="#3457DC" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
                     <path d="M18.3333 18.3333L16.6667 16.6667" stroke="#3457DC" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
@@ -47,52 +60,63 @@ const ProjectsTable = () => {
           </div>
         </div>
   
-        <div className="flex items-center w-full mb-[2vh] px-[0.5vw] relative z-10">
-          <div className="w-[20vw] text-[#80808a] text-[0.85vw]">Project Name</div>
-          <div className="flex-1 text-[#80808a] text-[0.85vw] text-center">Start Date</div>
-          <div className="flex-1 text-[#80808a] text-[0.85vw] text-center">Estimated Deadline</div>
-          <div className="flex-1 text-[#80808a] text-[0.85vw] text-center">Progress</div>
+        <div className="flex items-center w-full relative z-10" style={{ marginBottom: '2vh', padding: '0 0.5vw' }}>
+          <div className="w-[20vw] text-[#80808a]" style={{ fontSize: '0.85vw' }}>Project Name</div>
+          <div className="flex-1 text-[#80808a] text-center" style={{ fontSize: '0.85vw' }}>Start Date</div>
+          <div className="flex-1 text-[#80808a] text-center" style={{ fontSize: '0.85vw' }}>Estimated Deadline</div>
+          <div className="flex-1 text-[#80808a] text-center" style={{ fontSize: '0.85vw' }}>Progress</div>
         </div>
   
-        <div className="w-full h-[1px] bg-[#1E1D22] mb-[2.5vh] relative z-10" />
+        <div className="w-full relative z-10" style={{ height: '0.1vh', backgroundColor: '#1E1D22', marginBottom: '2.5vh' }} />
   
-        <div className="flex flex-col gap-[2.5vh] relative z-10 min-h-[25vh]">
+        <div className="flex flex-col relative z-10" style={{ gap: '2.5vh', minHeight: '25vh' }}>
           {filteredProjects.length > 0 ? filteredProjects.map((project) => (
-            <div key={project.id} className="flex items-center w-full rounded-[0.5vw] group transition-all animate-in fade-in slide-in-from-left-2 duration-300">
-              <div className="flex items-center w-[20vw] gap-[1.2vw]">
-                 <div className="w-[2.5vw] h-[8vh] rounded-[0.4vw] overflow-hidden bg-white/5 shrink-0 border border-white/5">
+            <div key={project.id} className="flex items-center w-full group transition-all animate-in fade-in slide-in-from-left-2 duration-300"
+                 style={{ borderRadius: '0.5vw' }}>
+              <div className="flex items-center w-[20vw]" style={{ gap: '1.2vw' }}>
+                 <div className="overflow-hidden bg-white/5 shrink-0 border border-white/5"
+                      style={{ width: '2.5vw', height: '8vh', borderRadius: '0.4vw' }}>
                     <img src={project.img} alt={project.name} className="w-full h-full object-cover" />
                  </div>
-                 <div className="flex flex-col gap-[0.3vh]">
-                    <p className="font-bold text-[0.95vw] text-white m-0" style={{ fontFamily: 'Gilroy, Poppins, sans-serif' }}>{project.name}</p>
-                    <p className="text-[#a5a5b2] text-[0.75vw] m-0" style={{ fontFamily: 'Poppins, sans-serif' }}>{project.update}</p>
+                 <div className="flex flex-col" style={{ gap: '0.3vh' }}>
+                    <p className="font-bold text-white m-0" style={{ fontSize: '0.95vw', fontFamily: 'Gilroy, Poppins, sans-serif' }}>{project.name}</p>
+                    <p className="text-[#a5a5b2] m-0" style={{ fontSize: '0.75vw', fontFamily: 'Poppins, sans-serif' }}>{project.update}</p>
                  </div>
               </div>
-              <div className="flex-1 text-center text-white text-[0.85vw] font-['Poppins',sans-serif]">{project.start}</div>
-              <div className="flex-1 text-center text-white text-[0.85vw] font-['Poppins',sans-serif]">{project.deadline}</div>
-              <div className="flex-1 text-center text-white text-[0.9vw] font-bold font-['Poppins',sans-serif]">{project.progress}</div>
+              <div className="flex-1 text-center text-white" style={{ fontSize: '0.85vw', fontFamily: 'Poppins, sans-serif' }}>{project.start}</div>
+              <div className="flex-1 text-center text-white" style={{ fontSize: '0.85vw', fontFamily: 'Poppins, sans-serif' }}>{project.deadline}</div>
+              <div className="flex-1 text-center text-white font-bold" style={{ fontSize: '0.9vw', fontFamily: 'Poppins, sans-serif' }}>{project.progress}</div>
             </div>
           )) : (
-              <div className="flex items-center justify-center w-full py-10">
-                  <p className="text-[#80808a] text-[1vw]">No projects found matching your search.</p>
+              <div className="flex items-center justify-center w-full" style={{ py: '5vh' }}>
+                  <p className="text-[#80808a]" style={{ fontSize: '1vw' }}>No projects found matching your search.</p>
               </div>
           )}
         </div>
   
-        <div className="w-full h-[1px] bg-[#1E1D22] mt-[3vh] mb-[2.5vh] relative z-10" />
+        <div className="w-full relative z-10" style={{ height: '0.1vh', backgroundColor: '#1E1D22', marginTop: '3vh', marginBottom: '2.5vh' }} />
   
         <div className="flex justify-between items-center w-full relative z-10">
-           <button className="w-[2.2vw] h-[2.2vw] flex items-center justify-center bg-[#3457dc] rounded-full hover:bg-[#4a6dec] transition-all group">
-              <svg width="1.2vw" height="1.2vw" viewBox="0 0 20 20" fill="none" stroke="white" strokeWidth="2.5" className="rotate-180">
+           <button className="flex items-center justify-center bg-[#3457dc] rounded-full hover:bg-[#4a6dec] transition-all group"
+                   style={{ width: '2.2vw', height: '2.2vw' }}>
+              <svg viewBox="0 0 20 20" fill="none" stroke="white" strokeWidth="2.5" className="rotate-180"
+                   style={{ width: '1.2vw', height: '1.2vw' }}>
                  <path d="M7 15l5-5-5-5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
            </button>
-           <div className="flex items-center gap-[0.8vw]">
-              <div className="px-[0.9vw] py-[0.6vh] bg-white/[0.02] border border-[#1e1d22] rounded-[0.4vw] text-white text-[0.9vw]">01</div>
-              <span className="text-[#a5a5b2] text-[0.85vw]">out of 4</span>
+           <div className="flex items-center" style={{ gap: '0.8vw' }}>
+              <div className="bg-white/[0.02] border border-[#1e1d22] text-white"
+                   style={{ 
+                     padding: '0.6vh 0.9vw', 
+                     borderRadius: '0.4vw', 
+                     fontSize: '0.9vw' 
+                   }}>01</div>
+              <span className="text-[#a5a5b2]" style={{ fontSize: '0.85vw' }}>out of 4</span>
            </div>
-           <button className="w-[2.2vw] h-[2.2vw] flex items-center justify-center bg-[#3457dc] rounded-full hover:bg-[#4a6dec] transition-all group">
-              <svg width="1.2vw" height="1.2vw" viewBox="0 0 20 20" fill="none" stroke="white" strokeWidth="2.5">
+           <button className="flex items-center justify-center bg-[#3457dc] rounded-full hover:bg-[#4a6dec] transition-all group"
+                   style={{ width: '2.2vw', height: '2.2vw' }}>
+              <svg viewBox="0 0 20 20" fill="none" stroke="white" strokeWidth="2.5"
+                   style={{ width: '1.2vw', height: '1.2vw' }}>
                  <path d="M7 15l5-5-5-5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
            </button>
@@ -114,53 +138,53 @@ const RoadmapSection = () => {
       <div style={{
           marginTop: '5vh',
           backgroundColor: '#151519', border: '1px solid #1e1d22',
-          borderRadius: '16px', padding: '24px', display: 'flex',
-          flexDirection: 'column', gap: '24px', width: '100%',
+          borderRadius: '1vw', padding: '1.5vw', display: 'flex',
+          flexDirection: 'column', gap: '2.5vh', width: '100%',
           position: 'relative'
       }}>
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'flex-end', position: 'relative', width: '100%' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'white', fontFamily: 'Gilroy, sans-serif' }}>Ai magazine Project Roadmap</h3>
-                  <p style={{ margin: 0, fontSize: '14px', color: '#a5a5b2' }}>Key Objectives & Milestones.</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8vh' }}>
+                  <h3 style={{ margin: 0, fontSize: '0.95vw', fontWeight: 800, color: 'white', fontFamily: 'Gilroy, sans-serif' }}>Ai magazine Project Roadmap</h3>
+                  <p style={{ margin: 0, fontSize: '0.75vw', color: '#a5a5b2' }}>Key Objectives & Milestones.</p>
               </div>
   
               {/* Absolutely Centered Status */}
               <div style={{
                   position: 'absolute', left: '50%', transform: 'translateX(-50%)',
-                  display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center'
+                  display: 'flex', flexDirection: 'column', gap: '0.7vh', alignItems: 'center'
               }}>
-                  <span style={{ fontSize: '14px', color: '#3457DC', fontWeight: 500, whiteSpace: 'nowrap' }}>1 of 8 Completed</span>
-                  <div style={{ width: '100%', minWidth: '80px', height: '4px', backgroundColor: '#1e1e24', borderRadius: '400px', overflow: 'hidden' }}>
+                  <span style={{ fontSize: '0.75vw', color: '#3457DC', fontWeight: 500, whiteSpace: 'nowrap' }}>1 of 8 Completed</span>
+                  <div style={{ width: '100%', minWidth: '4.5vw', height: '0.5vh', backgroundColor: '#1e1e24', borderRadius: '4vw', overflow: 'hidden' }}>
                       <div style={{ width: '12.5%', height: '100%', backgroundColor: '#3457DC' }} />
                   </div>
               </div>
           </div>
   
-          <div style={{ height: '1px', backgroundColor: '#2A2A30' }} />
+          <div style={{ height: '0.1vh', backgroundColor: '#2A2A30' }} />
   
           {/* Timeline Area with custom scrollbar */}
-          <div className="academic-timeline-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '32px', maxHeight: '400px', overflowY: 'auto', paddingRight: '12px' }}>
+          <div className="academic-timeline-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '3.5vh', maxHeight: '40vh', overflowY: 'auto', paddingRight: '0.8vw' }}>
               {milestones.map((milestone, index) => (
-                  <div key={index} style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
+                  <div key={index} style={{ display: 'flex', gap: '1.5vw', alignItems: 'flex-start' }}>
                       {/* Dot & Line Indicator */}
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '46px', position: 'relative' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '2.8vw', position: 'relative' }}>
                           <div style={{
                               backgroundColor: milestone.completed ? '#3457DC' : '#1e1e24',
                               backgroundImage: milestone.isCurrent ? 'linear-gradient(to bottom, #3457DC 50%, #1e1e24 50%)' : 'none',
-                              padding: '14px', borderRadius: '50%', display: 'flex',
+                              padding: '0.8vw', borderRadius: '50%', display: 'flex',
                               alignItems: 'center', justifyContent: 'center', zIndex: 2,
                               position: 'relative'
                           }}>
-                              <img src={milestone.isCurrent ? PauseIcon : ComputerIcon} alt="phase" style={{ width: '16px', height: '16px' }} />
+                              <img src={milestone.isCurrent ? PauseIcon : ComputerIcon} alt="phase" style={{ width: '0.9vw', height: '0.9vw' }} />
                           </div>
                           {index !== milestones.length - 1 && (
                               <div style={{
-                                  width: '2px', 
-                                  height: '100px', 
+                                  width: '0.1vw', 
+                                  height: '11vh', 
                                   backgroundColor: (milestone.completed && milestones[index+1].completed) || (milestone.completed && milestones[index+1].isCurrent) ? '#3457DC' : '#1e1e24',
                                   position: 'absolute', 
-                                  top: '22px', 
+                                  top: '2.2vh', 
                                   zIndex: 1
                               }} />
                           )}
@@ -168,17 +192,17 @@ const RoadmapSection = () => {
   
                       {/* Content */}
                       <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                              <span style={{ fontSize: '14px', color: '#a5a5b2', fontWeight: 500 }}>{milestone.date}</span>
-                              <span style={{ fontSize: '14px', color: 'white', fontWeight: 400 }}>{milestone.title}</span>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5vh' }}>
+                              <span style={{ fontSize: '0.75vw', color: '#a5a5b2', fontWeight: 500 }}>{milestone.date}</span>
+                              <span style={{ fontSize: '0.85vw', color: 'white', fontWeight: 400 }}>{milestone.title}</span>
                           </div>
                           <div style={{
                               backgroundColor: milestone.completed ? '#1e1e24' : 'rgba(30,30,36,0.3)', 
-                              padding: '8px 24px', 
-                              borderRadius: '16px',
+                              padding: '1vh 1.4vw', 
+                              borderRadius: '0.8vw',
                               color: milestone.completed ? 'white' : '#80808a', 
-                              fontSize: '14px', fontWeight: 500, cursor: milestone.completed ? 'pointer' : 'default',
-                              display: 'flex', alignItems: 'center', gap: '8px',
+                              fontSize: '0.8vw', fontWeight: 500, cursor: milestone.completed ? 'pointer' : 'default',
+                              display: 'flex', alignItems: 'center', gap: '0.6vw',
                               border: milestone.completed ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(255,255,255,0.02)',
                               transition: 'all 0.2s'
                           }}
@@ -187,8 +211,8 @@ const RoadmapSection = () => {
                           >
                               {milestone.completed ? 'View Details' : 'In Progress'}
                               {!milestone.completed && (
-                                   <div style={{ width: '14px', height: '14px', display: 'flex', opacity: 0.4 }}>
-                                      <img src={LockIcon} alt="lock" style={{ width: '100%', height: '100%' }} />
+                                   <div style={{ display: 'flex', opacity: 0.4 }}>
+                                      <img src={LockIcon} alt="lock" style={{ width: '0.8vw', height: '0.8vw' }} />
                                    </div>
                               )}
                           </div>
@@ -198,11 +222,11 @@ const RoadmapSection = () => {
           </div>
   
           {/* Bottom HR Divider */}
-          <div style={{ padding: '24px 0 8px 0' }}>
-              <div style={{ height: '1px', backgroundColor: '#2A2A30', width: '100%' }} />
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '16px' }}>
-                  <img src={InfoYellowIcon} alt="info" style={{ width: '1.2vw', height: '1.2vw', flexShrink: 0 }} />
-                  <p style={{ color: '#FCC841', fontSize: '13px', margin: 0, fontFamily: 'Poppins, sans-serif' }}>
+          <div style={{ padding: '2.5vh 0 1.5vh 0' }}>
+              <div style={{ height: '0.1vh', backgroundColor: '#2A2A30', width: '100%' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8vw', marginTop: '2vh' }}>
+                  <img src={InfoYellowIcon} alt="info" style={{ width: '1.3vw', height: '1.3vw', flexShrink: 0 }} />
+                  <p style={{ color: '#FCC841', fontSize: '0.75vw', margin: 0, fontFamily: 'Poppins, sans-serif' }}>
                       Milestones are updated based on Team Leader validation. Completing tasks ensures a steady workflow toward the final project goal.
                   </p>
               </div>
@@ -211,14 +235,14 @@ const RoadmapSection = () => {
           <style dangerouslySetInnerHTML={{
               __html: `
               .academic-timeline-scroll::-webkit-scrollbar {
-                  width: 6px;
+                  width: 0.35vw;
               }
               .academic-timeline-scroll::-webkit-scrollbar-track {
                   background: transparent;
               }
               .academic-timeline-scroll::-webkit-scrollbar-thumb {
                   background: #3457DC;
-                  border-radius: 10px;
+                  border-radius: 1vw;
               }
               .academic-timeline-scroll {
                   scrollbar-width: thin;
