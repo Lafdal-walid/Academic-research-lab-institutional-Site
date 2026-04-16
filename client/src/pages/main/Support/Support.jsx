@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RiAddLine, RiSubtractLine } from "react-icons/ri"; 
-import './Support.css';
-
+import Support from 'client/src/pages/main/support'; 
 const faqData = [
   {
     id: "01",
