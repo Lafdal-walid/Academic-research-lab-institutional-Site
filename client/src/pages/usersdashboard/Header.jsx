@@ -256,6 +256,7 @@ const Header = ({ onToggleSidebar, title, navItems }) => {
     const isAdmin = location.pathname.includes('/admin');
     const isSupport = location.pathname.startsWith('/support');
     const isUsersDashboard = location.pathname.includes('/usersdashboard');
+    const isLeaderDashboard = location.pathname.includes('/leaderdashboard');
 
     const mobileNavItems = navItems || (isAdmin
         ? [
@@ -292,16 +293,25 @@ const Header = ({ onToggleSidebar, title, navItems }) => {
                     { id: 'team-contact', path: `/usersdashboard/team-contact`, label: 'Team Contact', icon: <Support /> },
                     { id: 'account', path: `/usersdashboard/account/profile`, label: 'My Account', icon: <Account /> },
                 ]
-                : [
-                    { id: 'overview', path: `/${language}/user/overview`, label: t('overview') || 'Overview', icon: <Overview /> },
-                    { id: 'billing', path: `/${language}/user/billing`, label: t('billingPlan') || 'Billing', icon: <Billing /> },
-                    { id: 'invite-earn', path: `/${language}/user/invite`, label: t('inviteAndEarn') || 'Invite & Earn', icon: <Invite /> },
-                    { id: 'giveaways', path: `/${language}/user/giveaways`, label: t('giveaways') || 'Giveaways', icon: <Giveaways /> },
-                    { id: 'coupons', path: `/${language}/user/coupons`, label: t('coupons') || 'Coupons', icon: <Coupons /> },
-                    { id: 'notifications', path: `/${language}/user/notifications`, label: t('recentNotifications') || 'Notifications', icon: <Notifications /> },
-                    { id: 'support', path: `/${language}/user/support`, label: t('support') || 'Support', icon: <Support /> },
-                    { id: 'account', path: `/${language}/user/account/profile`, label: t('myAccount') || 'My Account', icon: <Account /> },
-                ]);
+                : isLeaderDashboard
+                    ? [
+                        { id: 'overview', path: `/leaderdashboard`, label: 'Users', icon: <Overview /> },
+                        { id: 'project-hub', path: `/leaderdashboard/project-hub`, label: 'Project Hub', icon: <Product /> },
+                        { id: 'notifications', path: `/leaderdashboard/notifications`, label: 'Notifications', icon: <Notifications /> },
+                        { id: 'manage-content', path: `/leaderdashboard/manage-content`, label: 'Manage Content', icon: <Content /> },
+                        { id: 'team-contact', path: `/leaderdashboard/team-contact`, label: 'Team Contact', icon: <Support /> },
+                        { id: 'admin-tools', path: `/leaderdashboard/admin-tools`, label: 'Admin Tools', icon: <Settings /> },
+                    ]
+                    : [
+                        { id: 'overview', path: `/${language}/user/overview`, label: t('overview') || 'Overview', icon: <Overview /> },
+                        { id: 'billing', path: `/${language}/user/billing`, label: t('billingPlan') || 'Billing', icon: <Billing /> },
+                        { id: 'invite-earn', path: `/${language}/user/invite`, label: t('inviteAndEarn') || 'Invite & Earn', icon: <Invite /> },
+                        { id: 'giveaways', path: `/${language}/user/giveaways`, label: t('giveaways') || 'Giveaways', icon: <Giveaways /> },
+                        { id: 'coupons', path: `/${language}/user/coupons`, label: t('coupons') || 'Coupons', icon: <Coupons /> },
+                        { id: 'notifications', path: `/${language}/user/notifications`, label: t('recentNotifications') || 'Notifications', icon: <Notifications /> },
+                        { id: 'support', path: `/${language}/user/support`, label: t('support') || 'Support', icon: <Support /> },
+                        { id: 'account', path: `/${language}/user/account/profile`, label: t('myAccount') || 'My Account', icon: <Account /> },
+                    ]);
 
     return (
         <>

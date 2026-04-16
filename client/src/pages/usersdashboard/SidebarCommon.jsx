@@ -31,7 +31,7 @@ const SidebarCommon = ({ items, isSidebarOpen = true, className = "" }) => {
                     const isActive = currentPath === item.path ||
                         (item.path === '/admin' && currentPath === '/admin/overview') ||
                         (item.path === '/support' && currentPath === '/support/overview') ||
-                        (currentPath.startsWith(item.path) && item.path !== '/admin' && item.path !== '/support' && item.path !== '/' && item.path !== '/usersdashboard');
+                        (currentPath.startsWith(item.path) && item.path !== '/admin' && item.path !== '/support' && item.path !== '/' && item.path !== '/usersdashboard' && item.path !== '/leaderdashboard');
 
                     return (
                         <React.Fragment key={item.id}>

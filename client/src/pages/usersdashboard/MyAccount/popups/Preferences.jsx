@@ -534,43 +534,43 @@ export default function Preferences() {
 
                         {/* Checkbox List */}
                         <div style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '3vh' }}>
-                            {/* Billing Alerts */}
+                            {/* Lab Activity Alerts */}
                             <div className="pref-row" style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '1.8vw' }}>
                                 <CheckboxChecked />
                                 <div className="pref-row" style={{ display: 'flex', alignItems: 'center', gap: '0.9vw' }}>
-                                    <p className="pref-checkbox-label" style={{ fontSize: '1.05vw' }}>{t('billing_alerts')}</p>
+                                    <p className="pref-checkbox-label" style={{ fontSize: '1.05vw' }}>Lab Activity Alerts</p>
                                     <p className="pref-desc" style={{ fontSize: '1.05vw' }}>( {t('always_enabled')} )</p>
                                 </div>
                             </div>
 
-                            {/* Promotions & offers */}
+                            {/* Publication Notifications */}
                             <div className="pref-row" style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '1.8vw' }} onClick={() => togglePreference('promotions')}>
                                 {preferences.promotions ? <CheckboxChecked /> : <CheckboxUnchecked />}
-                                <p className="pref-checkbox-label" style={{ fontSize: '1.05vw' }}>{t('promotions_offers')}</p>
+                                <p className="pref-checkbox-label" style={{ fontSize: '1.05vw' }}>Publication & Research Notifications</p>
                             </div>
 
-                            {/* Giveaway updates */}
+                            {/* Conference & Event Announcements */}
                             <div className="pref-row" style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '1.8vw' }} onClick={() => togglePreference('giveaways')}>
                                 {preferences.giveaways ? <CheckboxChecked /> : <CheckboxUnchecked />}
-                                <p className="pref-checkbox-label" style={{ fontSize: '1.05vw' }}>{t('giveaway_updates')}</p>
+                                <p className="pref-checkbox-label" style={{ fontSize: '1.05vw' }}>Conference & Event Announcements</p>
                             </div>
 
-                            {/* Referral activity */}
+                            {/* Grant & Funding Opportunities */}
                             <div className="pref-row" style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '1.8vw' }} onClick={() => togglePreference('referral')}>
                                 {preferences.referral ? <CheckboxChecked /> : <CheckboxUnchecked />}
-                                <p className="pref-checkbox-label" style={{ fontSize: '1.05vw' }}>{t('referral_activity')}</p>
+                                <p className="pref-checkbox-label" style={{ fontSize: '1.05vw' }}>Grant & Funding Opportunities</p>
                             </div>
 
-                            {/* Product updates & new features */}
+                            {/* Lab Meeting Reminders */}
                             <div className="pref-row" style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '1.8vw' }} onClick={() => togglePreference('updates')}>
                                 {preferences.updates ? <CheckboxChecked /> : <CheckboxUnchecked />}
-                                <p className="pref-checkbox-label" style={{ fontSize: '1.05vw' }}>{t('product_updates_new_features')}</p>
+                                <p className="pref-checkbox-label" style={{ fontSize: '1.05vw' }}>Lab Meeting & Schedule Reminders</p>
                             </div>
 
-                            {/* Support responses */}
+                            {/* Supervisor Responses */}
                             <div className="pref-row" style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '1.8vw' }} onClick={() => togglePreference('support')}>
                                 {preferences.support ? <CheckboxChecked /> : <CheckboxUnchecked />}
-                                <p className="pref-checkbox-label" style={{ fontSize: '1.05vw' }}>{t('support_responses')}</p>
+                                <p className="pref-checkbox-label" style={{ fontSize: '1.05vw' }}>Supervisor & Team Responses</p>
                             </div>
                         </div>
 

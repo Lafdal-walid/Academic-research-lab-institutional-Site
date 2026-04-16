@@ -216,7 +216,7 @@ const ReportsHistoryTable = ({ direction = 'ltr', reportsList, setReportsList })
                     <img src={DropdownIcon} alt="arrow" style={{ width: '0.8vw', transform: activeDropdown === 'sort' ? 'rotate(180deg)' : 'none', transition: '0.3s' }} />
                     {activeDropdown === 'sort' && (
                         <div style={dropdownMenuStyle}>
-                            {['Newest firt', 'Oldest first'].map(opt => (
+                            {['Newest first', 'Oldest first'].map(opt => (
                                 <div key={opt} style={dropdownItemStyle(selectedSort === opt)} onClick={() => { setSelectedSort(opt); setActiveDropdown(null); }}>
                                     {opt}
                                 </div>
@@ -636,7 +636,27 @@ const EditProgressForm = ({ onSave }) => {
     const [previewImage, setPreviewImage] = useState(null);
     const [selectedUniversity, setSelectedUniversity] = useState('Blida 1');
     const [isUniDropdownOpen, setIsUniDropdownOpen] = useState(false);
+    const [uniSearchTerm, setUniSearchTerm] = useState('');
+    const [selectedWilaya, setSelectedWilaya] = useState('Blida');
+    const [isWilayaDropdownOpen, setIsWilayaDropdownOpen] = useState(false);
+    const [wilayaSearchTerm, setWilayaSearchTerm] = useState('');
     const [degreeTitle, setDegreeTitle] = useState('P.h.d');
+
+    const uniDropdownRef = useRef(null);
+    const wilayaDropdownRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (uniDropdownRef.current && !uniDropdownRef.current.contains(event.target)) {
+                setIsUniDropdownOpen(false);
+            }
+            if (wilayaDropdownRef.current && !wilayaDropdownRef.current.contains(event.target)) {
+                setIsWilayaDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const fileInputRef = useRef(null);
     const imageInputRef = useRef(null);
@@ -818,71 +838,166 @@ const EditProgressForm = ({ onSave }) => {
                 {/* University & Wilaya Group */}
                 <div style={{ display: 'flex', gap: '40px' }}>
                     {/* University - Custom Premium Dropdown */}
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative' }}>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative' }} ref={uniDropdownRef}>
                         <p style={{ color: '#80808a', fontSize: '14px', margin: 0 }}>University</p>
                         <div
                             onClick={() => setIsUniDropdownOpen(!isUniDropdownOpen)}
                             style={{
                                 backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #2a2a30',
-                                borderRadius: '8px', padding: '9px 14px', display: 'flex',
+                                borderRadius: '12px', padding: '12px 14px', display: 'flex',
                                 justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer',
-                                position: 'relative'
+                                position: 'relative', transition: 'all 0.3s ease',
+                                boxShadow: isUniDropdownOpen ? '0 0 15px rgba(52, 87, 220, 0.1)' : 'none'
                             }}
                         >
-                            <span style={{ color: '#f0f0f2', fontSize: '14px' }}>{selectedUniversity}</span>
-                            <div style={{ transform: isUniDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+                            <span style={{ color: '#f0f0f2', fontSize: '14px', fontWeight: 500 }}>{selectedUniversity}</span>
+                            <div style={{ transform: isUniDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
                                 <AngleDownSvg />
                             </div>
                         </div>
 
                         {/* Dropdown List */}
-                        {isUniDropdownOpen && (
-                            <div
-                                style={{
-                                    position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '8px',
-                                    backgroundColor: '#1e1e24', border: '1px solid #2a2a30', borderRadius: '12px',
-                                    padding: '8px', zIndex: 100, boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
-                                    display: 'flex', flexDirection: 'column', gap: '4px'
-                                }}
-                            >
-                                {['Blida 1', 'USTHB', 'ensia', 'esi'].map((uni) => (
-                                    <div
-                                        key={uni}
-                                        onClick={() => {
-                                            setSelectedUniversity(uni);
-                                            setIsUniDropdownOpen(false);
-                                        }}
-                                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#3457DC'}
-                                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                                        style={{
-                                            padding: '10px 12px', borderRadius: '8px', color: 'white',
-                                            fontSize: '14px', cursor: 'pointer', transition: 'background-color 0.2s'
-                                        }}
-                                    >
-                                        {uni}
+                        <AnimatePresence>
+                            {isUniDropdownOpen && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    transition={{ duration: 0.2, ease: "easeOut" }}
+                                    style={{
+                                        position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '8px',
+                                        backgroundColor: 'rgba(30, 30, 36, 0.98)', border: '1px solid rgba(255, 255, 255, 0.08)',
+                                        borderRadius: '12px', padding: '8px', zIndex: 100, maxWidth: '100%',
+                                        boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+                                        backdropFilter: 'blur(20px)',
+                                        display: 'flex', flexDirection: 'column', gap: '4px'
+                                    }}
+                                >
+                                    {/* Search Inside Dropdown */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', borderBottom: '1px solid rgba(255,255,255,0.05)', marginBottom: '4px' }}>
+                                        <RiSearch2Line color="#a5a5b2" size="14px" />
+                                        <input 
+                                            placeholder="Search University..."
+                                            value={uniSearchTerm}
+                                            onChange={(e) => setUniSearchTerm(e.target.value)}
+                                            style={{ background: 'transparent', border: 'none', outline: 'none', color: '#f0f0f2', fontSize: '13px', width: '100%' }}
+                                        />
                                     </div>
-                                ))}
-                            </div>
-                        )}
+                                    <div style={{ maxHeight: '200px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }} className="custom-scrollbar">
+                                        {['Blida 1', 'USTHB', 'ensia', 'esi', 'Algiers 1', 'Oran 1', 'Constantine 1'].filter(u => u.toLowerCase().includes(uniSearchTerm.toLowerCase())).map((uni) => (
+                                            <div
+                                                key={uni}
+                                                onClick={() => {
+                                                    setSelectedUniversity(uni);
+                                                    setIsUniDropdownOpen(false);
+                                                    setUniSearchTerm('');
+                                                }}
+                                                onMouseOver={(e) => {
+                                                    e.currentTarget.style.backgroundColor = 'rgba(52, 87, 220, 0.15)';
+                                                    e.currentTarget.style.color = '#3457DC';
+                                                }}
+                                                onMouseOut={(e) => {
+                                                    e.currentTarget.style.backgroundColor = selectedUniversity === uni ? 'rgba(52, 87, 220, 0.1)' : 'transparent';
+                                                    e.currentTarget.style.color = selectedUniversity === uni ? '#3457DC' : 'white';
+                                                }}
+                                                style={{
+                                                    padding: '10px 14px', borderRadius: '8px', 
+                                                    color: selectedUniversity === uni ? '#3457DC' : 'white',
+                                                    fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s ease',
+                                                    fontWeight: selectedUniversity === uni ? 600 : 400,
+                                                    backgroundColor: selectedUniversity === uni ? 'rgba(52, 87, 220, 0.1)' : 'transparent',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+                                                }}
+                                            >
+                                                <span>{uni}</span>
+                                                {selectedUniversity === uni && <RiCheckLine size="16px" />}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
-                    {/* Wilaya */}
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {/* Wilaya - Custom Premium Dropdown */}
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative' }} ref={wilayaDropdownRef}>
                         <p style={{ color: '#80808a', fontSize: '14px', margin: 0 }}>wilaya</p>
-                        <div style={{ backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #2a2a30', borderRadius: '8px', padding: '9px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
-                            <select
-                                style={{
-                                    width: '100%', background: 'transparent', border: 'none', outline: 'none',
-                                    color: '#f0f0f2', fontSize: '14px', appearance: 'none', cursor: 'pointer',
-                                    paddingRight: '20px', position: 'relative', zIndex: 2
-                                }}
-                            >
-                                <option style={{ backgroundColor: '#1e1e24' }}>Blida</option>
-                                <option style={{ backgroundColor: '#1e1e24' }}>Algiers</option>
-                            </select>
-                            <div style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', zIndex: 1, pointerEvents: 'none' }}>
+                        <div
+                            onClick={() => setIsWilayaDropdownOpen(!isWilayaDropdownOpen)}
+                            style={{
+                                backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #2a2a30',
+                                borderRadius: '12px', padding: '12px 14px', display: 'flex',
+                                justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer',
+                                position: 'relative', transition: 'all 0.3s ease',
+                                boxShadow: isWilayaDropdownOpen ? '0 0 15px rgba(52, 87, 220, 0.1)' : 'none'
+                            }}
+                        >
+                            <span style={{ color: '#f0f0f2', fontSize: '14px', fontWeight: 500 }}>{selectedWilaya}</span>
+                            <div style={{ transform: isWilayaDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}>
                                 <AngleDownSvg />
                             </div>
                         </div>
+
+                        {/* Dropdown List */}
+                        <AnimatePresence>
+                            {isWilayaDropdownOpen && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    transition={{ duration: 0.2, ease: "easeOut" }}
+                                    style={{
+                                        position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '8px',
+                                        backgroundColor: 'rgba(30, 30, 36, 0.98)', border: '1px solid rgba(255, 255, 255, 0.08)',
+                                        borderRadius: '12px', padding: '8px', zIndex: 100, maxWidth: '100%',
+                                        boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+                                        backdropFilter: 'blur(20px)',
+                                        display: 'flex', flexDirection: 'column', gap: '4px'
+                                    }}
+                                >
+                                    {/* Search Inside Dropdown */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', borderBottom: '1px solid rgba(255,255,255,0.05)', marginBottom: '4px' }}>
+                                        <RiSearch2Line color="#a5a5b2" size="14px" />
+                                        <input 
+                                            placeholder="Search Wilaya..."
+                                            value={wilayaSearchTerm}
+                                            onChange={(e) => setWilayaSearchTerm(e.target.value)}
+                                            style={{ background: 'transparent', border: 'none', outline: 'none', color: '#f0f0f2', fontSize: '13px', width: '100%' }}
+                                        />
+                                    </div>
+                                    <div style={{ maxHeight: '200px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }} className="custom-scrollbar">
+                                        {['Blida', 'Algiers', 'Oran', 'Constantine', 'Setif', 'Annaba', 'Mostaganem'].filter(w => w.toLowerCase().includes(wilayaSearchTerm.toLowerCase())).map((wilaya) => (
+                                            <div
+                                                key={wilaya}
+                                                onClick={() => {
+                                                    setSelectedWilaya(wilaya);
+                                                    setIsWilayaDropdownOpen(false);
+                                                    setWilayaSearchTerm('');
+                                                }}
+                                                onMouseOver={(e) => {
+                                                    e.currentTarget.style.backgroundColor = 'rgba(52, 87, 220, 0.15)';
+                                                    e.currentTarget.style.color = '#3457DC';
+                                                }}
+                                                onMouseOut={(e) => {
+                                                    e.currentTarget.style.backgroundColor = selectedWilaya === wilaya ? 'rgba(52, 87, 220, 0.1)' : 'transparent';
+                                                    e.currentTarget.style.color = selectedWilaya === wilaya ? '#3457DC' : 'white';
+                                                }}
+                                                style={{
+                                                    padding: '10px 14px', borderRadius: '8px', 
+                                                    color: selectedWilaya === wilaya ? '#3457DC' : 'white',
+                                                    fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s ease',
+                                                    fontWeight: selectedWilaya === wilaya ? 600 : 400,
+                                                    backgroundColor: selectedWilaya === wilaya ? 'rgba(52, 87, 220, 0.1)' : 'transparent',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+                                                }}
+                                            >
+                                                <span>{wilaya}</span>
+                                                {selectedWilaya === wilaya && <RiCheckLine size="16px" />}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
                 </div>
 
@@ -895,7 +1010,7 @@ const EditProgressForm = ({ onSave }) => {
                     <div style={{ display: 'flex', gap: '60px' }}>
                         {/* Month */}
                         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <p style={{ color: '#80808a', fontSize: '14px', margin: 0 }}>Mounth</p>
+                            <p style={{ color: '#80808a', fontSize: '14px', margin: 0 }}>Month</p>
                             <div style={{ backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #1e1d22', borderRadius: '8px', padding: '9px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                                     <input
