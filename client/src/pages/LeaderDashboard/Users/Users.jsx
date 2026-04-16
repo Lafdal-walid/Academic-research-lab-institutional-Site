@@ -102,7 +102,7 @@ const Tab = ({ label, isActive, onClick }) => {
             onClick={onClick}
         >
             <div className="flex flex-col items-center w-fit relative" style={{ gap: '8px' }}>
-                <p className={`font-['Poppins:Bold',sans-serif] font-bold leading-[normal] not-italic text-[16px] whitespace-nowrap transition-colors duration-300 ${isActive ? 'text-[#3457dc] scale-105' : 'text-[#a5a5b2] hover:text-[#f5f5f5]'}`}>
+                <p className={`font-poppins font-bold leading-[normal] not-italic text-[15.36px] whitespace-nowrap transition-colors duration-300 ${isActive ? 'text-[#3457dc] scale-105' : 'text-[#a5a5b2] hover:text-[#f5f5f5]'}`}>
                     {label}
                 </p>
 
@@ -942,9 +942,9 @@ const Users = () => {
     return (
         <div className="w-full text-white font-poppins pb-10">
             {/* Header with Tabs */}
-            <div className="mb-[40px] mt-[10px]">
+            <div className="mb-[40px] mt-[0px]">
                 {/* Tab Navigation - Pure Text Style with Underline */}
-                <div className="flex gap-[30px] items-center pt-[0px] px-[0px] w-full">
+                <div className="flex gap-[10px] items-center pt-[0px] px-[0px] w-full">
                     <Tab
                         label="Users list"
                         isActive={activeTab === 'Users list'}
