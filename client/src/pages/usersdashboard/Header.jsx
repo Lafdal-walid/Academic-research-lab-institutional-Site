@@ -8,6 +8,15 @@ import VectorIcon from "@/assets/svg/userheader/Vector.svg";
 import EnglishIcon from "@/assets/svg/mainheader/EnglishIcon";
 import ArabicIcon from "@/assets/svg/mainheader/ArabicIcon";
 
+// Sidebar Icons
+import iconOverview from '@/assets/svg/leftbaruser/chart-pie-alt (1) 1.svg';
+import iconTracker from '@/assets/svg/leftbaruser/credit-card 1.svg';
+import iconPublications from '@/assets/svg/leftbaruser/Vector.svg';
+import iconProgress from '@/assets/svg/leftbaruser/chart-simple (2) 1.svg';
+import iconNotification from '@/assets/svg/leftbaruser/notificaion.svg';
+import iconContact from '@/assets/svg/leftbaruser/user-headset (2) 1.svg';
+import iconSettings from '@/assets/svg/leftbaruser/settings 1.svg';
+
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -39,10 +48,20 @@ const Settings = ({ className }) => (
 );
 
 const Discord2 = () => <span>D</span>;
-const Account = () => <span>A</span>;
-const Billing = () => <span>B</span>;
-const Support = () => <span>SP</span>;
-const Signout = () => <span>S</span>;
+const Account = () => <img src={iconSettings} alt="" className="w-[1.2vw] h-[1.2vw] brightness-0 invert opacity-70" />;
+const Billing = () => <img src={iconTracker} alt="" className="w-[1.2vw] h-[1.2vw] brightness-0 invert opacity-70" />;
+const Support = () => <img src={iconContact} alt="" className="w-[1.2vw] h-[1.2vw] brightness-0 invert opacity-70" />;
+const Signout = () => (
+    <svg width="1.2vw" height="1.2vw" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-70">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+        <polyline points="16 17 21 12 16 7" />
+        <line x1="21" y1="12" x2="9" y2="12" />
+    </svg>
+);
+const OverviewIcon = () => <img src={iconOverview} alt="" className="w-[1.2vw] h-[1.2vw] brightness-0 invert opacity-70" />;
+const PublicationsIcon = () => <img src={iconPublications} alt="" className="w-[1.2vw] h-[1.2vw] brightness-0 invert opacity-70" />;
+const ProgressIcon = () => <img src={iconProgress} alt="" className="w-[1.2vw] h-[1.2vw] brightness-0 invert opacity-70" />;
+const NotiIconSmall = () => <img src={iconNotification} alt="" className="w-[1.2vw] h-[1.2vw] brightness-0 invert opacity-70" />;
 const English = () => <span>EN</span>;
 const Arabic = () => <span>AR</span>;
 const Invite = () => <span>I</span>;
@@ -385,28 +404,34 @@ const Header = ({ onToggleSidebar, title, navItems }) => {
                             <div ref={notiRef} className={`absolute right-0 top-full mt-[1.2vh] w-[23vw] bg-[#121217] border border-[#2a2a30] rounded-xl overflow-hidden transition-all duration-200 z-50 shadow-2xl flex flex-col ${openNoti ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'}`} role="dialog" aria-hidden={!openNoti}>
                                 <div className="p-[1vw] border-b border-[#2a2a30] font-semibold text-white tracking-wide" style={{ fontSize: '1.05vw' }}>{t('recentNotifications')}</div>
                                 <div className="flex flex-col max-h-[300px] overflow-y-auto">
-                                    <div className="p-[1vw] hover:bg-white/5 cursor-pointer border-b border-[#2a2a30]/50">
-                                        <div className="font-medium text-white mb-[0.2vh]" style={{ fontSize: '1vw' }}>{t('giveaway')}</div>
-                                        <div className="text-white/60 mb-[0.4vh]" style={{ fontSize: '0.94vw' }}>{t('giveawayText')}</div>
-                                        <div className="text-white/40" style={{ fontSize: '0.8vw' }}>{t('minutesAgo', { count: 2 })}</div>
+                                    <div className="p-[1vw] hover:bg-white/5 cursor-pointer border-b border-[#2a2a30]/50" onClick={() => { navigate(`/usersdashboard/notifications`); setOpenNoti(false); }}>
+                                        <div className="font-medium text-white mb-[0.2vh]" style={{ fontSize: '1vw' }}>Scientific Seminar</div>
+                                        <div className="text-white/60 mb-[0.4vh]" style={{ fontSize: '0.94vw' }}>The deadline for the 'AI in Data Science' seminar submissions has been extended to May 20th.</div>
+                                        <div className="text-white/40" style={{ fontSize: '0.8vw' }}>2 minutes ago</div>
                                     </div>
-                                    <div className="p-[1vw] hover:bg-white/5 cursor-pointer border-b border-[#2a2a30]/50 flex gap-[0.5vw]">
+                                    <div className="p-[1vw] hover:bg-white/5 cursor-pointer border-b border-[#2a2a30]/50" onClick={() => { navigate(`/usersdashboard/notifications`); setOpenNoti(false); }}>
                                         <div>
-                                            <div className="font-medium text-white mb-[0.2vh]" style={{ fontSize: '1vw' }}>{t('systemUpdate')}</div>
-                                            <div className="text-white/60 mb-[0.4vh]" style={{ fontSize: '0.94vw' }}>{t('systemUpdateText')}</div>
-                                            <div className="text-white/40" style={{ fontSize: '0.8vw' }}>{t('hourAgo', { count: 1 })}</div>
+                                            <div className="font-medium text-white mb-[0.2vh]" style={{ fontSize: '1vw' }}>Project Milestone</div>
+                                            <div className="text-white/60 mb-[0.4vh]" style={{ fontSize: '0.94vw' }}>The 'Smart Safety Risk Detection' project has reached 80% completion. New datasets are now available for review.</div>
+                                            <div className="text-white/40" style={{ fontSize: '0.8vw' }}>1 hour ago</div>
                                         </div>
                                     </div>
-                                    <div className="p-[1vw] hover:bg-white/5 cursor-pointer flex gap-[0.5vw]">
+                                    <div className="p-[1vw] hover:bg-white/5 cursor-pointer flex gap-[0.5vw]" onClick={() => { navigate(`/usersdashboard/notifications`); setOpenNoti(false); }}>
                                         <div>
-                                            <div className="font-medium text-white mb-[0.2vh]" style={{ fontSize: '1vw' }}>{t('security')}</div>
-                                            <div className="text-white/60 mb-[0.4vh]" style={{ fontSize: '0.94vw' }}>{t('securityText')}</div>
-                                            <div className="text-white/40" style={{ fontSize: '0.8vw' }}>{t('yesterdayAt')} 4:11 PM</div>
+                                            <div className="font-medium text-white mb-[0.2vh]" style={{ fontSize: '1vw' }}>Access Granted</div>
+                                            <div className="text-white/60 mb-[0.4vh]" style={{ fontSize: '0.94vw' }}>You have been granted administrative access to the Central Research Database. Please verify your credentials.</div>
+                                            <div className="text-white/40" style={{ fontSize: '0.8vw' }}>Yesterday at 4:11 PM</div>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="p-[0.8vw] border-t border-[#2a2a30] text-center w-full">
-                                    <button className="font-medium text-[#3457DC] hover:text-[#3457DC]/80 w-full outline-none" style={{ fontSize: '0.94vw' }}>{t('viewAll')}</button>
+                                    <button 
+                                        onClick={() => { navigate(`/usersdashboard/notifications`); setOpenNoti(false); }}
+                                        className="font-medium text-[#3457DC] hover:text-[#3457DC]/80 w-full outline-none" 
+                                        style={{ fontSize: '0.94vw' }}
+                                    >
+                                        View All
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -437,13 +462,21 @@ const Header = ({ onToggleSidebar, title, navItems }) => {
                                 <button className={`avatar-button waves waves-effect flex items-center gap-[0.5vw] ${openAccount ? 'act' : ''}`} onClick={toggleAccount} aria-haspopup="true" aria-expanded={openAccount}>
                                     <img src={avatarUrl} alt="profile" style={{ borderRadius: '50%', width: '2.8vw', height: '2.8vw' }} />
                                 </button>
-                                <div ref={accountRef} className={`absolute right-0 top-full mt-[1vh] w-[16vw] bg-[#121217] border border-[#2a2a30] rounded-xl overflow-hidden transition-all duration-200 z-50 p-[0.6vw] shadow-2xl ${openAccount ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'}`} role="menu" aria-hidden={!openAccount}>
+                                <div ref={accountRef} className={`absolute right-0 top-full mt-[1vh] w-[18vw] bg-[#121217] border border-[#2a2a30] rounded-xl overflow-hidden transition-all duration-200 z-50 p-[0.6vw] shadow-2xl ${openAccount ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'}`} role="menu" aria-hidden={!openAccount}>
                                     <ul className="flex flex-col gap-[0.4vh]">
-                                        <li className="flex items-center gap-[0.8vw] px-[0.8vw] py-[1.2vh] rounded-[0.5vw] hover:bg-white/5 cursor-pointer text-[1vw] text-white/80 hover:text-white transition-colors" onClick={() => { navigate(`/${language}/user/account/profile`); setOpenAccount(false); }}><div style={{ transform: 'scale(1.2)' }}><Account /></div> <span>{t('myAccount')}</span></li>
-                                        <li className="flex items-center gap-[0.8vw] px-[0.8vw] py-[1.2vh] rounded-[0.5vw] hover:bg-white/5 cursor-pointer text-[1vw] text-white/80 hover:text-white transition-colors" onClick={() => { navigate(`/${language}/user/billing`); setOpenAccount(false); }}><div style={{ transform: 'scale(1.2)' }}><Billing /></div> <span>{t('billingPlan')}</span></li>
-                                        <li className="flex items-center gap-[0.8vw] px-[0.8vw] py-[1.2vh] rounded-[0.5vw] hover:bg-white/5 cursor-pointer text-[1vw] text-white/80 hover:text-white transition-colors" onClick={() => { navigate(`/${language}/user/support`); setOpenAccount(false); }}><div style={{ transform: 'scale(1.2)' }}><Support /></div> <span>{t('support')}</span></li>
+                                        <li className="flex items-center gap-[0.8vw] px-[0.8vw] py-[1.2vh] rounded-[0.5vw] hover:bg-white/5 cursor-pointer text-[0.9vw] text-white/80 hover:text-white transition-colors" onClick={() => { navigate(`/usersdashboard/notifications`); setOpenAccount(false); }}>
+                                            <div style={{ transform: 'scale(1.1)' }}><NotiIconSmall /></div> <span>Notifications</span>
+                                        </li>
+                                        <li className="flex items-center gap-[0.8vw] px-[0.8vw] py-[1.2vh] rounded-[0.5vw] hover:bg-white/5 cursor-pointer text-[0.9vw] text-white/80 hover:text-white transition-colors" onClick={() => { navigate(`/usersdashboard/team-contact`); setOpenAccount(false); }}>
+                                            <div style={{ transform: 'scale(1.1)' }}><Support /></div> <span>Team Contact</span>
+                                        </li>
+                                        <li className="flex items-center gap-[0.8vw] px-[0.8vw] py-[1.2vh] rounded-[0.5vw] hover:bg-white/5 cursor-pointer text-[0.9vw] text-white/80 hover:text-white transition-colors" onClick={() => { navigate(`/usersdashboard/account`); setOpenAccount(false); }}>
+                                            <div style={{ transform: 'scale(1.1)' }}><Account /></div> <span>My Account</span>
+                                        </li>
                                         <div className="h-px bg-[#2a2a30] my-[0.5vh] w-full" />
-                                        <li className="flex items-center gap-[0.8vw] px-[0.8vw] py-[1.2vh] rounded-[0.5vw] hover:bg-[#C5432D]/10 cursor-pointer text-[1vw] text-[#C5432D] transition-colors" onClick={onLogout}><div style={{ transform: 'scale(1.2)' }}><Signout /></div> <span>{t('signOut')}</span></li>
+                                        <li className="flex items-center gap-[0.8vw] px-[0.8vw] py-[1.2vh] rounded-[0.5vw] hover:bg-[#C5432D]/10 cursor-pointer text-[0.9vw] text-[#C5432D] transition-colors" onClick={onLogout}>
+                                            <div style={{ transform: 'scale(1.1)' }}><Signout /></div> <span>Sign Out</span>
+                                        </li>
                                     </ul>
                                 </div>
                             </div>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import ColorBends from '../../components/ui/ColorBends';
 
 // SVG Paths provided by USER
@@ -95,6 +96,7 @@ function Exclamation() {
 
 const Login = () => {
     const navigate = useNavigate();
+    const { setUser } = useAuth();
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -146,7 +148,16 @@ const Login = () => {
         setTimeout(() => {
             setIsSubmitting(false);
             const mockName = email.split('@')[0];
-            setLoggedInUserName(mockName.charAt(0).toUpperCase() + mockName.slice(1));
+            const formattedName = mockName.charAt(0).toUpperCase() + mockName.slice(1);
+            setLoggedInUserName(formattedName);
+            
+            // Update global auth state
+            setUser({ 
+                name: formattedName, 
+                email: email, 
+                plan: 'free' 
+            });
+            
             setShowSuccess(true);
             
             // Final redirect after showing success
