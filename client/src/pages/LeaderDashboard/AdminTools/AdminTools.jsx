@@ -11,9 +11,9 @@ const AdminTools = () => {
     const [selectedAdmin, setSelectedAdmin] = useState(null);
 
     const [admins, setAdmins] = useState([
-        { id: 1, name: 'Amir Khoury', email: 'amir@domain.com', role: 'Owner', joined: 'Jan 12, 2025', lastActive: '2 hours ago', status: 'Active' },
-        { id: 2, name: 'Amir Khoury', email: 'amir@domain.com', role: 'Support', joined: 'Jan 12, 2025', lastActive: '2 hours ago', status: 'Suspended' },
-        { id: 3, name: 'Amir Khoury', email: 'amir@domain.com', role: 'Finance', joined: 'Jan 12, 2025', lastActive: '2 hours ago', status: 'Active' },
+        { id: 1, name: 'Amir Khoury', email: 'amir@domain.com', role: 'superadmin', joined: 'Jan 12, 2025', lastActive: '2 hours ago', status: 'Active' },
+        { id: 2, name: 'Sarah Belkacem', email: 'sarah@domain.com', role: 'admin', joined: 'Jan 12, 2025', lastActive: '2 hours ago', status: 'Suspended' },
+        { id: 3, name: 'Yacine Rahmani', email: 'yacine@domain.com', role: 'user', joined: 'Jan 12, 2025', lastActive: '2 hours ago', status: 'Active' },
     ]);
 
     const handleEditClick = (admin) => {
@@ -98,7 +98,23 @@ const AdminTools = () => {
                                 <tr key={account.id} style={{ borderBottom: index !== admins.length - 1 ? '1px solid rgba(255,255,255,0.03)' : 'none', height: '8vh' }}>
                                     <td style={{ padding: '0 1vw', fontSize: '0.85vw', color: 'white' }}>{account.name}</td>
                                     <td style={{ padding: '0 1vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{account.email}</td>
-                                    <td style={{ padding: '0 1vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{account.role}</td>
+                                    <td style={{ padding: '0 1vw' }}>
+                                        <span style={{ 
+                                            fontSize: '0.75vw', 
+                                            padding: '0.4vh 0.8vw', 
+                                            borderRadius: '0.4vw',
+                                            backgroundColor: account.role === 'superadmin' ? 'rgba(235, 87, 87, 0.1)' : 
+                                                             account.role === 'admin' ? 'rgba(52, 87, 220, 0.1)' : 
+                                                             account.role === 'guest' ? 'rgba(165, 165, 178, 0.1)' : 'rgba(39, 189, 173, 0.1)',
+                                            color: account.role === 'superadmin' ? '#eb5757' : 
+                                                   account.role === 'admin' ? '#3457DC' : 
+                                                   account.role === 'guest' ? '#a5a5b2' : '#27bdad',
+                                            fontWeight: 600,
+                                            textTransform: 'capitalize'
+                                        }}>
+                                            {account.role}
+                                        </span>
+                                    </td>
                                     <td style={{ padding: '0 1vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{account.joined}</td>
                                     <td style={{ padding: '0 1vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{account.lastActive}</td>
                                     <td style={{ padding: '0 1vw' }}>

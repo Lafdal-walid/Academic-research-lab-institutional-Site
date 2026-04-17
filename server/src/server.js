@@ -6,7 +6,16 @@ app.use(express.json());
 app.set("view engine", "ejs");
 
 const mongoose = require("mongoose");
+const cors = require('cors');
 const Article = require("./models/Article");
+const Team = require("./models/Team");
+const Publication = require("./models/Publication");
+const News = require("./models/News");
+const Project = require("./models/Project");
+const authRoutes = require("./routes/authRoutes");
+
+app.use(cors());
+app.use('/api/auth', authRoutes);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)

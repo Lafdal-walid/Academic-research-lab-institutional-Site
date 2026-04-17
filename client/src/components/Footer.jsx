@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 // Inline Icons for better reliability
 const RiDiscordFill = () => (
@@ -28,11 +28,15 @@ const HiOutlineArrowNarrowUp = ({ size = 20 }) => (
 );
 
 const Footer = () => {
+  const location = useLocation();
+  const isProjectsMenu = location.pathname.includes('/projects');
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
+    <div className={isProjectsMenu ? "bg-[#070710]" : "bg-transparent"}>
     <footer
       className="relative pt-[90px] md:pt-[130px] pb-[28px] px-6 md:px-20 overflow-x-hidden font-poppins bg-[#121014] text-white"
       style={{
@@ -139,6 +143,7 @@ const Footer = () => {
         </div>
       </div>
     </footer>
+    </div>
   );
 };
 

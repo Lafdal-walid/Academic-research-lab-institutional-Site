@@ -10,6 +10,7 @@ import ArabicIcon from '../assets/svg/mainheader/ArabicIcon';
 import iconNotification from '../assets/svg/leftbaruser/notificaion.svg';
 import iconContact from '../assets/svg/leftbaruser/user-headset (2) 1.svg';
 import iconSettings from '../assets/svg/leftbaruser/settings 1.svg';
+import iconOverview from '../assets/svg/leftbaruser/chart-pie-alt (1) 1.svg';
 
 const svgPaths = {
   p15d466f0: "M8.35 5.45L8.575 6.125L8 5.7H8.7L8.125 6.125L8.35 5.45ZM6.85 5.45L7.075 6.125L6.5 5.7H7.2L6.625 6.125L6.85 5.45ZM5.325 5.45L5.55 6.125L4.975 5.7H5.675L5.1 6.125L5.325 5.45ZM3.8 5.45L4.025 6.125L3.45 5.7H4.15L3.575 6.125L3.8 5.45ZM2.275 5.45L2.5 6.125L1.925 5.7H2.625L2.05 6.125L2.275 5.45ZM0.75 5.45L0.975 6.125L0.4 5.7H1.1L0.525 6.125L0.75 5.45ZM7.6 4.8L7.825 5.475L7.25 5.05H7.95L7.375 5.475L7.6 4.8ZM6.075 4.8L6.3 5.475L5.725 5.05H6.425L5.85 5.475L6.075 4.8ZM4.575 4.8L4.8 5.475L4.225 5.05H4.925L4.35 5.475L4.575 4.8ZM3.05 4.8L3.275 5.475L2.7 5.05H3.4L2.825 5.475L3.05 4.8ZM1.525 4.8L1.75 5.475L1.175 5.05H1.875L1.3 5.475L1.525 4.8ZM8.35 4.15L8.575 4.825L8 4.4H8.7L8.125 4.825L8.35 4.15ZM6.85 4.15L7.075 4.825L6.5 4.4H7.2L6.625 4.825L6.85 4.15ZM5.325 4.15L5.55 4.825L4.975 4.4H5.675L5.1 4.825L5.325 4.15ZM3.8 4.15L4.025 4.825L3.45 4.4H4.15L3.575 4.825L3.8 4.15ZM2.275 4.15L2.5 4.825L1.925 4.4H2.625L2.05 4.825L2.275 4.15ZM0.75 4.15L0.975 4.825L0.4 4.4H1.1L0.525 4.825L0.75 4.15ZM7.6 3.525L7.825 4.2L7.25 3.775H7.95L7.375 4.2L7.6 3.525ZM6.075 3.525L6.3 4.2L5.725 3.775H6.425L5.85 4.2L6.075 3.525ZM4.575 3.525L4.8 4.2L4.225 3.775H4.925L4.35 4.2L4.575 3.525ZM3.05 3.525L3.275 4.2L2.7 3.775H3.4L2.825 4.2L3.05 3.525ZM1.525 3.525L1.75 4.2L1.175 3.775H1.875L1.3 4.2L1.525 3.525ZM8.35 2.875L8.575 3.55L8 3.125H8.7L8.125 3.55L8.35 2.875ZM6.85 2.875L7.075 3.55L6.5 3.125H7.2L6.625 3.55L6.85 2.875ZM5.325 2.875L5.55 3.55L4.975 3.125H5.675L5.1 3.55L5.325 2.875ZM3.8 2.875L4.025 3.55L3.45 3.125H4.15L3.575 3.55L3.8 2.875ZM2.275 2.875L2.5 3.55L1.925 3.125H2.625L2.05 3.55L2.275 2.875ZM0.75 2.875L0.975 3.55L0.4 3.125H1.1L0.525 3.55L0.75 2.875ZM7.6 2.225L7.825 2.9L7.25 2.475H7.95L7.375 2.9L7.6 2.225ZM6.075 2.225L6.3 2.9L5.725 2.475H6.425L5.85 2.9L6.075 2.225ZM4.575 2.225L4.8 2.9L4.225 2.475H4.925L4.35 2.9L4.575 2.225ZM3.05 2.225L3.275 2.9L2.7 2.475H3.4L2.825 2.9L3.05 2.225ZM1.525 2.225L1.75 2.9L1.175 2.475H1.875L1.3 2.9L1.525 2.225ZM8.35 1.575L8.575 2.25L8 1.825H8.7L8.125 2.25L8.35 1.575ZM6.85 1.575L7.075 2.25L6.5 1.825H7.2L6.625 2.25L6.85 1.575ZM5.325 1.575L5.55 2.25L4.975 1.825H5.675L5.1 2.25L5.325 1.575ZM3.8 1.575L4.025 2.25L3.45 1.825H4.15L3.575 2.25L3.8 1.575ZM2.275 1.575L2.5 2.25L1.925 1.825H2.625L2.05 2.25L2.275 1.575ZM0.75 1.575L0.975 2.25L0.4 1.825H1.1L0.525 2.25L0.75 1.575ZM7.6 0.925L7.825 1.6L7.25 1.175H7.95L7.375 1.6L7.6 0.925ZM6.075 0.925L6.3 1.6L5.725 1.175H6.425L5.85 1.6L6.075 0.925ZM4.575 0.925L4.8 1.6L4.225 1.175H4.925L4.35 1.6L4.575 0.925ZM3.05 0.925L3.275 1.6L2.7 1.175H3.4L2.825 1.6L3.05 0.925ZM1.525 0.925L1.75 1.6L1.175 1.175H1.875L1.3 1.6L1.525 0.925ZM8.35 0.275L8.575 0.95L8 0.525H8.7L8.125 0.95L8.35 0.275ZM6.85 0.275L7.075 0.95L6.5 0.525H7.2L6.625 0.95L6.85 0.275ZM5.325 0.275L5.55 0.95L4.975 0.525H5.675L5.1 0.95L5.325 0.275ZM3.8 0.275L4.025 0.95L3.45 0.525H4.15L3.575 0.95L3.8 0.275ZM2.275 0.275L2.5 0.95L1.925 0.525H2.625L2.05 0.95L2.275 0.275ZM0.75 0.275L0.975 0.95L0.4 0.525H1.1L0.525 0.95L0.75 0.275Z",
@@ -24,6 +25,10 @@ const AccountIcon = () => (
 
 const NotiIcon = () => (
     <img src={iconNotification} alt="" className="w-[1.2vw] h-[1.2vw] brightness-0 invert opacity-70" />
+);
+
+const OverviewIcon = () => (
+    <img src={iconOverview} alt="" className="w-[1.2vw] h-[1.2vw] brightness-0 invert opacity-70" />
 );
 
 const SupportIcon = () => (
@@ -59,8 +64,9 @@ const Header = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const isLeader = location.pathname.includes('/leaderdashboard');
-  const userRole = isLeader ? 'Team Leader' : 'User';
+  const userRole = user?.role === 'superadmin' ? 'Super Admin' : 
+                   user?.role === 'admin' ? 'Admin' : 
+                   user?.role === 'guest' ? 'Guest' : 'User';
   
   const avatarUrl = user?.avatar || `https://ui-avatars.com/api/?name=${user?.name || 'User'}&background=3457DC&color=fff`;
 
@@ -268,16 +274,28 @@ const Header = () => {
                     <div className={`absolute right-0 top-full mt-[2vh] w-[16vw] bg-[#121217] border border-[#2a2a30] rounded-xl overflow-hidden transition-all duration-200 z-[100] p-[0.6vw] shadow-2xl ${isAccountOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'}`}>
                         <ul className="flex flex-col gap-[0.4vh]">
                             <li className="flex items-center gap-[0.8vw] px-[0.8vw] py-[1.2vh] rounded-[0.5vw] hover:bg-white/5 cursor-pointer text-[0.9vw] text-white/80 hover:text-white transition-colors" 
-                                onClick={() => { navigate(`/usersdashboard/notifications`); setIsAccountOpen(false); }}>
+                                onClick={() => { 
+                                    const path = (user?.role === 'admin' || user?.role === 'superadmin') ? '/leaderdashboard' : '/usersdashboard/overview';
+                                    navigate(path); 
+                                    setIsAccountOpen(false); 
+                                }}>
+                                <OverviewIcon /> <span>Go to Dashboard</span>
+                            </li>
+                            <li className="flex items-center gap-[0.8vw] px-[0.8vw] py-[1.2vh] rounded-[0.5vw] hover:bg-white/5 cursor-pointer text-[0.9vw] text-white/80 hover:text-white transition-colors" 
+                                onClick={() => { 
+                                    const path = (user?.role === 'admin' || user?.role === 'superadmin') ? '/leaderdashboard/notifications' : '/usersdashboard/notifications';
+                                    navigate(path); 
+                                    setIsAccountOpen(false); 
+                                }}>
                                 <NotiIcon /> <span>Notifications</span>
                             </li>
                             <li className="flex items-center gap-[0.8vw] px-[0.8vw] py-[1.2vh] rounded-[0.5vw] hover:bg-white/5 cursor-pointer text-[0.9vw] text-white/80 hover:text-white transition-colors" 
-                                onClick={() => { navigate(`/usersdashboard/team-contact`); setIsAccountOpen(false); }}>
-                                <SupportIcon /> <span>Team Contact</span>
-                            </li>
-                            <li className="flex items-center gap-[0.8vw] px-[0.8vw] py-[1.2vh] rounded-[0.5vw] hover:bg-white/5 cursor-pointer text-[0.9vw] text-white/80 hover:text-white transition-colors" 
-                                onClick={() => { navigate(`/usersdashboard/account`); setIsAccountOpen(false); }}>
-                                <AccountIcon /> <span>My Account</span>
+                                onClick={() => { 
+                                    const path = (user?.role === 'admin' || user?.role === 'superadmin') ? '/leaderdashboard' : '/usersdashboard/account';
+                                    navigate(path); 
+                                    setIsAccountOpen(false); 
+                                }}>
+                                <AccountIcon /> <span>{ (user?.role === 'admin' || user?.role === 'superadmin') ? 'Admin Panel' : 'My Account'}</span>
                             </li>
                             <div className="h-px bg-[#2a2a30] my-[0.5vh] w-full" />
                             <li className="flex items-center gap-[0.8vw] px-[0.8vw] py-[1.2vh] rounded-[0.5vw] hover:bg-[#C5432D]/10 cursor-pointer text-[0.9vw] text-[#C5432D] transition-colors" 

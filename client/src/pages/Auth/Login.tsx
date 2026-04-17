@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useGoogleLogin } from '@react-oauth/google';
 import ColorBends from '../../components/ui/ColorBends';
 
 // SVG Paths provided by USER
@@ -143,29 +144,91 @@ const Login = () => {
         }
 
         setIsSubmitting(true);
-        // UI/UX Only: Mock success and redirect
 
-        setTimeout(() => {
-            setIsSubmitting(false);
-            const mockName = email.split('@')[0];
-            const formattedName = mockName.charAt(0).toUpperCase() + mockName.slice(1);
-            setLoggedInUserName(formattedName);
-            
-            // Update global auth state
-            setUser({ 
-                name: formattedName, 
-                email: email, 
-                plan: 'free' 
+        try {
+            const res = await fetch('http://localhost:5000/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
             });
-            
-            setShowSuccess(true);
-            
-            // Final redirect after showing success
-            setTimeout(() => {
-                navigate('/');
-            }, 3200);
-        }, 1500);
+            const data = await res.json();
+
+            if (res.ok) {
+                // Store token in localStorage
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data));
+
+                const formattedName = data.username || email.split('@')[0];
+                setLoggedInUserName(formattedName);
+
+                // Update global auth state
+                setUser({
+                    name: formattedName,
+                    email: data.email,
+                    role: data.role,
+                    degree: data.degree,
+                    plan: 'free'
+                });
+
+                setShowSuccess(true);
+
+                // Final redirect after showing success
+                setTimeout(() => {
+                    if (data.role === 'admin' || data.role === 'superadmin') {
+                        navigate('/leaderdashboard');
+                    } else if (data.role === 'user') {
+                        navigate('/usersdashboard');
+                    } else {
+                        navigate('/');
+                    }
+                }, 3200);
+            } else {
+                setErrors({ email: '', password: data.message || 'Invalid email or password' });
+            }
+        } catch (error) {
+            setErrors({ email: '', password: 'Server error. Please try again.' });
+        } finally {
+            setIsSubmitting(false);
+        }
     };
+
+    const handleGoogleLogin = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            setIsSubmitting(true);
+            try {
+                const res = await fetch('http://localhost:5000/api/auth/google-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: tokenResponse.access_token })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data));
+                    const formattedName = data.username || data.email.split('@')[0];
+                    setLoggedInUserName(formattedName);
+                    setUser({ name: formattedName, email: data.email, role: data.role, degree: data.degree, plan: 'free' });
+                    setShowSuccess(true);
+                    setTimeout(() => {
+                        if (data.role === 'admin' || data.role === 'superadmin') {
+                            navigate('/leaderdashboard');
+                        } else if (data.role === 'user') {
+                            navigate('/usersdashboard');
+                        } else {
+                            navigate('/');
+                        }
+                    }, 3200);
+                } else {
+                    setErrors({ email: '', password: data.message || 'Google login failed' });
+                }
+            } catch (error) {
+                setErrors({ email: '', password: 'Server error. Please try again.' });
+            } finally {
+                setIsSubmitting(false);
+            }
+        },
+        onError: () => setErrors({ email: '', password: 'Google login failed' })
+    });
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-[#0B0A0C] relative overflow-hidden font-poppins text-white">
@@ -308,7 +371,11 @@ const Login = () => {
                                 </div>
 
                                 {/* Google Button (Frame 4/5) */}
-                                <button type="button" className="relative rounded-[16px] shrink-0 w-full border border-[#2a2a30] hover:bg-white/5 transition-all">
+                                <button 
+                                    type="button" 
+                                    onClick={() => handleGoogleLogin()}
+                                    className="relative rounded-[16px] shrink-0 w-full border border-[#2a2a30] hover:bg-white/5 transition-all"
+                                >
                                     <div className="flex flex-row items-center justify-center size-full">
                                         <div className="content-stretch flex gap-[10px] items-center justify-center px-[14px] py-[14px] relative w-full">
                                             <div className="relative shrink-0 size-[18px]" data-name="Logo-google-icon-PNG 1">

@@ -206,6 +206,7 @@ const Header = ({ onToggleSidebar, title, navItems }) => {
     const onLogout = async () => {
         setOpenMobileSidebar(false);
         await logout();
+        navigate('/');
     };
 
     const avatarUrl = user?.avatar || `https://ui-avatars.com/api/?name=${user?.name || 'User'}&background=random`;
@@ -453,7 +454,9 @@ const Header = ({ onToggleSidebar, title, navItems }) => {
                                     style={{ padding: '0.8vh 1vw', gap: '0.5vw', height: '2.5vw' }}
                                 >
                                     <span className="font-poppins font-medium leading-none text-white/80 whitespace-nowrap tracking-wide" style={{ fontSize: '0.95vw' }}>
-                                        {isPremium ? 'Premium' : 'Free'}
+                                        {user?.role === 'superadmin' ? 'Super Admin' : 
+                                         user?.role === 'admin' ? 'Admin' : 
+                                         user?.role === 'guest' ? 'Guest' : 'User'}
                                     </span>
                                     <div className="w-[0.5vw] h-[0.5vw] rounded-full bg-white/80 shrink-0" />
                                 </div>
@@ -464,11 +467,11 @@ const Header = ({ onToggleSidebar, title, navItems }) => {
                                 </button>
                                 <div ref={accountRef} className={`absolute right-0 top-full mt-[1vh] w-[18vw] bg-[#121217] border border-[#2a2a30] rounded-xl overflow-hidden transition-all duration-200 z-50 p-[0.6vw] shadow-2xl ${openAccount ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'}`} role="menu" aria-hidden={!openAccount}>
                                     <ul className="flex flex-col gap-[0.4vh]">
+                                        <li className="flex items-center gap-[0.8vw] px-[0.8vw] py-[1.2vh] rounded-[0.5vw] hover:bg-white/5 cursor-pointer text-[0.9vw] text-white/80 hover:text-white transition-colors" onClick={() => { navigate(`/usersdashboard/overview`); setOpenAccount(false); }}>
+                                            <div style={{ transform: 'scale(1.1)' }}><OverviewIcon /></div> <span>Go to Dashboard</span>
+                                        </li>
                                         <li className="flex items-center gap-[0.8vw] px-[0.8vw] py-[1.2vh] rounded-[0.5vw] hover:bg-white/5 cursor-pointer text-[0.9vw] text-white/80 hover:text-white transition-colors" onClick={() => { navigate(`/usersdashboard/notifications`); setOpenAccount(false); }}>
                                             <div style={{ transform: 'scale(1.1)' }}><NotiIconSmall /></div> <span>Notifications</span>
-                                        </li>
-                                        <li className="flex items-center gap-[0.8vw] px-[0.8vw] py-[1.2vh] rounded-[0.5vw] hover:bg-white/5 cursor-pointer text-[0.9vw] text-white/80 hover:text-white transition-colors" onClick={() => { navigate(`/usersdashboard/team-contact`); setOpenAccount(false); }}>
-                                            <div style={{ transform: 'scale(1.1)' }}><Support /></div> <span>Team Contact</span>
                                         </li>
                                         <li className="flex items-center gap-[0.8vw] px-[0.8vw] py-[1.2vh] rounded-[0.5vw] hover:bg-white/5 cursor-pointer text-[0.9vw] text-white/80 hover:text-white transition-colors" onClick={() => { navigate(`/usersdashboard/account`); setOpenAccount(false); }}>
                                             <div style={{ transform: 'scale(1.1)' }}><Account /></div> <span>My Account</span>

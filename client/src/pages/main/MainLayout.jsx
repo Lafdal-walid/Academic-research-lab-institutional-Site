@@ -1,9 +1,12 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 
 const MainLayout = ({ children }) => {
+  const location = useLocation();
+  const isFullWidthVariant = location.pathname.includes('/projects');
+
   return (
     <div className="min-h-screen bg-background-main text-white selection:bg-accent selection:text-white">
       {/* Background Decor */}
@@ -11,8 +14,8 @@ const MainLayout = ({ children }) => {
       
       <Header />
       
-      <main className="relative z-10 w-full pt-20">
-        <div className="container mx-auto px-6 py-12 lg:py-24">
+      <main className={`relative z-10 w-full ${isFullWidthVariant ? '' : 'pt-20'}`}>
+        <div className={isFullWidthVariant ? 'w-full' : 'container mx-auto px-6 py-12 lg:py-24'}>
           {children}
         </div>
       </main>

@@ -5,18 +5,18 @@ import UpdatePasswordModal from './UpdatePasswordModal';
 
 const EditAdminModal = ({ isOpen, onClose, adminData }) => {
     const [name, setName] = useState('');
-    const [team, setTeam] = useState('Collaborators');
+    const [role, setRole] = useState('user');
     const [showPassword, setShowPassword] = useState(false);
-    const [isTeamDropdownOpen, setIsTeamDropdownOpen] = useState(false);
+    const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
     useEffect(() => {
         if (adminData) {
             setName(adminData.name || '');
-            setTeam(adminData.role === 'Owner' ? 'A+ Team' : 'Collaborators');
+            setRole(adminData.role || 'user');
         } else {
             setName('');
-            setTeam('Collaborators');
+            setRole('user');
         }
     }, [adminData, isOpen]);
 
@@ -110,15 +110,15 @@ const EditAdminModal = ({ isOpen, onClose, adminData }) => {
                             </button>
                         </div>
 
-                        {/* Team */}
+                        {/* Role */}
                         <div className="flex flex-col gap-[12px] w-full relative">
-                            <label className="font-['Poppins',sans-serif] text-[#80808a] text-[14px]">Team</label>
+                            <label className="font-['Poppins',sans-serif] text-[#80808a] text-[14px]">Role</label>
                             <div 
-                                className={`bg-[rgba(255,255,255,0.01)] h-[41px] relative rounded-[8px] w-full border ${isTeamDropdownOpen ? 'border-[#3457DC]' : 'border-[#2a2a30]'} px-[14px] flex items-center justify-between cursor-pointer transition-colors`}
-                                onClick={() => setIsTeamDropdownOpen(!isTeamDropdownOpen)}
+                                className={`bg-[rgba(255,255,255,0.01)] h-[41px] relative rounded-[8px] w-full border ${isRoleDropdownOpen ? 'border-[#3457DC]' : 'border-[#2a2a30]'} px-[14px] flex items-center justify-between cursor-pointer transition-colors`}
+                                onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
                             >
-                                <span className="text-white text-[14px] font-['Poppins',sans-serif]">{team}</span>
-                                <div className={`text-[#3457DC] transition-transform duration-300 ${isTeamDropdownOpen ? 'rotate-180' : ''}`}>
+                                <span className="text-white text-[14px] font-['Poppins',sans-serif] text-capitalize">{role}</span>
+                                <div className={`text-[#3457DC] transition-transform duration-300 ${isRoleDropdownOpen ? 'rotate-180' : ''}`}>
                                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                                         <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                                     </svg>
@@ -127,20 +127,20 @@ const EditAdminModal = ({ isOpen, onClose, adminData }) => {
 
                             {/* Dropdown Menu */}
                             <AnimatePresence>
-                                {isTeamDropdownOpen && (
+                                {isRoleDropdownOpen && (
                                     <motion.div 
                                         initial={{ opacity: 0, y: -10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -10 }}
                                         className="absolute top-[100%] left-0 right-0 mt-2 bg-[#1e1e24] border border-[#2a2a30] rounded-[8px] overflow-hidden z-[110] shadow-2xl"
                                     >
-                                        {['A+ Team', 'Collaborators', 'Support Team'].map((option) => (
+                                        {['guest', 'user', 'admin', 'superadmin'].map((option) => (
                                             <div 
                                                 key={option}
-                                                className="px-[14px] py-[10px] text-white text-[14px] font-['Poppins',sans-serif] hover:bg-[#3457DC] cursor-pointer transition-colors"
+                                                className="px-[14px] py-[10px] text-white text-[14px] font-['Poppins',sans-serif] hover:bg-[#3457DC] cursor-pointer transition-colors text-capitalize"
                                                 onClick={() => {
-                                                    setTeam(option);
-                                                    setIsTeamDropdownOpen(false);
+                                                    setRole(option);
+                                                    setIsRoleDropdownOpen(false);
                                                 }}
                                             >
                                                 {option}

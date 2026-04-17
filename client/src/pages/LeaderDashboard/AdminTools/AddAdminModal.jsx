@@ -103,7 +103,7 @@ const AddAdminModal = ({ isOpen, onClose, onAdd }) => {
                                         exit={{ opacity: 0, y: -10 }}
                                         className="absolute top-[100%] left-0 right-0 mt-2 bg-[#1e1e24] border border-[#2a2a30] rounded-[8px] overflow-hidden z-[110] shadow-2xl"
                                     >
-                                        {['Owner', 'Support', 'Finance'].map((option) => (
+                                        {['guest', 'user', 'admin', 'superadmin'].map((option) => (
                                             <div 
                                                 key={option}
                                                 className="px-[14px] py-[10px] text-white text-[14px] font-['Poppins',sans-serif] hover:bg-[#3457DC] cursor-pointer transition-colors"

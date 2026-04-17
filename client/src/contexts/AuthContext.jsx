@@ -3,10 +3,15 @@ import React, { createContext, useContext, useState } from 'react';
 const AuthContext = createContext(undefined);
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState(() => {
+        const savedUser = localStorage.getItem('user');
+        return savedUser ? JSON.parse(savedUser) : null;
+    });
 
     const logout = async () => {
         console.log('Logging out...');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
         setUser(null);
     };
 

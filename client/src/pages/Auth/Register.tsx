@@ -57,7 +57,7 @@ const Register: React.FC = () => {
         setErrors(prev => ({ ...prev, [id]: '' }));
     };
 
-    const handleStep1Submit = (e: React.FormEvent) => {
+    const handleStep1Submit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formData.username || !formData.email || !formData.password) {
             setErrors({
@@ -68,13 +68,48 @@ const Register: React.FC = () => {
             return;
         }
         setIsSubmitting(true);
-        setTimeout(() => { setIsSubmitting(false); setStep(2); }, 1000);
+        try {
+            const res = await fetch('http://localhost:5000/api/auth/send-email-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: formData.email })
+            });
+            if (res.ok) {
+                setOtp(['', '', '', '']);
+                setStep(2); // email verification first
+            } else {
+                const data = await res.json();
+                alert(data.message || 'Error sending email code');
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    const handleStep2Submit = (e: React.FormEvent) => {
+    // Step 3: Phone number entry → send phone OTP
+    const handleStep2Submit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
-        setTimeout(() => { setIsSubmitting(false); setStep(3); }, 1000);
+        try {
+            const res = await fetch('http://localhost:5000/api/auth/send-phone-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phoneNumber: selectedCountry.code + phoneNumber })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setOtp(['', '', '', '']);
+                setStep(4); // phone OTP verify
+            } else {
+                alert(data.message || 'Error sending SMS');
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleOtpChange = (index: number, value: string) => {
@@ -90,16 +125,84 @@ const Register: React.FC = () => {
         if (e.key === 'Backspace' && !otp[index] && index > 0) document.getElementById(`otp-${index - 1}`)?.focus();
     };
 
-    const handlePhoneVerify = (e: React.FormEvent) => {
+    // Step 4: Verify phone OTP → register
+    const handlePhoneVerify = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
-        setTimeout(() => { setIsSubmitting(false); setOtp(['', '', '', '']); setStep(4); }, 1500);
+        const code = otp.join('');
+        try {
+            const res = await fetch('http://localhost:5000/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: formData.username,
+                    email: formData.email,
+                    password: formData.password,
+                    phoneNumber: selectedCountry.code + phoneNumber,
+                    phoneOtp: code
+                })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                navigate('/login');
+            } else {
+                alert(data.message || 'Invalid code or registration failed');
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    const handleEmailVerify = (e: React.FormEvent) => {
+    // Step 2: Verify email OTP → go to phone input
+    const handleEmailVerify = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
-        setTimeout(() => { setIsSubmitting(false); navigate('/login'); }, 1500);
+        const code = otp.join('');
+        try {
+            const res = await fetch('http://localhost:5000/api/auth/verify-email-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: formData.email, otp: code })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setOtp(['', '', '', '']);
+                setStep(3); // go to phone input
+            } else {
+                alert(data.message || 'Invalid email code');
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleRegisterLater = async () => {
+        setIsSubmitting(true);
+        try {
+            const res = await fetch('http://localhost:5000/api/auth/register-later', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: formData.username,
+                    email: formData.email,
+                    password: formData.password
+                })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                navigate('/login');
+            } else {
+                alert(data.message || 'Registration failed');
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -121,9 +224,26 @@ const Register: React.FC = () => {
                         />
                     )}
 
+                    {/* Step 2: Email OTP */}
                     {step === 2 && (
-                        <PhoneInputForm 
+                        <VerificationForm 
+                            title="Check your email" 
+                            description={<>We've sent a 4-digit verification code to <span className="text-accent font-medium">{formData.email}</span></>} 
+                            otp={otp} 
+                            onOtpChange={handleOtpChange} 
+                            onOtpKeyDown={handleOtpKeyDown} 
+                            onSubmit={handleEmailVerify} 
                             onBack={() => setStep(1)} 
+                            onResend={() => {}}
+                            isSubmitting={isSubmitting} 
+                            buttonText="Verify Email" 
+                        />
+                    )}
+
+                    {/* Step 3: Phone input */}
+                    {step === 3 && (
+                        <PhoneInputForm 
+                            onBack={() => setStep(2)} 
                             onSubmit={handleStep2Submit} 
                             countries={countries} 
                             selectedCountry={selectedCountry} 
@@ -133,11 +253,12 @@ const Register: React.FC = () => {
                             phoneNumber={phoneNumber} 
                             handlePhoneChange={(e) => setPhoneNumber(e.target.value)} 
                             isSubmitting={isSubmitting} 
-                            onLater={() => navigate('/login')} 
+                            onLater={handleRegisterLater} 
                         />
                     )}
 
-                    {step === 3 && (
+                    {/* Step 4: Phone OTP → registers */}
+                    {step === 4 && (
                         <VerificationForm 
                             title="Verify Phone" 
                             description={<>We've sent a 4-digit code to <span className="text-white font-medium">{selectedCountry.code} {phoneNumber}</span></>} 
@@ -145,25 +266,10 @@ const Register: React.FC = () => {
                             onOtpChange={handleOtpChange} 
                             onOtpKeyDown={handleOtpKeyDown} 
                             onSubmit={handlePhoneVerify} 
-                            onBack={() => setStep(2)} 
-                            onResend={() => {}}
-                            isSubmitting={isSubmitting} 
-                            buttonText="Verify Phone" 
-                        />
-                    )}
-
-                    {step === 4 && (
-                        <VerificationForm 
-                            title="Check your email" 
-                            description={<>We've sent a 4-digit verification code to <span className="text-accent font-medium">{formData.email}</span></>} 
-                            otp={otp} 
-                            onOtpChange={handleOtpChange} 
-                            onOtpKeyDown={handleOtpKeyDown} 
-                            onSubmit={handleEmailVerify} 
                             onBack={() => setStep(3)} 
                             onResend={() => {}}
                             isSubmitting={isSubmitting} 
-                            buttonText="Verify Email" 
+                            buttonText="Verify Phone & Create Account" 
                         />
                     )}
 

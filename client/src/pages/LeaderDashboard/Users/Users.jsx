@@ -140,12 +140,46 @@ const ManageUsersTable = () => {
     const [currentPage, setCurrentPage] = useState(2);
     const totalPages = 12;
 
-    const [users, setUsers] = useState([
-        { id: 1, userId: 'ID-2481', email: 'amine.kh@lab.dz', username: 'Amine Khababa', degree: 'Doctorat', team: 'team 1', status: 'In Project', checked: true },
-        { id: 2, userId: 'ID-2482', email: 'lydia.m@lab.dz', username: 'Lydia Mansouri', degree: 'Professor', team: 'team 2', status: 'Without Project', checked: false },
-        { id: 3, userId: 'ID-2483', email: 'yacine.r@lab.dz', username: 'Yacine Rahmani', degree: 'Researcher', team: 'team 3', status: 'In Project', checked: false },
-        { id: 4, userId: 'ID-2484', email: 'sarah.b@lab.dz', username: 'Sarah Belkacem', degree: 'Doctorat', team: 'team 4', status: 'Without Project', checked: false },
-    ]);
+    const [users, setUsers] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            setIsLoading(true);
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch('http://localhost:5000/api/auth/admin/users', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    const formattedUsers = data.map(user => ({
+                        id: user._id,
+                        userId: `ID-${user._id.toString().slice(-4).toUpperCase()}`,
+                        email: user.email,
+                        username: user.username,
+                        role: user.role,
+                        degree: user.degree || 'unknown',
+                        team: 'Not Assigned',
+                        status: 'Without Project',
+                        checked: false
+                    }));
+                    setUsers(formattedUsers);
+                } else {
+                    setError(data.message || 'Failed to fetch users');
+                }
+            } catch (err) {
+                setError('Connection failed');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchUsers();
+    }, []);
 
     const handleToggleRow = (id) => {
         setUsers(prev => prev.map(u => u.id === id ? { ...u, checked: !u.checked } : u));
@@ -267,6 +301,7 @@ const ManageUsersTable = () => {
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>User Id</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>email</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>User name</th>
+                            <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Role</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>academic graduation</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Team</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, textAlign: 'center' }}>Status</th>
@@ -274,7 +309,19 @@ const ManageUsersTable = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {users.map((user) => (
+                        {isLoading ? (
+                            <tr>
+                                <td colSpan="9" style={{ textAlign: 'center', padding: '5vh', color: '#a5a5b2' }}>Loading users...</td>
+                            </tr>
+                        ) : error ? (
+                            <tr>
+                                <td colSpan="9" style={{ textAlign: 'center', padding: '5vh', color: '#eb5757' }}>{error}</td>
+                            </tr>
+                        ) : users.length === 0 ? (
+                            <tr>
+                                <td colSpan="9" style={{ textAlign: 'center', padding: '5vh', color: '#a5a5b2' }}>No users found</td>
+                            </tr>
+                        ) : users.map((user) => (
                             <tr key={user.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', height: '8vh' }}>
                                 <td style={{ padding: '0 0.5vw' }}>
                                     <div onClick={() => handleToggleRow(user.id)}
@@ -285,6 +332,23 @@ const ManageUsersTable = () => {
                                 <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{user.userId}</td>
                                 <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{user.email}</td>
                                 <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'white' }}>{user.username}</td>
+                                <td style={{ padding: '0 0.5vw' }}>
+                                    <span style={{ 
+                                        fontSize: '0.75vw', 
+                                        padding: '0.4vh 0.8vw', 
+                                        borderRadius: '0.4vw',
+                                        backgroundColor: user.role === 'superadmin' ? 'rgba(235, 87, 87, 0.1)' : 
+                                                         user.role === 'admin' ? 'rgba(52, 87, 220, 0.1)' : 
+                                                         user.role === 'guest' ? 'rgba(165, 165, 178, 0.1)' : 'rgba(39, 189, 173, 0.1)',
+                                        color: user.role === 'superadmin' ? '#eb5757' : 
+                                               user.role === 'admin' ? '#3457DC' : 
+                                               user.role === 'guest' ? '#a5a5b2' : '#27bdad',
+                                        fontWeight: 600,
+                                        textTransform: 'capitalize'
+                                    }}>
+                                        {user.role}
+                                    </span>
+                                </td>
                                 <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: user.degree === 'Doctorat' ? '#FCC841' : 'rgba(255,255,255,0.7)', fontWeight: user.degree === 'Doctorat' ? 600 : 400 }}>{user.degree}</td>
                                 <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{user.team}</td>
                                 <td style={{ padding: '0 0.5vw', textAlign: 'center' }}>

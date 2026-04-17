@@ -1,9 +1,14 @@
+import React from 'react';
+import Welcome from './Welcome';
+import ProjectCatalog from './ProjectCatalog';
+
 const Projects = () => {
-  return (
-    <div>
-      <h1>Projects</h1>
-    </div>
-  );
+    return (
+        <main className="w-full min-h-screen bg-[#0A070E]">
+            <Welcome />
+            <ProjectCatalog />
+        </main>
+    );
 };
 
 export default Projects;
