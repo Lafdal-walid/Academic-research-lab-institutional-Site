@@ -1,0 +1,144 @@
+{
+    "Pricing": "Pricing",
+    "title": "Welcome to Our Platform",
+    "subtitle": "The best gaming experience",
+    "showcase": {
+        "country": "Country",
+        "title1": "Optimizing Setups Across",
+        "title2": "the Globe",
+        "subtitle": "built to perform, no matter where you play.",
+        "more": "& more"
+    },
+    "testimonials": {
+        "title1": "Trusted by Thousands of",
+        "title2": "Gamers",
+        "subtitle": "Here's what They experienced with IQ Optimizer.",
+        "text": "Lorem ipsum dolor sit amet consectetur. Aliquet aliquam sapien aliquet sed nam odio maecenas aliquam. Feugiat tortor dignissim massa lorem maecenas facilisis."
+    },
+    "faq": {
+        "title": "Have Questions?",
+        "subtitle": "Check our FAQ",
+        "q1": "What are the team's primary research areas?",
+        "a1": "We focus on Big Data analysis, predictive modeling using Machine Learning, and optimizing Warehouse Management Systems (WMS) to enhance logistics efficiency through data-driven insights.",
+        "q2": "Which technologies and frameworks do we utilize?",
+        "a2": "We utilize a modern stack including React, Node.js, Python, and various AI/Machine Learning frameworks to build robust and scalable systems.",
+        "q3": "How does competitive programming influence our work?",
+        "a3": "It sharpens our problem-solving skills, helps us write highly efficient algorithms, and fosters a culture of technical excellence.",
+        "q4": "Are we open to professional collaborations?",
+        "a4": "Yes, we actively seek collaborations with academic institutions and industrial partners to solve complex real-world problems.",
+        "q5": "What makes our software solutions unique?",
+        "a5": "Our solutions combine deep academic research with practical implementation, focusing on performance, scalability, and measurable impact.",
+        "q6": "Where can I access our publications and source code?",
+        "a6": "You can access our research papers in the Publications section of this site, and explore some of our open-source projects on GitHub.",
+        "moreBtn": "More FAQ",
+        "communityBtn": "Join Community"
+    },
+    "pricing": {
+        "title": "Our Plans",
+        "subtitle1": "Compare what's included in each plan and",
+        "subtitle2": "find the one that fits your needs.",
+        "monthly": "Monthly",
+        "yearly": "Yearly ( save 30% )",
+        "sar": "SAR",
+        "perMonth": "/ month • billed yearly",
+        "popular": "Popular",
+        "plans": {
+            "free": {
+                "name": "Free",
+                "desc": "Perfect to explore, but you'll want more",
+                "btn": "Download Free",
+                "f1": "Basic optimization for Windows, Internet, Mouse & Keyboard",
+                "f2": "Access to free giveaways (limited to basic tier)",
+                "f3": "Enhances internet settings",
+                "f4": "Gets the most optimal settings for your games"
+            },
+            "annual": {
+                "name": "Premium Annual",
+                "desc": "The ultimate plan for committed gamers, more perks the longer you stay",
+                "btn": "Choose Plan",
+                "f1": "Full software access",
+                "f2": "Early access to updates",
+                "f3": "Priority giveaway access (starts immediately)",
+                "f4": "Month 3: Device unlink option",
+                "f5": "Month 4: Freeze subscription",
+                "f6": "Month 7: Loyalty badge",
+                "f7": "Month 12: Grand reward"
+            },
+            "sixMonth": {
+                "name": "Premium 6-Month",
+                "desc": "Mid-term plan with stability + rewards",
+                "btn": "Choose Plan",
+                "f1": "Full software access",
+                "f2": "24/7 customer support",
+                "f3": "Free updates",
+                "f4": "Giveaway entry (direct with plan)",
+                "f5": "Month 2: Extra giveaway chance",
+                "f6": "Month 3: Device unlink option",
+                "f7": "Month 6: Bonus free month"
+            }
+        }
+    },
+    "stats": {
+        "downloads": {
+            "value": "219,818",
+            "label": "TOTAL DOWNLOADS",
+            "desc": "Hundreds of thousands rely on IQ Optimizer for better gaming performance."
+        },
+        "rating": {
+            "value": "4.8",
+            "label": "AVERAGE RATING",
+            "desc": "Backed by thousands of verified reviews from real players."
+        },
+        "community": {
+            "value": "50K+",
+            "label": "Community members"
+        },
+        "sessions": {
+            "value": "+ 28.4 M",
+            "label": "Optimized Sessions"
+        }
+    },
+    "coupon": {
+        "modalBtn": "Have a Coupon ?",
+        "title": "Enter Coupon Code",
+        "description": "Enter the code exactly as it is. You can either add it to your account or use it directly.",
+        "label": "Coupon code",
+        "placeholder": "Example: IQ-C1421",
+        "back": "Back",
+        "validInfo": "Annual Premium Subscription for 20 days",
+        "validDate": "June 25, 2025",
+        "useNow": "Use Now",
+        "claim": "Claim Coupon"
+    },
+    "builtToBoost": {
+        "built": "BUILT",
+        "to": "TO",
+        "boost": "BOOST",
+        "made": ", MADE",
+        "to_be": "TO BE",
+        "simple": "SIMPLE.",
+        "description": "Boost FPS and responsiveness with IQ Optimizer, no complicated setup required.",
+        "cta": {
+            "download": "Download Free",
+            "supports": "Supports Windows 10 and Higher"
+        },
+        "on": "ON",
+        "off": "OFF"
+    },
+    "intro": {
+        "kicker": "IQ Optimizer:",
+        "title": "What It Does & How It Helps",
+        "p1": "IQ Optimizer upgrades your system for better in-game performance on any PC, from low-end laptops to high-end gaming setups. It boosts FPS, reduces lag, and improves responsiveness by stopping unnecessary background tasks and fine-tuning registry values to maximize system efficiency.",
+        "p2": "Just pick a plan (Free or Premium), install, and optimize in one click. No complex setup. No confusion, just smoother, faster gameplay.",
+        "download": "Download Free",
+        "plans": "Check Our plans"
+    },
+    "ready": {
+        "graphics": "Graphics",
+        "performance": "Performance",
+        "title1": "READY TO BOOST",
+        "title2": "YOUR GAMES ?",
+        "download": "Download now",
+        "ssl": "SSL-certified for safe, secure use."
+    }
+}

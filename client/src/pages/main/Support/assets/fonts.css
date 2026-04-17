@@ -1,0 +1,181 @@
+@font-face {
+    font-family: 'Gilroy';
+    src: url('/fonts/gilroy/Gilroy-Regular.woff2') format('woff2'),
+         url('/fonts/gilroy/Gilroy-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Gilroy';
+    src: url('/fonts/gilroy/Gilroy-Medium.woff2') format('woff2'),
+         url('/fonts/gilroy/Gilroy-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Gilroy';
+    src: url('/fonts/gilroy/Gilroy-SemiBold.woff2') format('woff2'),
+         url('/fonts/gilroy/Gilroy-SemiBold.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Gilroy';
+    src: url('/fonts/gilroy/Gilroy-ExtraBold.woff2') format('woff2'),
+         url('/fonts/gilroy/Gilroy-ExtraBold.woff') format('woff');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Gilroy';
+    src: url('/fonts/gilroy/Gilroy-Black.woff2') format('woff2'),
+         url('/fonts/gilroy/Gilroy-Black.woff') format('woff');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'poppins';
+    font-style: normal;
+    font-weight: 100;
+    font-display: swap;
+    src: url('/fonts/poppins/poppins-latin-100-normal.woff2') format('woff2'),
+        url('/fonts/poppins/poppins-latin-100-normal.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'poppins';
+    font-style: normal;
+    font-weight: 200;
+    font-display: swap;
+    src: url('/fonts/poppins/poppins-latin-200-normal.woff2') format('woff2'),
+        url('/fonts/poppins/poppins-latin-200-normal.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'poppins';
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: url('/fonts/poppins/poppins-latin-300-normal.woff2') format('woff2'),
+        url('/fonts/poppins/poppins-latin-300-normal.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'poppins';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/fonts/poppins/poppins-latin-400-normal.woff2') format('woff2'),
+        url('/fonts/poppins/poppins-latin-400-normal.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'poppins';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('/fonts/poppins/poppins-latin-500-normal.woff2') format('woff2'),
+        url('/fonts/poppins/poppins-latin-500-normal.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'poppins';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('/fonts/poppins/poppins-latin-600-normal.woff2') format('woff2'),
+        url('/fonts/poppins/poppins-latin-600-normal.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'poppins';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('/fonts/poppins/poppins-latin-700-normal.woff2') format('woff2'),
+        url('/fonts/poppins/poppins-latin-700-normal.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'poppins';
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: url('/fonts/poppins/poppins-latin-800-normal.woff2') format('woff2'),
+        url('/fonts/poppins/poppins-latin-800-normal.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'poppins';
+    font-style: normal;
+    font-weight: 900;
+    font-display: swap;
+    src: url('/fonts/poppins/poppins-latin-900-normal.woff2') format('woff2'),
+        url('/fonts/poppins/poppins-latin-900-normal.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Tajawal';
+    src: url('/fonts/tajawal/Tajawal-ExtraLight.woff') format('woff');
+    font-weight: 200;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Tajawal';
+    src: url('/fonts/tajawal/Tajawal-Light.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Tajawal';
+    src: url('/fonts/tajawal/Tajawal-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Tajawal';
+    src: url('/fonts/tajawal/Tajawal-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Tajawal';
+    src: url('/fonts/tajawal/Tajawal-Bold.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Tajawal';
+    src: url('/fonts/tajawal/Tajawal-ExtraBold.woff') format('woff');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Tajawal';
+    src: url('/fonts/tajawal/Tajawal-Black.woff') format('woff');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}

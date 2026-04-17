@@ -1,0 +1,43 @@
+{
+    "subtitle": "Knowledge Retrieval Hub",
+    "title": "Technical",
+    "titleSpan": "FAQ",
+    "description": "Everything you need to know about our neural optimization engine, performance metrics, and compliance protocols.",
+    "searchPlaceholder": "Search the protocol database...",
+    "noNodes": "No nodes found",
+    "noNodesDesc": "Try adjusting your search query for better results.",
+    "sidebarTitle": "Can't Find",
+    "sidebarTitleSpan": "Answers?",
+    "liveRelay": "Live Relay",
+    "liveRelayDesc": "Contact Technical Support",
+    "discordTitle": "Official Discord",
+    "discordDesc": "Join 120k+ gamers for real-time tech support.",
+    "discordBtn": "Join Pulse Node",
+    "items": [
+        {
+            "category": "Core Tech",
+            "question": "Is IQOptimizer safe to use with anti-cheat software?",
+            "answer": "Yes, 100%. Our software operates at the OS kernel level to manage system resource allocation. We do not modify game files, memory, or network packets, making it fully compliant with BattleEye, EAC, Vanguard, and others."
+        },
+        {
+            "category": "Performance",
+            "question": "How much of an FPS boost can I honestly expect?",
+            "answer": "While results vary based on hardware, most users see a 15% to 40% increase in average frame rates. More importantly, we drastically reduce '1% lows' and '0.1% lows', leading to a much smoother experience."
+        },
+        {
+            "category": "Latency",
+            "question": "Does this actually improve my ping?",
+            "answer": "We optimize the way Windows 10/11 handles gaming-related network traffic using proprietary QoS protocols. This reduces jitter and stabilizes ping spikes, although we cannot fix physical issues with your ISP's routing."
+        },
+        {
+            "category": "Setup",
+            "question": "Do I need to re-run the optimization every time I play?",
+            "answer": "No. Once you deploy a node configuration, it persists in your system. Our background service monitors when you start a supported game and activates the high-performance profile automatically."
+        },
+        {
+            "category": "Support",
+            "question": "Can I use this on a gaming laptop?",
+            "answer": "Absolutely. In fact, laptop users often see the biggest gains due to more aggressive Windows power management that we override to ensure consistent performance."
+        }
+    ]
+}

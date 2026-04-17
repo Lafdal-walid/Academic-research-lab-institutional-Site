@@ -30,13 +30,15 @@ const HiOutlineArrowNarrowUp = ({ size = 20 }) => (
 const Footer = () => {
   const location = useLocation();
   const isProjectsMenu = location.pathname.includes('/projects');
+  const isSupportPage = location.pathname.includes('/support');
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <div className={isProjectsMenu ? "bg-[#070710]" : "bg-transparent"}>
+    <div className={isProjectsMenu ? "bg-[#0A070E]" : isSupportPage ? "bg-[#05030D]" : "bg-transparent"}>
+
     <footer
       className="relative pt-[90px] md:pt-[130px] pb-[28px] px-6 md:px-20 overflow-x-hidden font-poppins bg-[#121014] text-white"
       style={{
