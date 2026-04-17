@@ -9,8 +9,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useTranslation } from "@/hooks/useTranslation";
 
 // --- 1. Hero Section (About Us) ---
-const HerAbout = () => {
-    const { t, language } = useTranslation("about");
+const HerAboutUs = () => {
+    const { t, language } = useTranslation("aboutus");
     const isRTL = language === "ar";
 
     return (
@@ -142,15 +142,15 @@ const ContactCTA = () => {
     );
 };
 
-// --- Main About Component ---
-function About() {
+// --- Main AboutUs Component ---
+function AboutUs() {
     useEffect(() => {
         AOS.init({ duration: 1000, once: true });
     }, []);
 
     return (
         <main className="bg-[#020203] min-h-screen">
-            <HerAbout />
+            <HerAboutUs />
             <StatsSection />
             <MissionSection />
             <TimelineSection />
@@ -159,4 +159,4 @@ function About() {
     );
 }
 
-export default About;
+export default AboutUs;
