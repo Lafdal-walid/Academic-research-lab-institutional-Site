@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RiCloseLine } from 'react-icons/ri';
 
-const ChangeRoleModal = ({ isOpen, onClose, user, onUpdate }) => {
+const ChangeRoleModal = ({ isOpen, onClose, user, onUpdate, allowedRoles }) => {
     const [role, setRole] = useState('Select a role');
     const [degree, setDegree] = useState('unknown');
     const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
@@ -23,7 +23,7 @@ const ChangeRoleModal = ({ isOpen, onClose, user, onUpdate }) => {
         }
     };
 
-    const roles = ['guest', 'user', 'admin', 'superadmin'];
+    const roles = allowedRoles || ['guest', 'user', 'admin', 'superadmin'];
     const degrees = ['unknown', 'Student', 'Doctorat', 'Professor', 'Researcher', 'Expert'];
 
     return (

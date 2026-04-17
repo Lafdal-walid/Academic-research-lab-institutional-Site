@@ -7,6 +7,14 @@ const userSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    firstName: {
+        type: String,
+        trim: true
+    },
+    lastName: {
+        type: String,
+        trim: true
+    },
     email: {
         type: String,
         required: true,
@@ -19,6 +27,10 @@ const userSchema = new mongoose.Schema({
         required: true
     },
     phoneNumber: {
+        type: String,
+        default: ''
+    },
+    country: {
         type: String,
         default: ''
     },

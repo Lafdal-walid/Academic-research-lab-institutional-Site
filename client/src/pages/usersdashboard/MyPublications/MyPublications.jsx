@@ -80,7 +80,7 @@ const Tab = ({ label, isActive, onClick }) => {
     );
 };
 
-const ResearchPaperCard = ({ title, authors, year, journal, description, tags }) => {
+const ResearchPaperCard = ({ title, authors, year, journal, description, tags, link }) => {
     return (
         <div style={{
             backgroundColor: '#151519',
@@ -108,7 +108,7 @@ const ResearchPaperCard = ({ title, authors, year, journal, description, tags })
                 }}>
                     {title}
                 </h3>
-                <a href="#" style={{ transition: 'opacity 0.2s' }} onMouseOver={e => e.currentTarget.style.opacity = 0.7} onMouseOut={e => e.currentTarget.style.opacity = 1}>
+                <a href={link} target="_blank" rel="noopener noreferrer" style={{ transition: 'opacity 0.2s' }} onMouseOver={e => e.currentTarget.style.opacity = 0.7} onMouseOut={e => e.currentTarget.style.opacity = 1}>
                     <img src={LinkIcon} alt="link" style={{ width: '1.2vw' }} />
                 </a>
             </div>
@@ -190,28 +190,29 @@ const TeamPublicationContent = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const publications = [
-        {
-            title: "Attention Mechanisms in Hierarchical Cognitive Architectures for Multi-Agent Reasoning",
-            authors: "A. Benali, S. Mansouri, Y. Kaddour",
-            year: "2024",
-            journal: "IEEE Transactions on Neural Networks and Learning Systems",
-            description: "We propose a hierarchical attention-based cognitive architecture that enables multi-agent systems to perform coordinated reasoning tasks with significantly improved accuracy and convergence rates.",
-            tags: ["Vision-Machine Intelligence", "Multi-Agent Systems"]
-        },
-        {
-            title: "Dynamic Resource Allocation in Distributed Cloud Networks using Deep Reinforcement Learning",
-            authors: "M. Zahra, K. Omar",
-            year: "2023",
-            journal: "Journal of Network and Computer Applications",
-            description: "This paper explores the integration of DRL for managing network resources in real-time, focusing on latency reduction and energy efficiency in large-scale deployments.",
-            tags: ["Deep Learning", "Cloud Computing"]
-        }
-    ];
+    const [publications, setPublications] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchPublications = async () => {
+            try {
+                const res = await fetch('http://localhost:5000/api/publications');
+                if (res.ok) {
+                    const data = await res.json();
+                    setPublications(data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch publications", err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchPublications();
+    }, []);
 
     const filteredPublications = publications.filter(pub =>
         pub.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        pub.authors.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        pub.authors.some(auth => auth.toLowerCase().includes(searchTerm.toLowerCase())) ||
         pub.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
@@ -363,9 +364,24 @@ const TeamPublicationContent = () => {
 
             {/* Publications List */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                {filteredPublications.map((pub, idx) => (
-                    <ResearchPaperCard key={idx} {...pub} />
-                ))}
+                {isLoading ? (
+                    <div style={{ color: '#a5a5b2', textAlign: 'center', padding: '10vh' }}>Loading research papers...</div>
+                ) : filteredPublications.length === 0 ? (
+                    <div style={{ color: '#a5a5b2', textAlign: 'center', padding: '10vh' }}>No publications found.</div>
+                ) : (
+                    filteredPublications.map((pub, idx) => (
+                        <ResearchPaperCard 
+                            key={pub._id || idx} 
+                            title={pub.title}
+                            authors={pub.authors.join(', ')}
+                            year={pub.year}
+                            journal={pub.publisher}
+                            description={pub.contribution}
+                            tags={pub.tags}
+                            link={pub.documentUrl ? `http://localhost:5000${pub.documentUrl}` : '#'}
+                        />
+                    ))
+                )}
             </div>
 
             {/* Footer Section (Pagination) */}

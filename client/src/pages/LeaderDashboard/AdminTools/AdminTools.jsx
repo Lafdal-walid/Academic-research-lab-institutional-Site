@@ -1,35 +1,93 @@
+import { useState, useEffect } from 'react';
 import TrashIcon from '@/assets/svg/LeaderDashboard/admintools/Frame 6489.svg';
 import EditIcon from '@/assets/svg/LeaderDashboard/admintools/Frame 6490.svg';
 import AddAdminIcon from '@/assets/svg/LeaderDashboard/admintools/Group.svg';
 import EditAdminModal from './EditAdminModal';
 import AddAdminModal from './AddAdminModal';
-import { useState } from 'react';
 
 const AdminTools = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [selectedAdmin, setSelectedAdmin] = useState(null);
+    const [admins, setAdmins] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const [admins, setAdmins] = useState([
-        { id: 1, name: 'Amir Khoury', email: 'amir@domain.com', role: 'superadmin', joined: 'Jan 12, 2025', lastActive: '2 hours ago', status: 'Active' },
-        { id: 2, name: 'Sarah Belkacem', email: 'sarah@domain.com', role: 'admin', joined: 'Jan 12, 2025', lastActive: '2 hours ago', status: 'Suspended' },
-        { id: 3, name: 'Yacine Rahmani', email: 'yacine@domain.com', role: 'user', joined: 'Jan 12, 2025', lastActive: '2 hours ago', status: 'Active' },
-    ]);
+    const fetchAdmins = async () => {
+        setIsLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('http://localhost:5000/api/auth/admin/users', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                // Only show admins and superadmins
+                const filtered = data
+                    .filter(u => u.role === 'admin' || u.role === 'superadmin')
+                    .map(u => ({
+                        id: u._id,
+                        name: u.username,
+                        email: u.email,
+                        role: u.role,
+                        joined: new Date(u.createdAt).toLocaleDateString(),
+                        lastActive: 'Active',
+                        status: 'Active'
+                    }));
+                setAdmins(filtered);
+            }
+        } catch (err) { console.error(err); }
+        finally { setIsLoading(false); }
+    };
+
+    useEffect(() => {
+        fetchAdmins();
+    }, []);
 
     const handleEditClick = (admin) => {
         setSelectedAdmin(admin);
         setIsEditModalOpen(true);
     };
 
-    const handleAddAdmin = (newAdmin) => {
-        const adminWithMeta = {
-            id: admins.length + 1,
-            ...newAdmin,
-            joined: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-            lastActive: 'Just now',
-            status: 'Active'
-        };
-        setAdmins([...admins, adminWithMeta]);
+    const handleUpdateAdmin = async (adminId, updateData) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`http://localhost:5000/api/auth/admin/users/${adminId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updateData)
+            });
+            if (res.ok) {
+                setIsEditModalOpen(false);
+                fetchAdmins();
+            }
+        } catch (err) { console.error(err); }
+    };
+
+    const handleDeleteAdmin = async (adminId) => {
+        if (!window.confirm('Are you sure you want to demote this admin to Guest?')) return;
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`http://localhost:5000/api/auth/admin/users/${adminId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ role: 'guest' })
+            });
+            if (res.ok) {
+                fetchAdmins();
+            }
+        } catch (err) { console.error(err); }
+    };
+
+    const handleAddAdmin = async (newAdmin) => {
+        // Assume AddAdminModal logic handles the creation which is basically register or similar
+        // For simplicity, we'll just refresh list if successful
+        fetchAdmins();
         setIsAddModalOpen(false);
     };
 
@@ -140,7 +198,10 @@ const AdminTools = () => {
                                             >
                                                 <img src={EditIcon} alt="edit" style={{ width: '1.8vw', height: '1.8vw', objectFit: 'contain' }} />
                                             </button>
-                                            <button style={{ backgroundColor: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <button 
+                                                onClick={() => handleDeleteAdmin(account.id)}
+                                                style={{ backgroundColor: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                            >
                                                 <img src={TrashIcon} alt="delete" style={{ width: '1.8vw', height: '1.8vw', objectFit: 'contain' }} />
                                             </button>
                                         </div>
@@ -157,6 +218,7 @@ const AdminTools = () => {
                 isOpen={isEditModalOpen} 
                 onClose={() => setIsEditModalOpen(false)} 
                 adminData={selectedAdmin} 
+                onUpdate={handleUpdateAdmin}
             />
 
             {/* Add New Admin Modal */}

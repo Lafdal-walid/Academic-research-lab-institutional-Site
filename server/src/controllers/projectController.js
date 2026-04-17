@@ -17,13 +17,17 @@ exports.addMilestone = async (req, res) => {
 
 exports.getProjects = async (req, res) => {
     try {
-        // Fetch projects where the user is a member or part of the team
-        const projects = await Project.find({
-            $or: [
-                { members: req.user._id },
-                { team: req.user.team }
-            ]
-        }).populate('team');
+        // If admin, show all projects; else show user-specific projects
+        let query = {};
+        if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
+            query = {
+                $or: [
+                    { members: req.user._id },
+                    { team: req.user.team }
+                ]
+            };
+        }
+        const projects = await Project.find(query).populate('team');
         res.json(projects);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -50,6 +54,34 @@ exports.createProject = async (req, res) => {
             imageUrl
         });
         res.status(201).json(project);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+exports.updateProject = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, description, team, leader, members, status, startDate, endDate } = req.body;
+        
+        const updateData = {};
+        if (title) updateData.title = title;
+        if (description) updateData.description = description;
+        if (team) updateData.team = team;
+        if (leader) updateData.leader = leader;
+        if (members) updateData.members = typeof members === 'string' ? members.split(',').filter(m => m) : members;
+        if (status) updateData.status = status;
+        if (startDate) updateData.startDate = startDate;
+        if (endDate) updateData.endDate = endDate;
+
+        if (req.file) {
+            updateData.imageUrl = `/uploads/projects/${req.file.filename}`;
+        }
+
+        const project = await Project.findByIdAndUpdate(id, updateData, { new: true });
+        if (!project) return res.status(404).json({ message: 'Project not found' });
+        
+        res.status(200).json(project);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

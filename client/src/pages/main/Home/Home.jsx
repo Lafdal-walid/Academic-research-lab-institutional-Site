@@ -1,11 +1,8 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 
 const Home = () => {
-  return (
-    <>
-    </>
-  );
+  return <Navigate to="/projects" replace />;
 };
 
 export default Home;

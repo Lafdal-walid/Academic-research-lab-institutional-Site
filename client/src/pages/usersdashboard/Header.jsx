@@ -245,6 +245,7 @@ const Header = ({ onToggleSidebar, title, navItems }) => {
     const adminIndex = pathParts.indexOf('admin');
     const userIndex = pathParts.indexOf('user');
     const usersDashboardIndex = pathParts.indexOf('usersdashboard');
+    const leaderDashboardIndex = pathParts.indexOf('leaderdashboard');
 
     let pageSegment = 'overview';
     let subPageSegment = null;
@@ -258,6 +259,9 @@ const Header = ({ onToggleSidebar, title, navItems }) => {
     } else if (usersDashboardIndex !== -1) {
         pageSegment = pathParts[usersDashboardIndex + 1] || 'overview';
         subPageSegment = pathParts[usersDashboardIndex + 2];
+    } else if (leaderDashboardIndex !== -1) {
+        pageSegment = pathParts[leaderDashboardIndex + 1] || 'overview';
+        subPageSegment = pathParts[leaderDashboardIndex + 2];
     } else {
         pageSegment = pathParts[0] === 'en' || pathParts[0] === 'ar' ? (pathParts[1] || 'overview') : (pathParts[0] || 'overview');
     }
@@ -278,6 +282,11 @@ const Header = ({ onToggleSidebar, title, navItems }) => {
         'support': 'Support',
         'review': 'Leave Review',
         'support-team': 'Support Team',
+        'manage-content': 'Manage Content',
+        'project-hub': 'Project Hub',
+        'team-contact': 'Team Contact',
+        'admin-tools': 'Admin Tools',
+        'users': 'Users',
     };
 
     const subPageNames = {

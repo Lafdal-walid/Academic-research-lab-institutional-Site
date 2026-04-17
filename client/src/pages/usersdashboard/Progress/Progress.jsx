@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CalendarIcon from "@/assets/svg/userDashboard/PhdTracker/calendar-clock (7) 3.svg";
 import ComputerIcon from "@/assets/svg/userDashboard/PhdTracker/computer_(1)_1.svg";
 import InfoYellowIcon from "@/assets/svg/userDashboard/Progress/Frame_9216.svg";
@@ -10,17 +10,11 @@ import img1 from "@/assets/svg/userDashboard/Progress/01-ai-cover-mar2024-static
 import img2 from "@/assets/svg/userDashboard/Progress/5a30797ac91abd1c88194b924cf3eaa9 2.png";
 import img3 from "@/assets/svg/userDashboard/Progress/imagesf.png";
 
-const ProjectsTable = () => {
+const ProjectsTable = ({ projects, selectedProject, setSelectedProject }) => {
     const [searchTerm, setSearchTerm] = useState('');
-    
-    const projects = [
-      { id: 1, name: "Ai magasine", update: "Last update 1Hour ago", start: "April 6 2026", deadline: "June 6 2026", progress: "31%", img: img1 },
-      { id: 2, name: "Science", update: "Last update 1Hour ago", start: "April 7 2026", deadline: "June 7 2026", progress: "60%", img: img2 },
-      { id: 3, name: "Scientific American", update: "Last update 1Hour ago", start: "April 8 2026", deadline: "June 8 2026", progress: "95%", img: img3 },
-    ];
 
     const filteredProjects = projects.filter(project => 
-        project.name.toLowerCase().includes(searchTerm.toLowerCase())
+        project.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
   
     return (
@@ -70,24 +64,38 @@ const ProjectsTable = () => {
         <div className="w-full relative z-10" style={{ height: '0.1vh', backgroundColor: '#1E1D22', marginBottom: '2.5vh' }} />
   
         <div className="flex flex-col relative z-10" style={{ gap: '2.5vh', minHeight: '25vh' }}>
-          {filteredProjects.length > 0 ? filteredProjects.map((project) => (
-            <div key={project.id} className="flex items-center w-full group transition-all animate-in fade-in slide-in-from-left-2 duration-300"
-                 style={{ borderRadius: '0.5vw' }}>
+          {filteredProjects.length > 0 ? filteredProjects.map((project) => {
+            const m = project.milestones || [];
+            const c = m.filter(x => x.completed).length;
+            const progressRatio = m.length > 0 ? Math.round((c / m.length) * 100) : 0;
+            const isSelected = selectedProject && selectedProject._id === project._id;
+            
+            return (
+            <div key={project._id} 
+                 className="flex items-center w-full group transition-all animate-in fade-in slide-in-from-left-2 duration-300 cursor-pointer"
+                 onClick={() => setSelectedProject(project)}
+                 style={{ 
+                     borderRadius: '0.5vw', 
+                     backgroundColor: isSelected ? 'rgba(52,87,220,0.1)' : 'transparent',
+                     padding: isSelected ? '1vh 0.5vw' : '1vh 0.5vw',
+                     border: isSelected ? '1px solid rgba(52,87,220,0.3)' : '1px solid transparent'
+                 }}>
               <div className="flex items-center w-[20vw]" style={{ gap: '1.2vw' }}>
                  <div className="overflow-hidden bg-white/5 shrink-0 border border-white/5"
                       style={{ width: '2.5vw', height: '8vh', borderRadius: '0.4vw' }}>
-                    <img src={project.img} alt={project.name} className="w-full h-full object-cover" />
+                    <img src={project.imageUrl ? `http://localhost:5000${project.imageUrl}` : img1} alt={project.title} className="w-full h-full object-cover" />
                  </div>
                  <div className="flex flex-col" style={{ gap: '0.3vh' }}>
-                    <p className="font-bold text-white m-0" style={{ fontSize: '0.95vw', fontFamily: 'Gilroy, Poppins, sans-serif' }}>{project.name}</p>
-                    <p className="text-[#a5a5b2] m-0" style={{ fontSize: '0.75vw', fontFamily: 'Poppins, sans-serif' }}>{project.update}</p>
+                    <p className="font-bold text-white m-0" style={{ fontSize: '0.95vw', fontFamily: 'Gilroy, Poppins, sans-serif' }}>{project.title}</p>
+                    <p className="text-[#a5a5b2] m-0" style={{ fontSize: '0.75vw', fontFamily: 'Poppins, sans-serif' }}>{new Date(project.updatedAt).toLocaleDateString()}</p>
                  </div>
               </div>
-              <div className="flex-1 text-center text-white" style={{ fontSize: '0.85vw', fontFamily: 'Poppins, sans-serif' }}>{project.start}</div>
-              <div className="flex-1 text-center text-white" style={{ fontSize: '0.85vw', fontFamily: 'Poppins, sans-serif' }}>{project.deadline}</div>
-              <div className="flex-1 text-center text-white font-bold" style={{ fontSize: '0.9vw', fontFamily: 'Poppins, sans-serif' }}>{project.progress}</div>
+              <div className="flex-1 text-center text-white" style={{ fontSize: '0.85vw', fontFamily: 'Poppins, sans-serif' }}>{new Date(project.startDate).toLocaleDateString()}</div>
+              <div className="flex-1 text-center text-white" style={{ fontSize: '0.85vw', fontFamily: 'Poppins, sans-serif' }}>{project.endDate ? new Date(project.endDate).toLocaleDateString() : 'N/A'}</div>
+              <div className="flex-1 text-center text-white font-bold" style={{ fontSize: '0.9vw', fontFamily: 'Poppins, sans-serif', color: isSelected ? '#3457dc' : 'white' }}>{progressRatio}%</div>
             </div>
-          )) : (
+            );
+          }) : (
               <div className="flex items-center justify-center w-full" style={{ py: '5vh' }}>
                   <p className="text-[#80808a]" style={{ fontSize: '1vw' }}>No projects found matching your search.</p>
               </div>
@@ -125,14 +133,32 @@ const ProjectsTable = () => {
     );
   };
 
-const RoadmapSection = () => {
-    const milestones = [
-      { date: "Month 1", title: "Literature Review & Data Collection", completed: true },
-      { date: "Month 2", title: "Theoretical Framework & Methodology", completed: false, isCurrent: true },
-      { date: "Month 3", title: "Experimental Setup & Testing", completed: false },
-      { date: "Month 4", title: "Data Analysis & Results Synthesis", completed: false },
-      { date: "Month 7", title: "Final Review & Submission", completed: false },
-    ];
+const RoadmapSection = ({ project }) => {
+    if(!project) {
+        return (
+            <div style={{ marginTop: '5vh', padding: '3vh', textAlign: 'center', color: '#a5a5b2', border: '1px solid #1e1d22', borderRadius: '1vw' }}>
+                Select a project to view its roadmap.
+            </div>
+        );
+    }
+    
+    // Sort milestones by date assuming date is chronological, but they are stored as strings or dates in schema.
+    const milestones = project.milestones || [];
+    const completedCount = milestones.filter(m => m.completed).length;
+    let nextInProgressFound = false;
+
+    // Create renderable milestones
+    const renderableMilestones = milestones.map((m, index) => {
+        let isCurrent = false;
+        if (!m.completed && !nextInProgressFound) {
+            isCurrent = true;
+            nextInProgressFound = true;
+        }
+        return {
+            ...m,
+            isCurrent
+        };
+    });
   
     return (
       <div style={{
@@ -145,7 +171,7 @@ const RoadmapSection = () => {
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'flex-end', position: 'relative', width: '100%' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8vh' }}>
-                  <h3 style={{ margin: 0, fontSize: '0.95vw', fontWeight: 800, color: 'white', fontFamily: 'Gilroy, sans-serif' }}>Ai magazine Project Roadmap</h3>
+                  <h3 style={{ margin: 0, fontSize: '0.95vw', fontWeight: 800, color: 'white', fontFamily: 'Gilroy, sans-serif' }}>{project.title} Roadmap</h3>
                   <p style={{ margin: 0, fontSize: '0.75vw', color: '#a5a5b2' }}>Key Objectives & Milestones.</p>
               </div>
   
@@ -154,9 +180,9 @@ const RoadmapSection = () => {
                   position: 'absolute', left: '50%', transform: 'translateX(-50%)',
                   display: 'flex', flexDirection: 'column', gap: '0.7vh', alignItems: 'center'
               }}>
-                  <span style={{ fontSize: '0.75vw', color: '#3457DC', fontWeight: 500, whiteSpace: 'nowrap' }}>1 of 8 Completed</span>
+                  <span style={{ fontSize: '0.75vw', color: '#3457DC', fontWeight: 500, whiteSpace: 'nowrap' }}>{completedCount} of {milestones.length} Completed</span>
                   <div style={{ width: '100%', minWidth: '4.5vw', height: '0.5vh', backgroundColor: '#1e1e24', borderRadius: '4vw', overflow: 'hidden' }}>
-                      <div style={{ width: '12.5%', height: '100%', backgroundColor: '#3457DC' }} />
+                      <div style={{ width: `${milestones.length ? (completedCount/milestones.length)*100 : 0}%`, height: '100%', backgroundColor: '#3457DC', transition: 'width 0.3s ease' }} />
                   </div>
               </div>
           </div>
@@ -165,7 +191,7 @@ const RoadmapSection = () => {
   
           {/* Timeline Area with custom scrollbar */}
           <div className="academic-timeline-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '3.5vh', maxHeight: '40vh', overflowY: 'auto', paddingRight: '0.8vw' }}>
-              {milestones.map((milestone, index) => (
+              {renderableMilestones.length > 0 ? renderableMilestones.map((milestone, index) => (
                   <div key={index} style={{ display: 'flex', gap: '1.5vw', alignItems: 'flex-start' }}>
                       {/* Dot & Line Indicator */}
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '2.8vw', position: 'relative' }}>
@@ -178,11 +204,11 @@ const RoadmapSection = () => {
                           }}>
                               <img src={milestone.isCurrent ? PauseIcon : ComputerIcon} alt="phase" style={{ width: '0.9vw', height: '0.9vw' }} />
                           </div>
-                          {index !== milestones.length - 1 && (
+                          {index !== renderableMilestones.length - 1 && (
                               <div style={{
                                   width: '0.1vw', 
                                   height: '11vh', 
-                                  backgroundColor: (milestone.completed && milestones[index+1].completed) || (milestone.completed && milestones[index+1].isCurrent) ? '#3457DC' : '#1e1e24',
+                                  backgroundColor: (milestone.completed && renderableMilestones[index+1].completed) || (milestone.completed && renderableMilestones[index+1].isCurrent) ? '#3457DC' : '#1e1e24',
                                   position: 'absolute', 
                                   top: '2.2vh', 
                                   zIndex: 1
@@ -218,7 +244,11 @@ const RoadmapSection = () => {
                           </div>
                       </div>
                   </div>
-              ))}
+              )) : (
+                  <div style={{ color: '#80808a', fontSize: '0.9vw', textAlign: 'center', padding: '3vh' }}>
+                      No milestones have been created for this project yet.
+                  </div>
+              )}
           </div>
   
           {/* Bottom HR Divider */}
@@ -254,6 +284,30 @@ const RoadmapSection = () => {
   };
 
 const Progress = () => {
+  const [projects, setProjects] = useState([]);
+  const [selectedProject, setSelectedProject] = useState(null);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('http://localhost:5000/api/projects', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setProjects(data);
+          if (data.length > 0) {
+            setSelectedProject(data[0]);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch projects", err);
+      }
+    };
+    fetchProjects();
+  }, []);
+
   return (
     <div className="w-full text-white font-poppins pb-[6vh] animate-in fade-in duration-500">
       {/* Header Section with Title and Action Button */}
@@ -298,9 +352,9 @@ const Progress = () => {
         </button>
       </div>
 
-      <ProjectsTable />
+      <ProjectsTable projects={projects} selectedProject={selectedProject} setSelectedProject={setSelectedProject} />
       
-      <RoadmapSection />
+      <RoadmapSection project={selectedProject} />
     </div>
   );
 };

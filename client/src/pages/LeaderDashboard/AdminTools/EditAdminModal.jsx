@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { RiCloseLine, RiInformationLine, RiEyeLine, RiEyeOffLine, RiArrowDownSLine } from 'react-icons/ri';
 import UpdatePasswordModal from './UpdatePasswordModal';
 
-const EditAdminModal = ({ isOpen, onClose, adminData }) => {
+const EditAdminModal = ({ isOpen, onClose, adminData, onUpdate }) => {
     const [name, setName] = useState('');
     const [role, setRole] = useState('user');
     const [showPassword, setShowPassword] = useState(false);
@@ -134,10 +134,10 @@ const EditAdminModal = ({ isOpen, onClose, adminData }) => {
                                         exit={{ opacity: 0, y: -10 }}
                                         className="absolute top-[100%] left-0 right-0 mt-2 bg-[#1e1e24] border border-[#2a2a30] rounded-[8px] overflow-hidden z-[110] shadow-2xl"
                                     >
-                                        {['guest', 'user', 'admin', 'superadmin'].map((option) => (
+                                        {['admin', 'superadmin'].map((option) => (
                                             <div 
                                                 key={option}
-                                                className="px-[14px] py-[10px] text-white text-[14px] font-['Poppins',sans-serif] hover:bg-[#3457DC] cursor-pointer transition-colors text-capitalize"
+                                                className="px-[14px] py-[10px] text-white text-[14px] font-['Poppins',sans-serif] hover:bg-[#3457DC] cursor-pointer transition-colors capitalize"
                                                 onClick={() => {
                                                     setRole(option);
                                                     setIsRoleDropdownOpen(false);
@@ -159,7 +159,10 @@ const EditAdminModal = ({ isOpen, onClose, adminData }) => {
                             >
                                 Cancel
                             </button>
-                            <button className="flex-1 bg-[#3457DC] hover:bg-[#4a6dec] text-white h-[50px] rounded-[16px] font-['Poppins',sans-serif] font-medium text-[14px] transition-all">
+                            <button 
+                                onClick={() => onUpdate && onUpdate(adminData.id, { username: name, role })}
+                                className="flex-1 bg-[#3457DC] hover:bg-[#4a6dec] text-white h-[50px] rounded-[16px] font-['Poppins',sans-serif] font-medium text-[14px] transition-all"
+                            >
                                 Save changes
                             </button>
                         </div>

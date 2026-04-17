@@ -726,7 +726,7 @@ const EditProgressForm = ({ onSave }) => {
         <div onClick={handleClearImage} style={{ position: 'relative', flexShrink: 0, width: '16px', height: '16px', cursor: 'pointer' }}>
             <svg style={{ position: 'absolute', display: 'block', inset: 0, width: '100%', height: '100%' }} fill="none" preserveAspectRatio="none" viewBox="0 0 20 20">
                 <g clipPath="url(#clip0_85_21405)">
-                    <path d="M17.5001 3.33333H14.9167C14.7233 2.39284 14.2116 1.54779 13.4678 0.940598C12.724 0.333408 11.7936 0.0012121 10.8334 0L9.16675 0C8.20658 0.0012121 7.27618 0.333408 6.53237 0.940598C5.78857 1.54779 5.27683 2.39284 5.08341 3.33333H2.50008C2.27907 3.33333 2.06711 3.42113 1.91083 3.57741C1.75455 3.73369 1.66675 3.94565 1.66675 4.16667C1.66675 4.38768 1.75455 4.59964 1.91083 4.75592C2.06711 4.9122 2.27907 5 2.50008 5H3.33341V15.8333C3.33474 16.938 3.77415 17.997 4.55526 18.7782C5.33638 19.5593 6.39542 19.9987 7.50008 20H12.5001C13.6047 19.9987 14.6638 19.5593 15.4449 18.7782C16.226 17.997 16.6654 16.938 16.6667 15.8333V5H17.5001C17.7211 5 17.9331 4.9122 18.0893 4.75592C18.2456 4.59964 18.3334 4.38768 18.3334 4.16667C18.3334 3.94565 18.2456 3.73369 18.0893 3.57741C17.9331 3.42113 17.7211 3.33333 17.5001 3.33333ZM9.16675 1.66667H10.8334C11.3503 1.6673 11.8544 1.82781 12.2764 2.1262C12.6985 2.42459 13.0179 2.84624 13.1909 3.33333H6.80925C6.98223 2.84624 7.30167 2.42459 7.72374 2.1262C8.14581 1.82781 8.64985 1.6673 9.16675 1.66667ZM15.0001 15.8333C15.0001 16.4964 14.7367 17.1323 14.2678 17.6011C13.799 18.0699 13.1631 18.3333 12.5001 18.3333H7.50008C6.83704 18.3333 6.20116 18.0699 5.73231 17.6011C5.26347 17.1323 5.00008 16.4964 5.00008 15.8333V5H15.0001V15.8333Z" fill="#C5432D" />
+                    <path d="M17.5001 3.33333H14.9167C14.7233 2.39284 14.2116 1.54779 13.4678 0.940598C12.724 0.333408 11.7936 0.0012121 10.8334 0L9.16675 0C8.20658 0.0012121 7.27618 0.333408 6.53237 0.940598C5.78857 1.54779 5.27683 2.39284 5.08341 3.33333H2.50008C2.27907 3.33333 2.06711 3.42113 1.91083 3.57741C1.75455 3.73369 1.66675 3.94565 1.66675 4.16667C1.66675 4.38768 1.75455 4.59964 1.91083 4.75592C2.06711 4.9122 2.27907 5 2.50008 5H3.33341V15.8333C3.33474 16.938 3.77415 17.997 4.55526 18.7782C5.33638 19.5593 6.39542 19.9987 7.50008 20H12.5001C13.6047 19.9987 14.6638 19.5593 15.4449 18.7782C16.226 17.997 16.6654 16.938 16.6667 15.8333V5H17.5001C17.7211 5 17.9331 4.9122 18.0893 4.75592C18.2456 4.59964 18.3334 4.38768 18.3334 4.16667C18.3334 3.94565 18.2456 3.73369 18.0893 3.57741C17.9331 3.42113 17.7211 3.33333 17.5001 3.33333ZM9.16675 1.66667H10.8334C11.3503 1.6673 11.8544 1.82781 12.2764 2.1262C12.6985 2.42459 13.0179 2.84624 13.1909 3.33333H6.80925C6.98223 2.84624 7.30167 2.42459 7.72374 2.1262C8.14581 1.82781 8.64985 1.66675 9.16675 1.66667ZM15.0001 15.8333C15.0001 16.4964 14.7367 17.1323 14.2678 17.6011C13.799 18.0699 13.1631 18.3333 12.5001 18.3333H7.50008C6.83704 18.3333 6.20116 18.0699 5.73231 17.6011C5.26347 17.1323 5.00008 16.4964 5.00008 15.8333V5H15.0001V15.8333Z" fill="#C5432D" />
                     <path d="M8.33333 14.9999C8.55435 14.9999 8.76631 14.9121 8.92259 14.7558C9.07887 14.5996 9.16667 14.3876 9.16667 14.1666V9.16659C9.16667 8.94557 9.07887 8.73361 8.92259 8.57733C8.76631 8.42105 8.55435 8.33325 8.33333 8.33325C8.11232 8.33325 7.90036 8.42105 7.74408 8.57733C7.5878 8.73361 7.5 8.94557 7.5 9.16659V14.1666C7.5 14.3876 7.5878 14.5996 7.74408 14.7558C7.90036 14.9121 8.11232 14.9999 8.33333 14.9999Z" fill="#C5432D" />
                     <path d="M11.6666 14.9999C11.8876 14.9999 12.0996 14.9121 12.2558 14.7558C12.4121 14.5996 12.4999 14.3876 12.4999 14.1666V9.16659C12.4999 8.94557 12.4121 8.73361 12.2558 8.57733C12.0996 8.42105 11.8876 8.33325 11.6666 8.33325C11.4456 8.33325 11.2336 8.42105 11.0773 8.57733C10.921 8.73361 10.8333 8.94557 10.8333 9.16659V14.1666C10.8333 14.3876 10.921 14.5996 11.0773 14.7558C11.2336 14.9121 11.4456 14.9999 11.6666 14.9999Z" fill="#C5432D" />
                 </g>
@@ -739,7 +739,7 @@ const EditProgressForm = ({ onSave }) => {
         <div style={{ position: 'relative', flexShrink: 0, width: '20px', height: '20px', cursor: 'pointer' }}>
             <svg style={{ position: 'absolute', display: 'block', inset: 0, width: '100%', height: '100%' }} fill="none" preserveAspectRatio="none" viewBox="0 0 20 20">
                 <g clipPath="url(#clip0_85_21405)">
-                    <path d="M17.5001 3.33333H14.9167C14.7233 2.39284 14.2116 1.54779 13.4678 0.940598C12.724 0.333408 11.7936 0.0012121 10.8334 0L9.16675 0C8.20658 0.0012121 7.27618 0.333408 6.53237 0.940598C5.78857 1.54779 5.27683 2.39284 5.08341 3.33333H2.50008C2.27907 3.33333 2.06711 3.42113 1.91083 3.57741C1.75455 3.73369 1.66675 3.94565 1.66675 4.16667C1.66675 4.38768 1.75455 4.59964 1.91083 4.75592C2.06711 4.9122 2.27907 5 2.50008 5H3.33341V15.8333C3.33474 16.938 3.77415 17.997 4.55526 18.7782C5.33638 19.5593 6.39542 19.9987 7.50008 20H12.5001C13.6047 19.9987 14.6638 19.5593 15.4449 18.7782C16.226 17.997 16.6654 16.938 16.6667 15.8333V5H17.5001C17.7211 5 17.9331 4.9122 18.0893 4.75592C18.2456 4.59964 18.3334 4.38768 18.3334 4.16667C18.3334 3.94565 18.2456 3.73369 18.0893 3.57741C17.9331 3.42113 17.7211 3.33333 17.5001 3.33333ZM9.16675 1.66667H10.8334C11.3503 1.6673 11.8544 1.82781 12.2764 2.1262C12.6985 2.42459 13.0179 2.84624 13.1909 3.33333H6.80925C6.98223 2.84624 7.30167 2.42459 7.72374 2.1262C8.14581 1.82781 8.64985 1.6673 9.16675 1.66667ZM15.0001 15.8333C15.0001 16.4964 14.7367 17.1323 14.2678 17.6011C13.799 18.0699 13.1631 18.3333 12.5001 18.3333H7.50008C6.83704 18.3333 6.20116 18.0699 5.73231 17.6011C5.26347 17.1323 5.00008 16.4964 5.00008 15.8333V5H15.0001V15.8333Z" fill="#C5432D" />
+                    <path d="M17.5001 3.33333H14.9167C14.7233 2.39284 14.2116 1.54779 13.4678 0.940598C12.724 0.333408 11.7936 0.0012121 10.8334 0L9.16675 0C8.20658 0.0012121 7.27618 0.333408 6.53237 0.940598C5.78857 1.54779 5.27683 2.39284 5.08341 3.33333H2.50008C2.27907 3.33333 2.06711 3.42113 1.91083 3.57741C1.75455 3.73369 1.66675 3.94565 1.66675 4.16667C1.66675 4.38768 1.75455 4.59964 1.91083 4.75592C2.06711 4.9122 2.27907 5 2.50008 5H3.33341V15.8333C3.33474 16.938 3.77415 17.997 4.55526 18.7782C5.33638 19.5593 6.39542 19.9987 7.50008 20H12.5001C13.6047 19.9987 14.6638 19.5593 15.4449 18.7782C16.226 17.997 16.6654 16.938 16.6667 15.8333V5H17.5001C17.7211 5 17.9331 4.9122 18.0893 4.75592C18.2456 4.59964 18.3334 4.38768 18.3334 4.16667C18.3334 3.94565 18.2456 3.73369 18.0893 3.57741C17.9331 3.42113 17.7211 3.33333 17.5001 3.33333ZM9.16675 1.66667H10.8334C11.3503 1.6673 11.8544 1.82781 12.2764 2.1262C12.6985 2.42459 13.0179 2.84624 13.1909 3.33333H6.80925C6.98223 2.84624 7.30167 2.42459 7.72374 2.1262C8.14581 1.82781 8.64985 1.66667 9.16675 1.66667ZM15.0001 15.8333C15.0001 16.4964 14.7367 17.1323 14.2678 17.6011C13.799 18.0699 13.1631 18.3333 12.5001 18.3333H7.50008C6.83704 18.3333 6.20116 18.0699 5.73231 17.6011C5.26347 17.1323 5.00008 16.4964 5.00008 15.8333V5H15.0001V15.8333Z" fill="#C5432D" />
                     <path d="M8.33333 14.9999C8.55435 14.9999 8.76631 14.9121 8.92259 14.7558C9.07887 14.5996 9.16667 14.3876 9.16667 14.1666V9.16659C9.16667 8.94557 9.07887 8.73361 8.92259 8.57733C8.76631 8.42105 8.55435 8.33325 8.33333 8.33325C8.11232 8.33325 7.90036 8.42105 7.74408 8.57733C7.5878 8.73361 7.5 8.94557 7.5 9.16659V14.1666C7.5 14.3876 7.5878 14.5996 7.74408 14.7558C7.90036 14.9121 8.11232 14.9999 8.33333 14.9999Z" fill="#C5432D" />
                     <path d="M11.6666 14.9999C11.8876 14.9999 12.0996 14.9121 12.2558 14.7558C12.4121 14.5996 12.4999 14.3876 12.4999 14.1666V9.16659C12.4999 8.94557 12.4121 8.73361 12.2558 8.57733C12.0996 8.42105 11.8876 8.33325 11.6666 8.33325C11.4456 8.33325 11.2336 8.42105 11.0773 8.57733C10.921 8.73361 10.8333 8.94557 10.8333 9.16659V14.1666C10.8333 14.3876 10.921 14.5996 11.0773 14.7558C11.2336 14.9121 11.4456 14.9999 11.6666 14.9999Z" fill="#C5432D" />
                 </g>
@@ -1130,20 +1130,32 @@ const PhdTracker = () => {
     const [showReportsTable, setShowReportsTable] = useState(false);
     const [teamReports, setTeamReports] = useState([]);
     const [userReports, setUserReports] = useState([]);
-
-    const [academicPhases, setAcademicPhases] = useState([
-        { date: 'april 2026', title: 'Joining the team', completed: true },
-    ]);
+    const [academicPhases, setAcademicPhases] = useState([]);
+    const [stats, setStats] = useState({ mgr: 0, phd: 0, prof: 0, eng: 0 });
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const fetchReports = async () => {
+        const fetchTrackerData = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const res = await fetch('http://localhost:5000/api/reports', {
+                if (!token) return;
+
+                // Fetch Stats
+                const statsRes = await fetch('http://localhost:5000/api/stats/overview', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                if (res.ok) {
-                    const data = await res.json();
+                if (statsRes.ok) {
+                    const statsData = await statsRes.json();
+                    setStats(statsData.degreeStats || { mgr: 0, phd: 0, prof: 0, eng: 0 });
+                }
+
+                // Fetch User Reports
+                const userData = JSON.parse(localStorage.getItem('user') || '{}');
+                const reportsRes = await fetch(`http://localhost:5000/api/reports?user=${userData._id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (reportsRes.ok) {
+                    const data = await reportsRes.json();
                     const formatted = data.map(rep => ({
                         id: rep._id,
                         dateTime: rep.dateTimeString || new Date(rep.createdAt).toLocaleString(),
@@ -1153,29 +1165,45 @@ const PhdTracker = () => {
                         fileUrl: rep.fileUrl || '',
                         checked: false
                     }));
-                    setTeamReports(formatted);
                     setUserReports(formatted);
-                    
+                    if (formatted.length > 0) setShowReportsTable(true);
+
                     const initialPhase = [{
-                        date: data.length > 0 ? new Date(data[0].user?.createdAt || data[0].createdAt).toLocaleString('en-US', { month: 'long', year: 'numeric' }).toLowerCase() : 'april 2026',
+                        date: data.length > 0 ? new Date(data[0].createdAt).toLocaleString('en-US', { month: 'long', year: 'numeric' }).toLowerCase() : 'april 2026',
                         title: 'Joining the team',
                         completed: true
                     }];
-
-                    const dynamicPhases = data
-                        .filter(rep => rep.status !== 'Refused')
-                        .map(rep => ({
-                            date: rep.dateTimeString ? rep.dateTimeString.split(' \u2013 ')[0].toLowerCase() : '',
-                            title: rep.document,
-                            completed: rep.status === 'Accepted'
-                        }));
+                    const dynamicPhases = data.filter(r => r.status !== 'Refused').map(r => ({
+                        date: r.dateTimeString?.split(' – ')[0].toLowerCase() || '',
+                        title: r.document,
+                        completed: r.status === 'Accepted'
+                    }));
                     setAcademicPhases([...initialPhase, ...dynamicPhases]);
+                }
+                
+                // Fetch Team Reports
+                const teamReportsRes = await fetch('http://localhost:5000/api/reports', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (teamReportsRes.ok) {
+                    const data = await teamReportsRes.json();
+                    setTeamReports(data.map(rep => ({
+                        id: rep._id,
+                        dateTime: rep.dateTimeString || new Date(rep.createdAt).toLocaleString(),
+                        document: rep.document,
+                        university: rep.university,
+                        status: rep.status,
+                        fileUrl: rep.fileUrl || '',
+                        checked: false
+                    })));
                 }
             } catch (err) {
                 console.error(err);
+            } finally {
+                setIsLoading(false);
             }
         };
-        fetchReports();
+        fetchTrackerData();
     }, []);
 
     const handleAddReport = async (formData) => {
@@ -1227,22 +1255,22 @@ const PhdTracker = () => {
     const overviewStats = [
         {
             title: "Team Manager",
-            value: "1",
+            value: stats.mgr.toString(),
             icon: <img src={TeamIcon} alt="Team" style={{ width: '1.25vw', height: '1.25vw', objectFit: 'contain' }} />
         },
         {
             title: "Ph.D Professor",
-            value: "5",
+            value: stats.phd.toString(),
             icon: <img src={TeamIcon} alt="Team" style={{ width: '1.25vw', height: '1.25vw', objectFit: 'contain' }} />
         },
         {
             title: "Professor",
-            value: "4",
+            value: stats.prof.toString(),
             icon: <img src={TeamIcon} alt="Team" style={{ width: '1.25vw', height: '1.25vw', objectFit: 'contain' }} />
         },
         {
             title: "Engineering Graduate",
-            value: "2",
+            value: stats.eng.toString(),
             icon: <img src={TeamIcon} alt="Team" style={{ width: '1.25vw', height: '1.25vw', objectFit: 'contain' }} />
         }
     ];
@@ -1298,7 +1326,7 @@ const PhdTracker = () => {
                             transition={{ duration: 0.3 }}
                             className="flex flex-col gap-[3vh]"
                         >
-                            {userReports.length > 0 ? (
+                            {userReports.some(r => r.status === 'Accepted') ? (
                                 <CongratsBanner direction="ltr" />
                             ) : (
                                 <RestrictionBanner direction="ltr" />

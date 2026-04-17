@@ -39,3 +39,27 @@ exports.getAllTeams = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+exports.updateTeam = async (req, res) => {
+    try {
+        const { name, focus, leader, members, activeProjects } = req.body;
+        const team = await Team.findByIdAndUpdate(
+            req.params.id,
+            { name, focus, leader, members, activeProjects },
+            { new: true }
+        );
+        if (!team) return res.status(404).json({ message: 'Team not found' });
+        res.json(team);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+exports.deleteTeam = async (req, res) => {
+    try {
+        const team = await Team.findByIdAndDelete(req.params.id);
+        if (!team) return res.status(404).json({ message: 'Team not found' });
+        res.json({ message: 'Team deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

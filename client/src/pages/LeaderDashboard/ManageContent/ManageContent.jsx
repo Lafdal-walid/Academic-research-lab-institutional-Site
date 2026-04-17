@@ -41,15 +41,41 @@ const Tab = ({ label, isActive, onClick }) => {
     );
 };
 
-const NewsGalleryTable = () => {
+const NewsGalleryTable = ({ onEdit }) => {
     const [searchTerm, setSearchTerm] = useState('');
     
-    const [newsData, setNewsData] = useState([
-        { id: 1, added: 'July 25, 2025', createdBy: 'walid', team: 'A+ team', views: '200', checked: true },
-        { id: 2, added: 'July 25, 2025', createdBy: 'walid', team: 'A+ team', views: '100', checked: false },
-        { id: 3, added: 'July 25, 2025', createdBy: 'walid', team: 'A+ team', views: '1000', checked: false },
-        { id: 4, added: 'July 25, 2025', createdBy: 'walid', team: 'A+ team', views: '600', checked: false },
-    ]);
+    const [newsData, setNewsData] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchNews = async () => {
+        try {
+            const res = await fetch('http://localhost:5000/api/news');
+            if (res.ok) {
+                const data = await res.json();
+                setNewsData(data);
+            }
+        } catch (error) {
+            console.error('Error fetching news:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteNews = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this news?')) return;
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`http://localhost:5000/api/news/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) fetchNews();
+        } catch (error) { console.error(error); }
+    };
+
+    React.useEffect(() => {
+        fetchNews();
+    }, []);
 
     const handleToggleRow = (id) => {
         setNewsData(prev => prev.map(n => n.id === id ? { ...n, checked: !n.checked } : n));
@@ -106,6 +132,7 @@ const NewsGalleryTable = () => {
                                 </div>
                             </th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Added</th>
+                            <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Title</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Created by</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Team name</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -115,30 +142,43 @@ const NewsGalleryTable = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {newsData.map((row) => (
-                            <tr key={row.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', height: '8vh' }}>
+                        {newsData.length > 0 ? newsData.map((row) => (
+                            <tr key={row._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', height: '8vh' }}>
                                 <td style={{ padding: '0 0.5vw' }}>
-                                    <div onClick={() => handleToggleRow(row.id)}
+                                    <div onClick={() => handleToggleRow(row._id)}
                                         style={{ width: '1.1vw', height: '1.1vw', borderRadius: '4px', border: row.checked ? 'none' : '1px solid #2a2a30', backgroundColor: row.checked ? '#3457DC' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                                         {row.checked && <RiCheckLine color="white" size="0.8vw" />}
                                     </div>
                                 </td>
-                                <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{row.added}</td>
-                                <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{row.createdBy}</td>
-                                <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'white' }}>{row.team}</td>
+                                <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>
+                                    {new Date(row.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                                </td>
+                                <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'white', fontWeight: 500 }}>{row.title}</td>
+                                <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{row.createdBy?.username || 'Admin'}</td>
+                                <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'white' }}>{row.team?.name || 'No Team'}</td>
                                 <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{row.views}</td>
                                 <td style={{ padding: '0 0.5vw', textAlign: 'right' }}>
                                     <div className="flex items-center justify-end gap-3">
-                                        <button className="bg-transparent border-none cursor-pointer hover:scale-110 transition-transform">
+                                        <button 
+                                            className="bg-transparent border-none cursor-pointer hover:scale-110 transition-transform"
+                                            onClick={() => onEdit(row)}
+                                        >
                                             <img src={EditIcon} alt="edit" className="w-[1.2vw]" />
                                         </button>
-                                        <button className="bg-transparent border-none cursor-pointer hover:scale-110 transition-transform">
+                                        <button 
+                                            className="bg-transparent border-none cursor-pointer hover:scale-110 transition-transform"
+                                            onClick={() => handleDeleteNews(row._id)}
+                                        >
                                             <img src={TrashIcon} alt="delete" className="w-[1.2vw]" />
                                         </button>
                                     </div>
                                 </td>
                             </tr>
-                        ))}
+                        )) : (
+                            <tr>
+                                <td colSpan="6" style={{ textAlign: 'center', padding: '2vw', color: '#a5a5b2' }}>No news found</td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>
@@ -177,76 +217,223 @@ const NewsGalleryTable = () => {
     );
 };
 
-const AddNewsForm = () => {
+const AddNewsForm = ({ onPublished, editData }) => {
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [teamId, setTeamId] = useState('');
+    const [image, setImage] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
+    const [teams, setTeams] = useState([]);
+    const [isPublishing, setIsPublishing] = useState(false);
+    const [showTeamDropdown, setShowTeamDropdown] = useState(false);
+    const fileInputRef = React.useRef(null);
+
+    React.useEffect(() => {
+        const fetchTeams = async () => {
+            try {
+                const res = await fetch('http://localhost:5000/api/teams');
+                if (res.ok) {
+                    const data = await res.json();
+                    setTeams(data);
+                }
+            } catch (error) { console.error(error); }
+        };
+        fetchTeams();
+
+        if (editData) {
+            setTitle(editData.title || '');
+            setDescription(editData.description || '');
+            setTeamId(editData.team?._id || editData.team || '');
+            if (editData.imageUrl) setImagePreview(`http://localhost:5000${editData.imageUrl}`);
+        }
+    }, [editData]);
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setImage(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handlePublish = async () => {
+        if (!title || !description || !teamId) {
+            alert('Please fill in all required fields (Title, Description, Team)');
+            return;
+        }
+
+        setIsPublishing(true);
+        try {
+            const token = localStorage.getItem('token');
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('description', description);
+            formData.append('team', teamId);
+            if (image) formData.append('image', image);
+
+            const url = editData ? `http://localhost:5000/api/news/${editData._id}` : 'http://localhost:5000/api/news';
+            const method = editData ? 'PUT' : 'POST';
+
+            const res = await fetch(url, {
+                method,
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData
+            });
+
+            if (res.ok) {
+                alert(editData ? 'News updated!' : 'News published!');
+                if (onPublished) onPublished();
+                // Reset form if not editing
+                if (!editData) {
+                    setTitle('');
+                    setDescription('');
+                    setTeamId('');
+                    setImage(null);
+                    setImagePreview(null);
+                }
+            } else {
+                const error = await res.json();
+                alert(`Error: ${error.message}`);
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to publish news');
+        } finally {
+            setIsPublishing(false);
+        }
+    };
+
+    const selectedTeamName = teams.find(t => t._id === teamId)?.name || 'Select Team';
+
     return (
         <div className="flex flex-col gap-6 w-full animate-in fade-in duration-500">
             <div className="bg-[#151519] border border-white/[0.05] rounded-[16px] p-[24px] relative w-full">
                 <div aria-hidden="true" className="absolute border border-[#1e1d22] border-solid inset-0 pointer-events-none rounded-[16px]" />
                 
                 <div className="content-stretch flex flex-col gap-[32px] items-start relative w-full">
-                    {/* Header */}
                     <div className="w-full">
                         <p className="font-['Gilroy',sans-serif] font-bold leading-[normal] not-italic text-[18px] text-white">News & Galety Setup</p>
                     </div>
 
-                    {/* Form Fields - Stacked */}
                     <div className="content-stretch flex flex-col gap-[20px] items-start w-full">
-                        {/* Title */}
                         <div className="content-stretch flex flex-col gap-[12px] items-start w-full">
                             <p className="font-['Poppins',sans-serif] leading-[normal] not-italic text-[#80808a] text-[14px]">Ttitle</p>
-                            <div className="bg-[rgba(255,255,255,0.01)] h-[45px] relative rounded-[8px] w-full border border-[#2a2a30] transition-all hover:border-white/10 focus-within:border-[#3457dc]">
+                            <div className="bg-[rgba(255,255,255,0.01)] h-[45px] relative rounded-[8px] w-full border border-[#2a2a30] transition-all focus-within:border-[#3457dc]">
                                 <input 
                                     type="text"
                                     className="bg-transparent border-none outline-none size-full px-[14px] text-white font-['Poppins',sans-serif] text-[14px]"
                                     placeholder="Title"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
                                 />
                             </div>
                         </div>
 
-                        {/* Description */}
                         <div className="content-stretch flex flex-col gap-[12px] items-start w-full">
                             <p className="font-['Poppins',sans-serif] leading-[normal] not-italic text-[#80808a] text-[14px]">Description</p>
-                            <div className="bg-[rgba(255,255,255,0.01)] min-h-[150px] relative rounded-[8px] w-full border border-[#2a2a30] transition-all hover:border-white/10 focus-within:border-[#3457dc] p-[14px]">
+                            <div className="bg-[rgba(255,255,255,0.01)] min-h-[150px] relative rounded-[8px] w-full border border-[#2a2a30] p-[14px] focus-within:border-[#3457dc]">
                                 <textarea 
-                                    className="bg-transparent border-none outline-none w-full h-full text-white font-['Poppins',sans-serif] text-[14px] resize"
+                                    className="bg-transparent border-none outline-none w-full h-full text-white font-['Poppins',sans-serif] text-[14px] resize-none"
                                     placeholder="News Dscription .."
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
                                 />
                             </div>
                         </div>
-
                         {/* Research Team Dropdown */}
-                        <div className="content-stretch flex flex-col gap-[12px] items-start w-full">
+                        <div className="content-stretch flex flex-col gap-[12px] items-start w-full relative">
                             <p className="font-['Poppins',sans-serif] leading-[normal] not-italic text-[#80808a] text-[14px]">Research Team</p>
-                            <div className="bg-[rgba(255,255,255,0.01)] h-[45px] relative rounded-[8px] w-full border border-[#2a2a30] flex items-center justify-between px-[14px] cursor-pointer hover:bg-white/[0.02] transition-all">
-                                <span className="font-['Poppins',sans-serif] text-white text-[14px]">A+ Team</span>
-                                <img src={DropdownIcon} alt="arrow" className="w-[1.2vw] brightness-0 invert opacity-60" style={{ filter: 'invert(29%) sepia(87%) saturate(1917%) hue-rotate(219deg) brightness(97%) contrast(92%)' }} />
+                            <div 
+                                onClick={() => setShowTeamDropdown(!showTeamDropdown)}
+                                className={`bg-[rgba(255,255,255,0.01)] h-[45px] relative rounded-[8px] w-full border ${showTeamDropdown ? 'border-[#3457dc]' : 'border-[#2a2a30]'} flex items-center justify-between px-[14px] cursor-pointer hover:bg-white/[0.02] transition-all`}
+                            >
+                                <span className={`font-['Poppins',sans-serif] text-[14px] ${teamId ? 'text-white' : 'text-white/30'}`}>
+                                    {selectedTeamName}
+                                </span>
+                                <div className={`transition-transform duration-300 ${showTeamDropdown ? 'rotate-180' : ''}`}>
+                                    <svg width="1.2vw" height="1.2vw" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M7 10L12 15L17 10" stroke="#3457dc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </div>
                             </div>
+                            
+                            {showTeamDropdown && (
+                                <>
+                                    <div className="fixed inset-0 z-40" onClick={() => setShowTeamDropdown(false)} />
+                                    <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-[#151519] border border-[#2a2a30] rounded-[8px] shadow-2xl z-50 max-h-[200px] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
+                                        <div className="p-1">
+                                            {teams.length > 0 ? teams.map(t => (
+                                                <div 
+                                                    key={t._id} 
+                                                    className={`p-3 rounded-md cursor-pointer text-[14px] transition-colors ${teamId === t._id ? 'bg-[#3457dc]/10 text-[#3457dc]' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}
+                                                    onClick={() => { setTeamId(t._id); setShowTeamDropdown(false); }}
+                                                >
+                                                    {t.name}
+                                                </div>
+                                            )) : (
+                                                <div className="p-3 text-[14px] text-white/40 text-center">No teams found</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
 
-                        {/* Picture Preview - Now at the bottom */}
                         <div className="flex flex-col gap-[12px] w-full mt-[10px]">
                             <p className="font-['Poppins',sans-serif] leading-[normal] not-italic text-[#80808a] text-[14px]">choose Project picture :</p>
-                            <div className="bg-[rgba(255,255,255,0.01)] h-[200px] relative rounded-[16px] w-full border border-[#2a2a30] overflow-hidden group">
-                                {/* Action icons in top-right */}
+                            <input 
+                                type="file" 
+                                className="hidden" 
+                                ref={fileInputRef} 
+                                onChange={handleImageChange} 
+                                accept="image/*"
+                            />
+                            <div 
+                                onClick={() => fileInputRef.current.click()}
+                                className="bg-[rgba(255,255,255,0.01)] h-[200px] relative rounded-[16px] w-full border border-[#2a2a30] overflow-hidden group cursor-pointer"
+                            >
+                                {imagePreview && (
+                                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                )}
                                 <div className="absolute top-[16px] right-[16px] flex gap-[12px] z-10">
-                                    <button className="bg-transparent border-none cursor-pointer hover:scale-110 transition-transform">
+                                    <button 
+                                        className="bg-white/10 p-2 rounded-full hover:scale-110 transition-transform backdrop-blur-md"
+                                        onClick={(e) => { e.stopPropagation(); fileInputRef.current.click(); }}
+                                    >
                                         <img src={EditIcon} alt="edit" className="w-[1.1vw]" />
                                     </button>
-                                    <button className="bg-transparent border-none cursor-pointer hover:scale-110 transition-transform">
-                                        <img src={TrashIcon} alt="delete" className="w-[1.1vw]" />
-                                    </button>
+                                    {imagePreview && (
+                                        <button 
+                                            className="bg-red-500/10 p-2 rounded-full hover:scale-110 transition-transform backdrop-blur-md"
+                                            onClick={(e) => { e.stopPropagation(); setImage(null); setImagePreview(null); }}
+                                        >
+                                            <img src={TrashIcon} alt="delete" className="w-[1.1vw]" />
+                                        </button>
+                                    )}
                                 </div>
-                                <div className="size-full flex items-center justify-center">
-                                    {/* Center icon removed */}
-                                </div>
+                                {!imagePreview && (
+                                    <div className="size-full flex flex-col items-center justify-center gap-2 opacity-40">
+                                        <RiArrowDownSLine size={30} className="-rotate-180" color="#3457dc" />
+                                        <p className="text-[12px] text-white">Click to upload image</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
 
-                    {/* Action Button - Bottom Left */}
                     <div className="w-full flex justify-start mt-[10px]">
-                        <button className="bg-[#3457dc] content-stretch flex items-center justify-center px-[32px] py-[14px] relative rounded-[16px] transition-all hover:bg-[#2a46b3] active:scale-95">
-                            <p className="font-['Poppins',sans-serif] font-medium leading-[normal] not-italic text-[14px] text-white whitespace-nowrap">Publish</p>
+                        <button 
+                            className="bg-[#3457dc] content-stretch flex items-center justify-center px-[32px] py-[14px] relative rounded-[16px] transition-all hover:bg-[#2a46b3] active:scale-95 disabled:opacity-50"
+                            onClick={handlePublish}
+                            disabled={isPublishing}
+                        >
+                            <p className="font-['Poppins',sans-serif] font-medium leading-[normal] not-italic text-[14px] text-white whitespace-nowrap">
+                                {isPublishing ? 'Publishing...' : (editData ? 'Update News' : 'Publish')}
+                            </p>
                         </button>
                     </div>
                 </div>
@@ -257,13 +444,27 @@ const AddNewsForm = () => {
 
 const ManageContent = () => {
     const [activeTab, setActiveTab] = useState('News & Gallery');
+    const [editData, setEditData] = useState(null);
+
+    const handleEdit = (news) => {
+        setEditData(news);
+        setActiveTab('Add News');
+    };
 
     const renderTabContent = () => {
         switch (activeTab) {
             case 'News & Gallery':
-                return <NewsGalleryTable />;
+                return <NewsGalleryTable onEdit={handleEdit} />;
             case 'Add News':
-                return <AddNewsForm />;
+                return (
+                    <AddNewsForm 
+                        editData={editData} 
+                        onPublished={() => { 
+                            setActiveTab('News & Gallery'); 
+                            setEditData(null); 
+                        }} 
+                    />
+                );
             default:
                 return null;
         }

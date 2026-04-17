@@ -335,9 +335,134 @@ const ProjectTimeline = ({ projectName, projectId, milestones = [], onRefresh })
     );
 };
 
-const ProjectsTable = ({ projects = [], selectedId, onSelect }) => {
+const EditProjectModal = ({ isOpen, onClose, project, teams, users, onUpdate }) => {
+    const [formData, setFormData] = useState({
+        name: project?.name || '',
+        description: project?.raw?.description || '',
+        teamId: project?.raw?.team?._id || project?.raw?.team || '',
+        leaderId: project?.raw?.leader?._id || project?.raw?.leader || '',
+        status: project?.status || 'On going',
+        endDate: project?.raw?.endDate ? new Date(project?.raw?.endDate).toISOString().split('T')[0] : ''
+    });
+    const [isLoading, setIsLoading] = useState(false);
+
+    if (!isOpen) return null;
+
+    const handleUpdate = async () => {
+        setIsLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`http://localhost:5000/api/projects/${project.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    title: formData.name,
+                    description: formData.description,
+                    team: formData.teamId,
+                    leader: formData.leaderId,
+                    status: formData.status,
+                    endDate: formData.endDate
+                })
+            });
+            if (res.ok) {
+                onUpdate();
+                onClose();
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const teamName = teams.find(t => t._id === formData.teamId)?.name || 'Select team';
+    const leaderName = users.find(u => u.id === formData.leaderId)?.name || 'Select leader';
+
+    return (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[2000] flex items-center justify-center p-4">
+            <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-[#151519] border border-[#1e1d22] rounded-[24px] p-8 w-full max-w-2xl flex flex-col gap-6"
+            >
+                <h2 className="text-xl font-bold text-white">Edit Project Details</h2>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormInput label="Project Name" value={formData.name} onChange={(val) => setFormData({...formData, name: val})} />
+                    <FormSelect 
+                        label="Status" 
+                        value={formData.status} 
+                        options={['On going', 'Completed', 'Canceled']} 
+                        onSelect={(val) => setFormData({...formData, status: val})} 
+                    />
+                </div>
+
+                <FormTextArea label="Description" value={formData.description} onChange={(val) => setFormData({...formData, description: val})} />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormSelect 
+                        label="Research Team" 
+                        value={teamName} 
+                        options={teams.map(t => t.name)}
+                        onSelect={(name) => {
+                            const team = teams.find(t => t.name === name);
+                            if (team) {
+                                setFormData({
+                                    ...formData, 
+                                    teamId: team._id,
+                                    leaderId: team.leader?._id || team.leader
+                                });
+                            }
+                        }}
+                    />
+                    <div className="flex flex-col gap-2 opacity-80">
+                        <p className="text-[#80808a] text-[14px]">Project Leader (Team Leader)</p>
+                        <div className="bg-[#1e1e24]/50 p-3 rounded-lg border border-white/5 text-white font-medium">
+                            {teams.find(t => t._id === formData.teamId)?.leader?.email || "No team selected"}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex justify-end gap-4 mt-4">
+                    <button onClick={onClose} className="px-6 py-2 text-[#a5a5b2] hover:text-white transition-colors">Cancel</button>
+                    <button 
+                        onClick={handleUpdate} 
+                        disabled={isLoading}
+                        className="bg-[#3457dc] text-white px-8 py-2 rounded-xl font-bold hover:bg-[#2a4ac0] disabled:opacity-50 transition-all"
+                    >
+                        {isLoading ? 'Saving...' : 'Update Project'}
+                    </button>
+                </div>
+            </motion.div>
+        </div>
+    );
+};
+
+const ProjectsTable = ({ projects = [], selectedId, onSelect, onRefresh }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [activeRowAction, setActiveRowAction] = useState(null);
+    const [editingProject, setEditingProject] = useState(null);
+    const [teams, setTeams] = useState([]);
+    const [users, setUsers] = useState([]);
+
+    React.useEffect(() => {
+        const fetchMeta = async () => {
+            const token = localStorage.getItem('token');
+            const [tRes, uRes] = await Promise.all([
+                fetch('http://localhost:5000/api/teams', { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch('http://localhost:5000/api/auth/admin/users', { headers: { 'Authorization': `Bearer ${token}` } })
+            ]);
+            if (tRes.ok) setTeams(await tRes.json());
+            if (uRes.ok) {
+                const uData = await uRes.json();
+                setUsers(uData.map(u => ({ id: u._id, name: u.username })));
+            }
+        };
+        fetchMeta();
+    }, []);
 
     const getStatusStyle = (status) => {
         switch (status) {
@@ -392,6 +517,7 @@ const ProjectsTable = ({ projects = [], selectedId, onSelect }) => {
                         <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Project Name</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Start Date</th>
+                            <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Research Team</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Estimated Deadline</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, textAlign: 'center' }}>Progress</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, textAlign: 'center' }}>Status</th>
@@ -416,6 +542,15 @@ const ProjectsTable = ({ projects = [], selectedId, onSelect }) => {
                                     </div>
                                 </td>
                                 <td style={{ padding: '2.5vh 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{project.start}</td>
+                                <td style={{ padding: '2.5vh 0.5vw' }}>
+                                    <span style={{ 
+                                        fontSize: '0.85vw', 
+                                        fontWeight: 500, 
+                                        color: '#FFFFFF' 
+                                    }}>
+                                        {project.teamName || 'N/A'}
+                                    </span>
+                                </td>
                                 <td style={{ padding: '2.5vh 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{project.deadline}</td>
                                 <td style={{ padding: '2.5vh 0.5vw', textAlign: 'center', fontSize: '0.9vw', fontWeight: 700, color: 'white' }}>{project.progress}</td>
                                 <td style={{ padding: '2.5vh 0.5vw', textAlign: 'center' }}>
@@ -447,7 +582,16 @@ const ProjectsTable = ({ projects = [], selectedId, onSelect }) => {
                                                 minWidth: 'max-content', padding: '0.4vw',
                                                 boxShadow: '0 8px 32px rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)'
                                             }}>
-                                                <div style={{ padding: '1vh 1.5vw', cursor: 'pointer', fontSize: '0.8vw', borderRadius: '0.5vw', color: 'rgba(255, 255, 255, 0.9)', textAlign: 'left' }}>Edit Status</div>
+                                                <div 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setEditingProject(project);
+                                                        setActiveRowAction(null);
+                                                    }}
+                                                    style={{ padding: '1vh 1.5vw', cursor: 'pointer', fontSize: '0.8vw', borderRadius: '0.5vw', color: 'rgba(255, 255, 255, 0.9)', textAlign: 'left' }}
+                                                >
+                                                    Edit Status
+                                                </div>
                                             </div>
                                         )}
                                     </div>
@@ -457,6 +601,17 @@ const ProjectsTable = ({ projects = [], selectedId, onSelect }) => {
                     </tbody>
                 </table>
             </div>
+
+            {editingProject && (
+                <EditProjectModal 
+                    isOpen={!!editingProject} 
+                    onClose={() => setEditingProject(null)} 
+                    project={editingProject}
+                    teams={teams}
+                    users={users}
+                    onUpdate={onRefresh}
+                />
+            )}
 
             {/* Pagination */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginTop: '4vh' }}>
@@ -499,6 +654,7 @@ const ProjectHubManager = ({ projects, isLoading, onRefresh }) => {
                 projects={projects} 
                 selectedId={selectedProjectId} 
                 onSelect={setSelectedProjectId} 
+                onRefresh={onRefresh}
             />
             {selectedProjectId && (
                 <ProjectTimeline 
@@ -514,10 +670,10 @@ const ProjectHubManager = ({ projects, isLoading, onRefresh }) => {
 
 const ProjectsList = ({ projects, stats, isLoading, onRefresh }) => {
     const projectStats = [
-        { title: "Projects Completed", value: stats.completed.toString(), icon: ProjectsIcon },
-        { title: "ongoing Projects", value: stats.ongoing.toString(), icon: ProjectsIcon },
-        { title: "Canceled Projectes", value: stats.canceled.toString(), icon: ProjectsIcon },
-        { title: "Planned Projects", value: stats.planned.toString(), icon: ProjectsIcon },
+        { title: "Total Projects", value: (stats.total || 0).toString(), icon: ProjectsIcon },
+        { title: "Projects Completed", value: (stats.completed || 0).toString(), icon: ProjectsIcon },
+        { title: "Closed / Cancelled", value: (stats.canceled || 0).toString(), icon: ProjectsIcon },
+        { title: "In Progress", value: (stats.ongoing || 0).toString(), icon: ProjectsIcon },
     ];
 
     return (
@@ -597,45 +753,47 @@ function FormSelect({ label, value, options = [], onSelect }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="flex flex-col gap-[12px] items-start w-full relative">
-      <p className="font-['Poppins',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#80808a] text-[14px] w-full">{label}</p>
-      <div 
-        onClick={() => setIsOpen(!isOpen)}
-        className={`bg-[rgba(255,255,255,0.01)] flex items-center justify-between px-[14px] h-[41px] relative rounded-[8px] shrink-0 w-full border border-[#2a2a30] cursor-pointer hover:bg-white/[0.03] transition-all ${isOpen ? 'border-[#3457DC]' : ''}`}
-      >
-          <p className="font-['Poppins',sans-serif] text-[#a5a5b2] text-[14px]">{value}</p>
-          <div className={`size-[20px] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
-            <svg className="size-full" fill="none" viewBox="0 0 20 20">
-              <path d={svgPaths.p211f8400} fill="#3457DC" />
-            </svg>
-          </div>
-      </div>
-
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="absolute top-[105%] left-0 w-full bg-[#1e1e24] border border-[#2a2a30] rounded-[8px] overflow-hidden z-[1000] shadow-2xl"
+    <div className="flex flex-col gap-[12px] items-start w-full">
+      <p className="font-['Poppins',sans-serif] text-[#80808a] text-[14px] w-full">{label}</p>
+      <div className="relative w-full">
+          <div 
+            onClick={() => setIsOpen(!isOpen)}
+            className={`bg-[rgba(255,255,255,0.01)] flex items-center justify-between px-[14px] h-[41px] rounded-[8px] w-full border border-[#2a2a30] cursor-pointer hover:bg-white/[0.03] transition-all ${isOpen ? 'border-[#3457DC]' : ''}`}
           >
-            <div className="max-h-[200px] overflow-y-auto custom-scrollbar">
-              {options.map((option, idx) => (
-                <div 
-                  key={idx}
-                  onClick={() => {
-                    onSelect(option);
-                    setIsOpen(false);
-                  }}
-                  className="px-[14px] py-[10px] text-[14px] text-[#a5a5b2] hover:bg-[#3457DC] hover:text-white transition-colors cursor-pointer"
-                >
-                  {option}
+              <p className="font-['Poppins',sans-serif] text-[#a5a5b2] text-[14px]">{value}</p>
+              <div className={`size-[20px] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+                <svg className="size-full" fill="none" viewBox="0 0 20 20">
+                  <path d={svgPaths.p211f8400} fill="#3457DC" />
+                </svg>
+              </div>
+          </div>
+ 
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div 
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                className="absolute top-full left-0 w-full bg-[#1e1e24] border border-[#2a2a30] rounded-b-[8px] overflow-hidden z-[1000] shadow-2xl"
+              >
+                <div className="max-h-[200px] overflow-y-auto custom-scrollbar">
+                  {options.map((option, idx) => (
+                    <div 
+                      key={idx}
+                      onClick={() => {
+                        onSelect(option);
+                        setIsOpen(false);
+                      }}
+                      className="px-[14px] py-[10px] text-[14px] text-[#a5a5b2] hover:bg-[#3457DC] hover:text-white transition-colors cursor-pointer"
+                    >
+                      {option}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              </motion.div>
+            )}
+          </AnimatePresence>
+      </div>
     </div>
   );
 }
@@ -644,61 +802,63 @@ function FormMultiSelect({ label, selectedIds = [], options = [], onToggle }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="flex flex-col gap-[12px] items-start w-full relative">
+    <div className="flex flex-col gap-[12px] items-start w-full">
       <p className="font-['Poppins',sans-serif] text-[#80808a] text-[14px] w-full">{label}</p>
-      <div 
-        onClick={() => setIsOpen(!isOpen)}
-        className={`bg-[rgba(255,255,255,0.01)] flex items-center justify-between px-[14px] py-[8px] min-h-[41px] relative rounded-[8px] shrink-0 w-full border border-[#2a2a30] cursor-pointer hover:bg-white/[0.03] transition-all ${isOpen ? 'border-[#3457DC]' : ''}`}
-      >
-          <div className="flex flex-wrap gap-2 pr-4">
-            {selectedIds.length === 0 ? (
-              <p className="font-['Poppins',sans-serif] text-[#a5a5b2] text-[14px]">Select members</p>
-            ) : (
-                selectedIds.map(id => {
-                    const opt = options.find(o => o.id === id);
-                    return (
-                        <span key={id} className="bg-[#3457DC] text-white text-[11px] px-2 py-1 rounded-md">
-                            {opt?.name || id}
-                        </span>
-                    );
-                })
-            )}
-          </div>
-          <div className={`size-[20px] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
-            <svg className="size-full" fill="none" viewBox="0 0 20 20">
-              <path d={svgPaths.p211f8400} fill="#3457DC" />
-            </svg>
-          </div>
-      </div>
-
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="absolute top-[105%] left-0 w-full bg-[#1e1e24] border border-[#2a2a30] rounded-[8px] overflow-hidden z-[1000] shadow-2xl"
+      <div className="relative w-full">
+          <div 
+            onClick={() => setIsOpen(!isOpen)}
+            className={`bg-[rgba(255,255,255,0.01)] flex items-center justify-between px-[14px] py-[8px] min-h-[41px] rounded-[8px] w-full border border-[#2a2a30] cursor-pointer hover:bg-white/[0.03] transition-all ${isOpen ? 'border-[#3457DC]' : ''}`}
           >
-            <div className="max-h-[200px] overflow-y-auto custom-scrollbar">
-              {options.map((option) => (
-                <div 
-                  key={option.id}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onToggle(option.id);
-                  }}
-                  className={`px-[14px] py-[10px] text-[14px] transition-colors cursor-pointer flex items-center justify-between ${selectedIds.includes(option.id) ? 'bg-[#3457DC]/20 text-white font-bold' : 'text-[#a5a5b2] hover:bg-[#3457DC] hover:text-white'}`}
-                >
-                  <span>{option.name}</span>
-                  {selectedIds.includes(option.id) && (
-                      <div className="w-2 h-2 rounded-full bg-[#3457DC]" />
-                  )}
+              <div className="flex flex-wrap gap-2 pr-4">
+                {selectedIds.length === 0 ? (
+                  <p className="font-['Poppins',sans-serif] text-[#a5a5b2] text-[14px]">Select members</p>
+                ) : (
+                    selectedIds.map(id => {
+                        const opt = options.find(o => o.id === id);
+                        return (
+                            <span key={id} className="bg-[#3457DC] text-white text-[11px] px-2 py-1 rounded-md">
+                                {opt?.name || id}
+                            </span>
+                        );
+                    })
+                )}
+              </div>
+              <div className={`size-[20px] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+                <svg className="size-full" fill="none" viewBox="0 0 20 20">
+                  <path d={svgPaths.p211f8400} fill="#3457DC" />
+                </svg>
+              </div>
+          </div>
+ 
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div 
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                className="absolute top-full left-0 w-full bg-[#1e1e24] border border-[#2a2a30] rounded-b-[8px] overflow-hidden z-[1000] shadow-2xl"
+              >
+                <div className="max-h-[200px] overflow-y-auto custom-scrollbar">
+                  {options.map((option) => (
+                    <div 
+                      key={option.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onToggle(option.id);
+                      }}
+                      className={`px-[14px] py-[10px] text-[14px] transition-colors cursor-pointer flex items-center justify-between ${selectedIds.includes(option.id) ? 'bg-[#3457DC]/20 text-white font-bold' : 'text-[#a5a5b2] hover:bg-[#3457DC] hover:text-white'}`}
+                    >
+                      <span>{option.name}</span>
+                      {selectedIds.includes(option.id) && (
+                          <div className="w-2 h-2 rounded-full bg-[#3457DC]" />
+                      )}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              </motion.div>
+            )}
+          </AnimatePresence>
+      </div>
     </div>
   );
 }
@@ -726,19 +886,36 @@ const AddProject = ({ onPublished }) => {
     const fetchData = async () => {
         try {
             const token = localStorage.getItem('token');
+            const userStr = localStorage.getItem('user');
+            const currentUser = userStr ? JSON.parse(userStr) : null;
+
             // Fetch teams
             const teamsRes = await fetch('http://localhost:5000/api/teams', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const teamsData = await teamsRes.json();
-            if (teamsRes.ok) setTeams(teamsData);
+            if (teamsRes.ok) {
+                setTeams(teamsData);
+                // Pre-fill team if user has one
+                if (currentUser?.team) {
+                    updateField('teamId', currentUser.team);
+                    const myTeam = teamsData.find(t => t._id === currentUser.team);
+                    if (myTeam?.leader) {
+                        updateField('leaderId', myTeam.leader._id || myTeam.leader);
+                    }
+                }
+            }
 
             // Fetch users
             const usersRes = await fetch('http://localhost:5000/api/auth/admin/users', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const usersData = await usersRes.json();
-            if (usersRes.ok) setUsers(usersData.map(u => ({ id: u._id, name: u.username })));
+            if (usersRes.ok) {
+                const mappedUsers = usersData.map(u => ({ id: u._id, name: u.username }));
+                setUsers(mappedUsers);
+                if (currentUser) updateField('leaderId', currentUser._id);
+            }
         } catch (err) {
             console.error('Fetch error:', err);
         }
@@ -787,6 +964,7 @@ const AddProject = ({ onPublished }) => {
         dataToSend.append('description', formData.description);
         dataToSend.append('team', formData.teamId);
         dataToSend.append('members', formData.members.join(','));
+        dataToSend.append('leader', formData.leaderId);
         dataToSend.append('startDate', formData.startOption === 'now' ? new Date().toISOString() : formData.startDate);
         if (formData.endDate) dataToSend.append('endDate', formData.endDate);
         if (imageFile) dataToSend.append('image', imageFile);
@@ -856,18 +1034,22 @@ const AddProject = ({ onPublished }) => {
             options={teams.map(t => t.name)}
             onSelect={(name) => {
                 const team = teams.find(t => t.name === name);
-                if (team) updateField('teamId', team._id);
+                if (team) {
+                    setFormData(prev => ({
+                        ...prev,
+                        teamId: team._id,
+                        leaderId: team.leader?._id || team.leader,
+                        members: (team.members || []).map(m => m?._id || m)
+                    }));
+                }
             }}
           />
-          <FormSelect 
-            label="Project Leader" 
-            value={leaderName} 
-            options={users.map(u => u.name)}
-            onSelect={(name) => {
-                const user = users.find(u => u.name === name);
-                if (user) updateField('leaderId', user.id);
-            }}
-          />
+          <div className="flex flex-col gap-2 opacity-80">
+              <p className="text-[#80808a] text-[14px]">Project Leader (Team Leader Email)</p>
+              <div className="bg-[#1e1e24]/50 p-3 rounded-lg border border-white/5 text-white font-medium">
+                  {teams.find(t => t._id === formData.teamId)?.leader?.email || "No team selected"}
+              </div>
+          </div>
           <FormMultiSelect 
             label="Member List" 
             selectedIds={formData.members} 
@@ -1031,8 +1213,131 @@ const AddProject = ({ onPublished }) => {
     </div>
   );
 };
+const TeamsHistoryTable = ({ teams, onDelete, onEdit }) => {
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const filteredTeams = teams.filter(t => 
+        t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        t.focus.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const filterItemStyle = {
+        backgroundColor: 'rgba(255,255,255,0.01)',
+        borderRadius: '0.9vw',
+        padding: '1.1vh 1.2vw',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.6vw',
+        border: '1px solid #1e1d22',
+        minWidth: '30vw'
+    };
+
+    return (
+        <div style={{
+            backgroundColor: '#151519',
+            border: '1px solid rgba(255, 255, 255, 0.05)',
+            padding: '3vh 1.5vw 4vh 1.5vw',
+            borderRadius: '1.2vw',
+            display: 'flex',
+            flexDirection: 'column',
+            width: '100%'
+        }}>
+            {/* Header & Search */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '3.5vh' }}>
+                <div className="flex flex-col gap-1">
+                    <h2 style={{ fontSize: '1.2vw', fontWeight: 600, color: 'white', margin: 0, fontFamily: 'Gilroy, sans-serif' }}>Research Teams</h2>
+                    <p style={{ color: '#a5a5b2', fontSize: '0.85vw', margin: 0 }}>Choose from your saved Teams, or create a new one</p>
+                </div>
+                
+                <div style={filterItemStyle}>
+                    <input
+                        type="text"
+                        placeholder="Search /"
+                        style={{ flex: 1, backgroundColor: 'transparent', border: 'none', outline: 'none', color: '#f0f0f2', fontSize: '14px' }}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <RiSearch2Line color="#3457DC" size="1.2vw" />
+                </div>
+            </div>
+
+            {/* Table */}
+            <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                    <thead>
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                            <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Added</th>
+                            <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Created by</th>
+                            <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Team name</th>
+                            <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, textAlign: 'center' }}>Projects</th>
+                            <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, textAlign: 'right' }}>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredTeams.map((row) => (
+                            <tr key={row._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', height: '8vh' }}>
+                                <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{new Date(row.createdAt).toLocaleDateString()}</td>
+                                <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{row.leader?.email || row.leader?.username || 'Admin'}</td>
+                                <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'white', fontWeight: 500 }}>{row.name}</td>
+                                <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'white', textAlign: 'center' }}>{row.projectCount || 0}</td>
+                                <td style={{ padding: '0 0.5vw', textAlign: 'right' }}>
+                                    <div className="flex items-center justify-end gap-3">
+                                        <button 
+                                            className="bg-transparent border-none cursor-pointer hover:scale-110 transition-transform"
+                                            onClick={() => onEdit(row)}
+                                        >
+                                            <svg className="w-[1.2vw]" fill="none" viewBox="0 0 20 20">
+                                                <path d={svgPaths.p2f8ff900} fill="#3457DC" />
+                                                <path d={svgPaths.p3a2bde10} fill="#3457DC" />
+                                            </svg>
+                                        </button>
+                                        <button 
+                                            className="bg-transparent border-none cursor-pointer hover:scale-110 transition-transform"
+                                            onClick={() => onDelete(row._id)}
+                                        >
+                                            <svg className="w-[1.2vw]" fill="none" viewBox="0 0 16 16">
+                                                <path d={svgPaths.p3750e00} fill="#C5432D" />
+                                                <path d={svgPaths.p28d8d500} fill="#C5432D" />
+                                                <path d={svgPaths.pafd7500} fill="#C5432D" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                        {filteredTeams.length === 0 && (
+                            <tr>
+                                <td colSpan="5" style={{ textAlign: 'center', padding: '4vh', color: '#a5a5b2' }}>No teams found</td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Pagination Placeholder */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginTop: '4vh' }}>
+                <div style={{ display: 'flex', gap: '8vw', alignItems: 'center' }}>
+                    <button style={{ width: '2vw', height: '2vw', backgroundColor: '#3457DC', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                        <RiArrowLeftSLine color="#F7F7F7" size="1vw" />
+                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
+                        <div style={{ border: '1px solid #2a2a30', borderRadius: '0.4vw', padding: '0.5vh 0.6vw', backgroundColor: 'rgba(255,255,255,0.01)', minWidth: '2vw', textAlign: 'center' }}>
+                            <span style={{ fontSize: '0.8vw', color: '#ffffff' }}>1</span>
+                        </div>
+                        <span style={{ fontSize: '0.8vw', color: '#80808a' }}>of 1</span>
+                    </div>
+                    <button style={{ width: '2vw', height: '2vw', backgroundColor: '#3457DC', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                        <RiArrowRightSLine color="#F7F7F7" size="1vw" />
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const AddTeam = () => {
     const [formData, setFormData] = useState({
+        _id: null,
         name: '',
         focus: '',
         leaderId: '',
@@ -1041,26 +1346,50 @@ const AddTeam = () => {
     });
 
     const [users, setUsers] = useState([]);
-    const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+    const [teams, setTeams] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const fetchTeams = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const [teamsRes, projectsRes] = await Promise.all([
+                fetch('http://localhost:5000/api/teams', { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch('http://localhost:5000/api/projects', { headers: { 'Authorization': `Bearer ${token}` } })
+            ]);
+            
+            const teamsData = await teamsRes.json();
+            const projectsData = await projectsRes.json();
+
+            if (teamsRes.ok && projectsRes.ok) {
+                const teamsWithCounts = teamsData.map(t => ({
+                    ...t,
+                    projectCount: projectsData.filter(p => p.team === t._id || (p.team && p.team._id === t._id)).length
+                }));
+                setTeams(teamsWithCounts);
+            }
+        } catch (err) { console.error(err); }
+    };
+
+    const fetchUsers = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('http://localhost:5000/api/auth/admin/users', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                // Filter out guest users
+                const eligibleUsers = data.filter(u => u.role !== 'guest');
+                setUsers(eligibleUsers.map(u => ({ 
+                    id: u._id, 
+                    name: `${u.username} (${u.email})` 
+                })));
+            }
+        } catch (err) { console.error(err); }
+    };
 
     React.useEffect(() => {
-        const fetchUsers = async () => {
-            setIsLoadingUsers(true);
-            try {
-                const token = localStorage.getItem('token');
-                const res = await fetch('http://localhost:5000/api/auth/admin/users', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await res.json();
-                if (res.ok) {
-                    setUsers(data.map(u => ({ id: u._id, name: u.username })));
-                }
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setIsLoadingUsers(false);
-            }
-        };
+        fetchTeams();
         fetchUsers();
     }, []);
 
@@ -1079,14 +1408,18 @@ const AddTeam = () => {
 
     const handleCreateTeam = async () => {
         if (!formData.name || !formData.focus || !formData.leaderId) {
-            alert('Please fill in essential fields (Name, Focus, Leader)');
+            alert('Please fill in Name, Focus, and Leader');
             return;
         }
 
+        setIsLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/teams', {
-                method: 'POST',
+            const isEdit = !!formData._id;
+            const url = isEdit ? `http://localhost:5000/api/teams/${formData._id}` : 'http://localhost:5000/api/teams';
+            
+            const res = await fetch(url, {
+                method: isEdit ? 'PUT' : 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -1102,22 +1435,53 @@ const AddTeam = () => {
 
             const data = await res.json();
             if (res.ok) {
-                alert('Team created successfully!');
-                setFormData({ name: '', focus: '', leaderId: '', members: [], activeProjects: '' });
+                alert(isEdit ? 'Team updated successfully!' : 'Team created successfully!');
+                setFormData({ _id: null, name: '', focus: '', leaderId: '', members: [], activeProjects: '' });
+                fetchTeams();
             } else {
-                alert(data.message || 'Failed to create team');
+                alert(data.message || 'Error occurred');
             }
         } catch (err) {
             alert('Connection failed');
+        } finally {
+            setIsLoading(true);
         }
+    };
+
+    const handleDeleteTeam = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this team?')) return;
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`http://localhost:5000/api/teams/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) fetchTeams();
+        } catch (err) { console.error(err); }
+    };
+
+    const handleEditTeam = (team) => {
+        setFormData({
+            _id: team._id,
+            name: team.name,
+            focus: team.focus,
+            leaderId: team.leader?._id || team.leader,
+            members: (team.members || []).map(m => m?._id || m),
+            activeProjects: (team.activeProjects || []).join(', ')
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const leaderName = users.find(u => u.id === formData.leaderId)?.name || 'Select leader';
 
     return (
         <div className="flex flex-col gap-[4vh] w-full relative">
+            <TeamsHistoryTable teams={teams} onDelete={handleDeleteTeam} onEdit={handleEditTeam} />
+
             <div className="bg-[#151519] flex flex-col items-start p-[24px] rounded-[16px] border border-[#1e1d22] w-full relative">
-                <p className="font-['Gilroy',sans-serif] font-extrabold text-[16px] text-white mb-[24px]">Create New Research Team</p>
+                <p className="font-['Gilroy',sans-serif] font-extrabold text-[16px] text-white mb-[24px]">
+                    {formData._id ? 'Edit Research Team' : 'Create New Research Team'}
+                </p>
                 
                 <div className="flex flex-col gap-[24px] w-full">
                     <FormInput 
@@ -1152,20 +1516,29 @@ const AddTeam = () => {
                     </div>
 
                     <FormInput 
-                        label="Active Projects (Comma separated)" 
-                        placeholder="e.g. Project-X, Neural-Scan, Bio-Data" 
+                        label="Research Fields / Expertise (Comma separated)" 
+                        placeholder="e.g. AI, Machine Learning, Data Science" 
                         value={formData.activeProjects}
                         onChange={(val) => updateField('activeProjects', val)}
                     />
 
-                    <div className="w-full h-[1px] bg-[#2A2A30] my-[16px]" />
+                    <div className="w-full h-[1px] bg-[#2A2A30] my-[8px]" />
 
                     <button 
                         onClick={handleCreateTeam}
-                        className="bg-[#3457dc] text-white px-[32px] py-[14px] rounded-[16px] text-[14px] font-bold border-none cursor-pointer w-fit hover:bg-[#2a4ac0] active:scale-95 transition-all shadow-lg shadow-[#3457dc]/20"
+                        disabled={isLoading}
+                        className="bg-[#3457dc] text-white px-[32px] py-[14px] rounded-[16px] text-[14px] font-bold border-none cursor-pointer w-fit hover:bg-[#2a4ac0] active:scale-95 transition-all shadow-lg shadow-[#3457dc]/20 disabled:opacity-50"
                     >
-                        Create Team
+                        {formData._id ? 'Update Team' : 'Create Team'}
                     </button>
+                    {formData._id && (
+                        <button 
+                            onClick={() => setFormData({ _id: null, name: '', focus: '', leaderId: '', members: [], activeProjects: '' })}
+                            className="text-[#a5a5b2] text-[14px] hover:text-white transition-colors"
+                        >
+                            Cancel Edit
+                        </button>
+                    )}
                 </div>
             </div>
         </div>
@@ -1175,7 +1548,15 @@ const ProjectHub = () => {
     const [activeTab, setActiveTab] = useState('Projects');
     const [projects, setProjects] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [stats, setStats] = useState({ completed: 0, ongoing: 0, canceled: 0, planned: 0 });
+    const [stats, setStats] = useState({ 
+        total: 0, 
+        completed: 0, 
+        ongoing: 0, 
+        canceled: 0, 
+        planned: 0,
+        views: 0,
+        progressAvg: "0.00"
+    });
 
     const fetchAllData = async () => {
         setIsLoading(true);
@@ -1195,19 +1576,35 @@ const ProjectHub = () => {
                     progress: `${Math.round(((p.milestones?.filter(m => m.completed).length || 0) + 1) / ((p.milestones?.length || 0) + 1) * 100)}%`, 
                     status: p.status === 'Proposed' ? 'On going' : p.status,
                     img: p.imageUrl ? `http://localhost:5000${p.imageUrl}` : img1,
+                    teamName: p.team?.name || 'No Team',
                     milestones: p.milestones || [],
                     raw: p
                 }));
                 setProjects(formatted);
+
+                // Fetch total views and other system stats
+                const statsRes = await fetch('http://localhost:5000/api/stats/overview', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const sData = await statsRes.json();
+
                 setStats({
+                    total: data.length,
                     completed: data.filter(p => p.status === 'Completed').length,
                     ongoing: data.filter(p => p.status === 'Ongoing' || p.status === 'Proposed').length,
                     canceled: data.filter(p => p.status === 'Suspended').length,
-                    planned: data.filter(p => p.status === 'Proposed').length
+                    views: sData.views || 0,
+                    progressAvg: data.length > 0 
+                        ? (data.reduce((acc, p) => {
+                            const completedCount = p.milestones?.filter(m => m.completed).length || 0;
+                            const totalMilestones = p.milestones?.length || 0;
+                            return acc + (totalMilestones > 0 ? (completedCount / totalMilestones) : 0);
+                          }, 0) / data.length * 100).toFixed(2)
+                        : "0.00"
                 });
             }
         } catch (err) {
-            console.error(err);
+            console.error('Fetch Stats Error:', err);
         } finally {
             setIsLoading(false);
         }

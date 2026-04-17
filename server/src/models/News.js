@@ -1,22 +1,30 @@
 const mongoose = require('mongoose');
 
 const newsSchema = new mongoose.Schema({
-    headline: {
+    title: {
         type: String,
         required: true,
         trim: true
     },
-    date: {
-        type: Date,
-        default: Date.now
-    },
-    image: {
-        type: String, // URL to the image
-        default: ''
-    },
-    fullStory: {
+    description: {
         type: String,
         required: true
+    },
+    imageUrl: {
+        type: String,
+        default: ''
+    },
+    team: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Team'
+    },
+    views: {
+        type: Number,
+        default: 0
+    },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     }
 }, { timestamps: true });
 

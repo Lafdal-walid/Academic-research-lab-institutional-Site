@@ -266,6 +266,69 @@ exports.getProfile = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+exports.updateProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        if (user) {
+            user.username = req.body.username || user.username;
+            user.firstName = req.body.firstName !== undefined ? req.body.firstName : user.firstName;
+            user.lastName = req.body.lastName !== undefined ? req.body.lastName : user.lastName;
+            user.email = req.body.email || user.email;
+            user.phoneNumber = req.body.phoneNumber || user.phoneNumber;
+            user.country = req.body.country || user.country;
+            // update any other profile fields here as they are added to User schema
+
+            if (req.body.password) {
+                user.password = req.body.password;
+            }
+
+            const updatedUser = await user.save();
+            res.json({
+                _id: updatedUser._id,
+                username: updatedUser.username,
+                firstName: updatedUser.firstName,
+                lastName: updatedUser.lastName,
+                email: updatedUser.email,
+                role: updatedUser.role,
+                degree: updatedUser.degree,
+                country: updatedUser.country,
+                phoneNumber: updatedUser.phoneNumber,
+                token: generateToken(updatedUser._id)
+            });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+exports.changePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Verify current password
+        const isMatch = await user.comparePassword(currentPassword);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Incorrect current password' });
+        }
+
+        // Update with new password
+        user.password = newPassword;
+        await user.save();
+
+        res.json({ message: 'Password updated successfully' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 exports.getAllUsers = async (req, res) => {
     try {
         const users = await User.find({}).populate('team').select('-password');

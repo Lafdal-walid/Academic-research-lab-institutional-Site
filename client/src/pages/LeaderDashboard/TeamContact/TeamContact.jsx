@@ -51,11 +51,18 @@ const ChatItem = ({ name, message, time, active, unread, onClick }) => (
             <span className="text-[#a5a5b2] truncate w-[12vw]" style={{ fontSize: '0.75vw' }}>{message}</span>
          </div>
       </div>
-      <div className="flex flex-col items-end" style={{ gap: '0.4vh' }}>
-        <span className="text-[#9a9a9a]" style={{ fontSize: '0.7vw' }}>{time}</span>
-        {unread && (
-          <div style={{ width: '0.4vw', height: '0.4vw', borderRadius: '50%', backgroundColor: '#3457DC' }} />
-        )}
+      <div className="flex flex-col items-end justify-center" style={{ gap: '8px', minWidth: '3vw' }}>
+        <span className="text-[#9a9a9a] whitespace-nowrap" style={{ fontSize: '0.7vw' }}>{time}</span>
+        <div className="flex justify-end w-full" style={{ height: '1.2vh' }}>
+            {unread ? (
+              <div className="bg-[#3457dc] shadow-[0_0_10px_rgba(52,87,220,0.5)]" 
+                   style={{ width: '0.6vw', height: '0.6vw', borderRadius: '50%' }} />
+            ) : (
+                <svg width="0.8vw" height="0.8vw" viewBox="0 0 14 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0.748411 3.90725C0.523827 3.67625 0.529661 3.307 0.760661 3.08241C0.991661 2.85783 1.36149 2.86308 1.58549 3.09466L3.97074 5.55108C4.14983 5.73191 4.39599 5.834 4.65674 5.83458C4.91633 5.83458 5.16074 5.73366 5.34449 5.54991L10.6692 0.173329C10.8955 -0.0565048 11.2647 -0.0576714 11.494 0.169245C11.7232 0.396162 11.725 0.765412 11.4981 0.994079L6.17166 6.37183C5.76566 6.77783 5.22433 7.00066 4.65266 7.00066C4.07983 6.9995 3.54199 6.77491 3.13833 6.36775L0.748411 3.90725ZM13.8285 3.671C13.6004 3.44291 13.2306 3.44408 13.0037 3.67216L5.36958 11.3255C5.14908 11.546 4.85391 11.6673 4.54241 11.6673C4.22974 11.6673 3.93633 11.5437 3.71233 11.3179L0.991077 8.62466C0.761244 8.39833 0.392577 8.3995 0.165661 8.62933C-0.0606727 8.85858 -0.0589227 9.22725 0.169744 9.45416L2.88749 12.1433C3.32791 12.5872 3.91474 12.8322 4.54008 12.834C5.16308 12.834 5.75399 12.5913 6.19499 12.1497L13.8297 4.49583C14.0572 4.26775 14.0566 3.8985 13.8285 3.671Z" fill="#01CBB1"/>
+                </svg>
+            )}
+        </div>
       </div>
     </div>
   </div>
@@ -63,77 +70,99 @@ const ChatItem = ({ name, message, time, active, unread, onClick }) => (
 
 const TeamContact = () => {
     const [unreadOnly, setUnreadOnly] = useState(false);
-    const [selectedChatId, setSelectedChatId] = useState(1);
+    const [selectedChatId, setSelectedChatId] = useState(null);
     const [newMessage, setNewMessage] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [chats, setChats] = useState([]);
+    const [conversations, setConversations] = useState({});
+    const [isLoadingChats, setIsLoadingChats] = useState(true);
+    const [isLoadingMsgs, setIsLoadingMsgs] = useState(false);
     const messagesEndRef = useRef(null);
 
-    const [chats, setChats] = useState([
-      { id: 1, name: 'Walid', role: 'Doctorat', lastMessage: 'Can you try launching it from the ....', time: '11:20 am', unread: true },
-      { id: 2, name: 'Serine', role: 'Researcher', lastMessage: 'you : I did Actually check yes and it did ....', time: 'June 28', unread: false },
-      { id: 3, name: 'Prof. Ahmed', role: 'Lab Head', lastMessage: 'Meeting scheduled for tomorrow.', time: 'June 25', unread: false },
-    ]);
+    const fetchChats = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('http://localhost:5000/api/messages/list', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setChats(data);
+                if (data.length > 0 && !selectedChatId) {
+                    setSelectedChatId(data[0].id);
+                }
+            }
+        } catch (err) { console.error(err); }
+        finally { setIsLoadingChats(false); }
+    };
 
-    const [conversations, setConversations] = useState({
-      1: [
-        { id: 101, sender: 'Walid', type: 'doc', text: 'Lorem ipsum do . pdf', subtext: '1.2 mo', time: '12:00 pm', self: false },
-        { id: 102, sender: 'Walid', type: 'text', text: 'Lorem ipsum dolor sit amet consectetur. Ipsum ultrices sit aliquet volutpat. Neque pellentesque morbi tristique rhoncus sed enim nisl felis. Maec.', time: '12:00 pm', self: false },
-        { id: 103, sender: 'Walid', type: 'text', text: 'Lorem ipsum dolor sit amet consectetur. Ipsum ultrices sit aliquet volutpat. Neque pellentesque morbi tristique', time: '12:00 pm', self: false },
-        { id: 104, sender: 'Walid (Doctorat)', type: 'text', text: 'Lorem ipsum dolor sit amet consectetur. Ipsum.', time: '13:00 pm', self: false },
-        { id: 105, sender: 'Walid', type: 'text', text: 'Aa .. يعني لا يجب ان تنزل لاسفل ', time: '16:00 pm', self: false },
-      ],
-      2: [
-        { id: 201, sender: 'Serine', type: 'text', text: 'Have you analyzed the new dataset?', time: 'June 27', self: false },
-        { id: 202, sender: 'You', type: 'text', text: 'I did Actually check yes and it did show some interesting patterns.', time: 'June 28', self: true },
-      ],
-      3: [
-        { id: 301, sender: 'Prof. Ahmed', type: 'text', text: 'Please prepare the monthly report.', time: 'June 24', self: false },
-        { id: 302, sender: 'Prof. Ahmed', type: 'text', text: 'Meeting scheduled for tomorrow.', time: 'June 25', self: false },
-      ]
-    });
+    const fetchConversation = async (otherId) => {
+        if (!otherId) return;
+        setIsLoadingMsgs(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`http://localhost:5000/api/messages/conversation/${otherId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setConversations(prev => ({ ...prev, [otherId]: data }));
+            }
+        } catch (err) { console.error(err); }
+        finally { setIsLoadingMsgs(false); }
+    };
 
-    const prevChatIdRef = useRef(selectedChatId);
+    useEffect(() => {
+        fetchChats();
+    }, []);
+
+    useEffect(() => {
+        if (selectedChatId) {
+            fetchConversation(selectedChatId);
+        }
+    }, [selectedChatId]);
 
     const scrollToBottom = (instant = false) => {
       messagesEndRef.current?.scrollIntoView({ behavior: instant ? "auto" : "smooth" });
     };
 
     useEffect(() => {
-      const isChatSwitch = prevChatIdRef.current !== selectedChatId;
-      scrollToBottom(isChatSwitch);
-      prevChatIdRef.current = selectedChatId;
+        scrollToBottom();
     }, [conversations, selectedChatId]);
 
     const fileInputRef = useRef(null);
 
-    const handleSendMessage = (file = null) => {
+    const handleSendMessage = async (file = null) => {
       if (!newMessage.trim() && !file) return;
-      
-      const now = new Date();
-      const timeStr = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')} ${now.getHours() >= 12 ? 'pm' : 'am'}`;
-      
-      const newMsgObj = {
-        id: Date.now(),
-        sender: 'You',
-        type: file ? 'doc' : 'text',
-        text: file ? file.name : newMessage,
-        subtext: file ? (file.size / 1024 / 1024).toFixed(2) + ' mo' : '',
-        time: timeStr,
-        self: true
-      };
+      if (!selectedChatId) return;
 
-      setConversations(prev => ({
-        ...prev,
-        [selectedChatId]: [...(prev[selectedChatId] || []), newMsgObj]
-      }));
+      try {
+        const token = localStorage.getItem('token');
+        const formData = new FormData();
+        formData.append('recipient', selectedChatId);
+        
+        if (file) {
+            formData.append('file', file);
+            formData.append('type', 'doc');
+            formData.append('fileName', file.name);
+            formData.append('fileSize', (file.size / 1024 / 1024).toFixed(2) + ' mo');
+        } else {
+            formData.append('text', newMessage);
+            formData.append('type', 'text');
+        }
 
-      setChats(prev => prev.map(chat => 
-        chat.id === selectedChatId 
-          ? { ...chat, lastMessage: file ? file.name : newMessage, time: 'Just now', unread: false }
-          : chat
-      ));
+        const res = await fetch('http://localhost:5000/api/messages/send', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+        });
 
-      setNewMessage('');
+        if (res.ok) {
+            setNewMessage('');
+            fetchConversation(selectedChatId);
+            fetchChats();
+        }
+      } catch (err) { console.error(err); }
     };
 
     const handleFileSelect = (e) => {
@@ -143,53 +172,37 @@ const TeamContact = () => {
       }
     };
 
-    const handleCreateNewChat = (data) => {
-      const { recipient, message, file } = data;
+    const handleCreateNewChat = async (data) => {
+      const { recipientId, message, file } = data; // NewChatModal should return recipientId
+      
+      try {
+        const token = localStorage.getItem('token');
+        const formData = new FormData();
+        formData.append('recipient', recipientId);
+        if (message) formData.append('text', message);
+        formData.append('type', file ? 'doc' : 'text');
+        if (file) {
+            formData.append('file', file);
+            formData.append('fileName', file.name);
+            formData.append('fileSize', (file.size / 1024 / 1024).toFixed(2) + ' mo');
+        }
 
-      const newId = Date.now();
-      const newChat = {
-        id: newId,
-        name: recipient,
-        role: 'Collaborator',
-        lastMessage: file ? `you sent a file : ${file.name}` : `you : ${message}`,
-        time: 'Just now',
-        unread: false
-      };
-
-      const messages = [];
-      if (message.trim()) {
-        messages.push({
-          id: Date.now() + 1,
-          sender: 'You',
-          type: 'text',
-          text: message,
-          time: 'Just now',
-          self: true
+        const res = await fetch('http://localhost:5000/api/messages/send', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
         });
-      }
-      if (file) {
-        messages.push({
-          id: Date.now() + 2,
-          sender: 'You',
-          type: 'doc',
-          text: file.name,
-          subtext: file.size,
-          time: 'Just now',
-          self: true
-        });
-      }
 
-      setChats(prev => [newChat, ...prev]);
-      setConversations(prev => ({
-        ...prev,
-        [newId]: messages
-      }));
-      setSelectedChatId(newId);
-      setIsModalOpen(false);
+        if (res.ok) {
+            const newMsg = await res.json();
+            setIsModalOpen(false);
+            fetchChats();
+            setSelectedChatId(recipientId);
+        }
+      } catch (err) { console.error(err); }
     };
 
     const activeChat = chats.find(c => c.id === selectedChatId);
-
     const [searchTerm, setSearchTerm] = useState('');
 
     const filteredChats = chats
@@ -264,21 +277,21 @@ const TeamContact = () => {
                  <div style={{ height: '0.1vh', backgroundColor: '#1E1D22', width: '100%' }} />
               </div>
 
-              <div className="flex-1 overflow-y-auto pr-[0.4vw] custom-scrollbar">
-                 {filteredChats.map(chat => (
-                   <ChatItem 
-                      key={chat.id}
-                      name={chat.name}
-                      message={chat.lastMessage}
-                      time={chat.time}
-                      active={selectedChatId === chat.id}
-                      unread={chat.unread}
-                      onClick={() => {
-                        setSelectedChatId(chat.id);
-                        setChats(prev => prev.map(c => c.id === chat.id ? { ...c, unread: false } : c));
-                      }}
-                   />
-                 ))}
+                  <div className="flex-1 overflow-y-auto pr-[0.4vw] custom-scrollbar">
+                     {filteredChats.map(chat => (
+                       <ChatItem 
+                          key={chat.id}
+                          name={chat.name?.split('@')[0] || chat.name}
+                          message={chat.lastMessage}
+                          time={new Date(chat.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                          active={selectedChatId === chat.id}
+                          unread={chat.unread}
+                          onClick={() => {
+                            setSelectedChatId(chat.id);
+                            setChats(prev => prev.map(c => c.id === chat.id ? { ...c, unread: false } : c));
+                          }}
+                       />
+                     ))}
                  {filteredChats.length === 0 && (
                    <div className="text-center text-[#a5a5b2] py-[4vh]" style={{ fontSize: '0.8vw' }}>
                       No chats found.
@@ -294,7 +307,7 @@ const TeamContact = () => {
               <div className="flex items-center justify-between w-full">
                  <div className="flex flex-col" style={{ gap: '0.4vh' }}>
                     <h2 className="font-bold text-white m-0" style={{ fontSize: '1vw', fontFamily: 'Gilroy, Poppins, sans-serif' }}>
-                      {activeChat?.name}
+                      {activeChat?.name?.split('@')[0] || activeChat?.name}
                     </h2>
                     <div className="flex items-center" style={{ gap: '0.6vw' }}>
                        <div style={{ width: '0.2vh', height: '1.5vh', backgroundColor: '#3457DC' }} />
@@ -310,31 +323,32 @@ const TeamContact = () => {
 
               {/* Messages Area */}
               <div className="flex-1 overflow-y-auto pr-[0.5vw] custom-scrollbar" style={{ gap: '4vh', display: 'flex', flexDirection: 'column' }}>
-                 <div className="text-center text-[#a5a5b2] mb-[2vh]" style={{ fontSize: '0.7vw' }}>Conversation history with {activeChat?.name}</div>
+                 <div className="text-center text-[#a5a5b2] mb-[2vh]" style={{ fontSize: '0.7vw' }}>Conversation history with {activeChat?.name?.split('@')[0] || activeChat?.name}</div>
                  
                  {(conversations[selectedChatId] || []).map((msg, idx) => (
-                    <div key={msg.id} className={`flex flex-col w-full ${msg.self ? 'items-end' : 'items-start'}`} style={{ gap: '1vh' }}>
+                    <div key={msg.id} className={`flex flex-col w-full ${msg.self ? 'items-end' : 'items-start'}`} style={{ gap: '1vh', marginBottom: '2vh' }}>
+                       
                        {msg.type === 'doc' ? (
                           <div className="bg-[#222127] flex items-center cursor-pointer hover:bg-[#2A2A30] transition-colors" 
-                               style={{ gap: '0.8vw', padding: '1.2vh 1.2vw', borderRadius: '0.8vw', width: '22vw' }}>
+                               style={{ gap: '0.8vw', padding: '1.2vh 1.2vw', borderRadius: '0.8vw', maxWidth: '22vw' }}>
                              <svg viewBox="0 0 23 23" fill="white" style={{ width: '1.4vw', height: '1.4vw' }}>
                                 <path d={svgPaths.document} />
                              </svg>
                              <div className="flex flex-col">
-                                <span className="text-[0.8vw]">{msg.text}</span>
+                                <span className="text-[0.8vw] truncate">{msg.text}</span>
                                 <span className="text-[#a5a5b2] text-[0.7vw]">{msg.subtext}</span>
                              </div>
                           </div>
                        ) : (
                           <div className={`${msg.self ? 'bg-[#3457dc]' : 'bg-[#222127]'}`} 
-                               style={{ padding: '1.5vh 1.5vw', borderRadius: '0.8vw', width: '22vw' }}>
-                             <p className="m-0 leading-relaxed" style={{ fontSize: '0.85vw' }}>
+                               style={{ padding: '1.5vh 1.5vw', borderRadius: '0.8vw', width: 'Fit-content', maxWidth: '22vw' }}>
+                             <p className="m-0 leading-relaxed font-poppins" style={{ fontSize: '0.85vw' }}>
                                 {msg.text}
                              </p>
                           </div>
                        )}
                        <div className="flex justify-between w-[22vw]" style={{ fontSize: '0.7vw', color: '#9a9a9a' }}>
-                          <span>{msg.self ? `${chats.find(c => c.id === 1)?.name || 'You'} (${activeChat?.role})` : msg.sender}</span>
+                          <span className="font-medium">{msg.self ? 'You' : (activeChat?.name?.split('@')[0] || 'Member')}</span>
                           <span>{msg.time}</span>
                        </div>
                     </div>

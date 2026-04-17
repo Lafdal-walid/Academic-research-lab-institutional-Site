@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 // --- Asset Icons Imports ---
@@ -26,7 +26,7 @@ const AngleSmallDown = ({ color = "#3457DC" }) => (
 );
 
 // --- StatCard Component ---
-const LocalStatCard = ({ icon, title, value, width = '100%' }) => {
+const LocalStatCard = ({ icon, title, value, subValue, width = '100%' }) => {
     return (
         <div style={{
             width: width,
@@ -68,17 +68,22 @@ const LocalStatCard = ({ icon, title, value, width = '100%' }) => {
             </div>
 
             {/* Bottom Part: Value */}
-            <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'end', justifyContent: 'space-between', marginTop: '0.3vh' }}>
-                <h3 style={{ fontSize: '1.8vw', fontWeight: 500, color: 'white', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5vw' }}>
+            <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'baseline', justifyContent: 'start', marginTop: '0.3vh', gap: '0.4vw' }}>
+                <h3 style={{ fontSize: '1.8vw', fontWeight: 500, color: 'white', margin: 0 }}>
                     {value}
                 </h3>
+                {subValue && (
+                    <span style={{ fontSize: '0.9vw', fontWeight: 400, color: '#A5A5B2', fontFamily: "'Poppins', sans-serif" }}>
+                        {subValue}
+                    </span>
+                )}
             </div>
         </div>
     );
 };
 
 // --- ActivePlans Component ---
-const ActivePlans = ({ language = 'en' }) => {
+const ActivePlans = ({ language = 'en', projectStats }) => {
     const [statsMode, setStatsMode] = useState("M");
     const [currentDate, setCurrentDate] = useState(new Date(2026, 3)); // Starting at April 2026
 
@@ -105,29 +110,29 @@ const ActivePlans = ({ language = 'en' }) => {
     const t = {
         en: {
             projectHub: 'Project Hub',
-            totalValue: '12',
+            totalValue: (projectStats?.total || 0).toString(),
             totalLabel: 'Total',
             subLabel: 'Projects',
-            trendText: 'Views based on Last 2 Mounts',
-            plans: { completed: 'Completed', closed: 'Closed', inProgress: 'In Progress' }
+            trendText: 'Average Institutional Progress',
+            plans: { completed: 'Completed', closed: 'Closed / Cancelled', inProgress: 'In Progress' }
         },
         ar: {
             projectHub: 'بروجكت هوب',
-            totalValue: '12',
+            totalValue: (projectStats?.total || 0).toString(),
             totalLabel: 'إجمالي',
             subLabel: 'المشاريع',
-            trendText: 'المشاهدات بناءً على آخر شهرين',
-            plans: { completed: 'مكتمل', closed: 'مغلق', inProgress: 'قيد التنفيذ' }
+            trendText: 'متوسط التقدم المؤسسي',
+            plans: { completed: 'مكتمل', closed: 'مغلق / ملغي', inProgress: 'قيد التنفيذ' }
         }
     }[language];
 
     const data = {
-        total: 12,
-        trend: '45.65%',
+        total: projectStats?.total || 0,
+        trend: `${projectStats?.avgProgress || 0}%`,
         plans: [
-            { label: t.plans.completed, count: 5, color: "#F4C63D" },
-            { label: t.plans.closed, count: 3, color: "#3457DC" },
-            { label: t.plans.inProgress, count: 4, color: "#11CFC3" },
+            { label: t.plans.completed, count: projectStats?.completed || 0, color: "#F4C63D" },
+            { label: t.plans.closed, count: projectStats?.canceled || 0, color: "#3457DC" },
+            { label: t.plans.inProgress, count: projectStats?.ongoing || 0, color: "#11CFC3" },
         ]
     };
 
@@ -137,20 +142,22 @@ const ActivePlans = ({ language = 'en' }) => {
     const strokeWidth = 34;
     const circumference = 2 * Math.PI * radius;
 
+    const activePlans = useMemo(() => data.plans.filter(p => p.count > 0), [data.plans]);
+
     const segments = useMemo(() => {
         let currentOffset = 0;
-        const totalGap = 18 * data.plans.length;
+        const totalGap = activePlans.length > 1 ? (18 * activePlans.length) : 0;
         const availableCircumference = 360 - totalGap;
-        return data.plans.map(plan => {
-            const percentage = (plan.count / data.total);
+        return activePlans.map((plan, index) => {
+            const percentage = data.total > 0 ? (plan.count / data.total) : 0;
             const segmentAngle = percentage * availableCircumference;
             const dashLength = (segmentAngle / 360) * circumference;
             const offset = circumference - dashLength;
             const startRotation = currentOffset - 90;
-            currentOffset += segmentAngle + 18;
+            currentOffset += segmentAngle + (activePlans.length > 1 ? 18 : 0);
             return { ...plan, dashOffset: offset, rotation: startRotation };
         });
-    }, [data, circumference]);
+    }, [activePlans, data.total, circumference]);
 
     return (
         <div style={{
@@ -301,7 +308,7 @@ const ActivePlans = ({ language = 'en' }) => {
 
 
 // --- LastProjects Component ---
-const LastProjects = ({ language = 'en', style = {} }) => {
+const LastProjects = ({ language = 'en', style = {}, data = [] }) => {
     const t = {
         en: {
             lastProjects: 'Last Projects',
@@ -309,7 +316,7 @@ const LastProjects = ({ language = 'en', style = {} }) => {
             name: 'Name',
             complet: 'complet',
             approval: 'aproval',
-            outOf: 'out of 4'
+            outOf: `out of ${data.length || 0}`
         },
         ar: {
             lastProjects: 'المشاريع الأخيرة',
@@ -317,15 +324,26 @@ const LastProjects = ({ language = 'en', style = {} }) => {
             name: 'الاسم',
             complet: 'اكتمال',
             approval: 'موافقة',
-            outOf: 'من 4'
+            outOf: `من ${data.length || 0}`
         }
     }[language];
 
-    const projects = [
-        { id: 1, name: "Nature", date: "april 6 2026", complet: "4 april", approval: "6 april", img: Project1Img },
-        { id: 2, name: "Ai magasine", date: "april 6 2026", complet: "5 april", approval: "12 april", img: Project2Img },
-        { id: 3, name: "Scientific", date: "april 6 2026", complet: "6 april", approval: "13 april", img: Project3Img },
-    ];
+    const projects = data.map(p => {
+        let completLabel = 'Pending';
+        let approvalLabel = 'Review';
+        if (p.status === 'Completed') { completLabel = 'Done'; approvalLabel = 'Approved'; }
+        if (p.status === 'Suspended') { completLabel = 'Canceled'; approvalLabel = 'Denied'; }
+        if (p.status === 'Ongoing') { completLabel = 'Active'; approvalLabel = 'Processing'; }
+
+        return {
+            id: p._id,
+            name: p.title,
+            date: new Date(p.createdAt).toLocaleDateString(),
+            complet: completLabel,
+            approval: approvalLabel,
+            img: p.imageUrl ? `http://localhost:5000${p.imageUrl}` : Project1Img
+        };
+    });
 
     return (
         <div className="bg-[#151519] flex flex-col relative" style={{ padding: '2.22vh 1.25vw', borderRadius: '0.83vw', width: '100%', border: '1px solid #1E1D22', fontFamily: "'Poppins', sans-serif", ...style }}>
@@ -432,21 +450,21 @@ const LastProjects = ({ language = 'en', style = {} }) => {
         </div>
     );
 };
-const LastPublication = ({ language = 'en' }) => {
+const LastPublication = ({ language = 'en', data, avgViews = 0 }) => {
     const t = {
         en: {
             lastPublication: 'Last Publication',
             science: 'Science',
-            title: 'Attention Mechanisms',
-            date: 'April 4  28, 9:42 PM',
+            title: data?.title || 'No recent publication',
+            date: data ? new Date(data.createdAt).toLocaleString() : '',
             views: 'views',
             avgViews: 'Avg Views'
         },
         ar: {
             lastPublication: 'آخر منشور',
             science: 'علوم',
-            title: 'آليات الانتباه',
-            date: '4 أبريل 28، 9:42 مساءً',
+            title: data?.title || 'لا توجد منشورات حديثة',
+            date: data ? new Date(data.createdAt).toLocaleString() : '',
             views: 'مشاهدات',
             avgViews: 'متوسط المشاهدات'
         }
@@ -507,13 +525,13 @@ const LastPublication = ({ language = 'en' }) => {
                         <div className="flex items-center" style={{ gap: '2.75vw' }}>
                             <p className="text-white font-medium" style={{ fontSize: '0.8vw' }}>{t.views}</p>
                             <div className="bg-[#1e1e24] flex items-center justify-center rounded-full" style={{ padding: '0.51vh 0.57vw' }}>
-                                <p className="text-white" style={{ fontSize: '0.8vw' }}>100</p>
+                                <p className="text-white" style={{ fontSize: '0.8vw' }}>{data?.views || 0}</p>
                             </div>
                         </div>
                         <div className="flex items-center" style={{ gap: '2.75vw' }}>
                             <p className="text-white font-medium" style={{ fontSize: '0.8vw' }}>{t.avgViews}</p>
                             <div className="bg-[#043d37] flex items-center justify-center rounded-full" style={{ padding: '0.51vh 0.57vw' }}>
-                                <p className="text-[#01cbb1]" style={{ fontSize: '0.69vw' }}>60</p>
+                                <p className="text-[#01cbb1]" style={{ fontSize: '0.69vw' }}>{avgViews}</p>
                             </div>
                         </div>
                     </div>
@@ -526,35 +544,32 @@ const LastPublication = ({ language = 'en' }) => {
 
 
 // --- PublicationsAnalysis Component ---
-const PublicationsAnalysis = ({ language = 'en' }) => {
+const PublicationsAnalysis = ({ language = 'en', data = [], avg = 0, currentPeriod = 6 }) => {
+    const [showDropdown, setShowDropdown] = useState(false);
     const [selectedBar, setSelectedBar] = useState(0);
 
     const t = {
         en: {
             title: 'Publications',
-            subtitle: '3 Publications ( Monthly average )',
-            period: 'Last Month',
+            subtitle: `${avg} Publications ( Monthly average )`,
             label: ' Publications',
-            months: ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July']
+            months: data.map(d => d.month),
+            periods: { 3: 'Last 3 Months', 6: 'Last 6 Months', 12: 'Last Year' }
         },
         ar: {
             title: 'المنشورات',
-            subtitle: '3 منشورات (متوسط شهري)',
-            period: 'الشهر الماضي',
+            subtitle: `${avg} منشورات (متوسط شهري)`,
             label: ' منشورات',
-            months: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو']
+            months: data.map(d => d.month),
+            periods: { 3: 'آخر 3 أشهر', 6: 'آخر 6 أشهر', 12: 'آخر سنة' }
         }
     }[language];
 
-    const barData = [
-        { h: 15.4, value: 7 },
-        { h: 52.6, value: 3 },
-        { h: 51.1, value: 4 },
-        { h: 45.3, value: 5 },
-        { h: 41.5, value: 5 },
-        { h: 35.2, value: 6 },
-        { h: 35.2, value: 6 },
-    ];
+    const maxCount = Math.max(...data.map(d => d.count), 1);
+    const barData = data.map(d => ({
+        h: 100 - ((d.count / maxCount) * 80), // Scaling height, 80% max for padding
+        value: d.count
+    }));
 
     return (
         <div className="bg-[#151519] flex flex-col relative" style={{ padding: '2.78vh 1.25vw', borderRadius: '0.83vw', width: '100%', border: '1px solid #1E1D22', fontFamily: "'Poppins', sans-serif" }}>
@@ -568,20 +583,43 @@ const PublicationsAnalysis = ({ language = 'en' }) => {
                         {t.subtitle}
                     </p>
                 </div>
-                <div className="bg-[#1e1e24] flex items-center relative" style={{ gap: '0.625vw', padding: '1.16vh 0.83vw', borderRadius: '0.625vw' }}>
-                    <div className="flex items-center justify-center -rotate-90 -scale-y-100" style={{ width: '1.04vw', height: '1.04vw' }}>
-                        <svg className="size-full" fill="none" viewBox="0 0 20 20">
-                            <path d="M15.8842 6.545C15.7681 6.42884 15.6302 6.3367 15.4785 6.27383C15.3268 6.21096 15.1642 6.1786 15 6.1786C14.8358 6.1786 14.6732 6.21096 14.5215 6.27383C14.3698 6.3367 14.2319 6.42884 14.1158 6.545L10.2942 10.3658C10.216 10.4439 10.1101 10.4878 9.99958 10.4878C9.8891 10.4878 9.78314 10.4439 9.705 10.3658L5.88417 6.545C5.64978 6.3105 5.33184 6.17872 5.00029 6.17864C4.66875 6.17857 4.35075 6.3102 4.11625 6.54458C3.88175 6.77897 3.74997 7.09691 3.74989 7.42846C3.74982 7.76 3.88145 8.078 4.11583 8.3125L7.9375 12.1342C8.20834 12.405 8.52989 12.6199 8.88377 12.7665C9.23766 12.9131 9.61695 12.9885 10 12.9885C10.383 12.9885 10.7623 12.9131 11.1162 12.7665C11.4701 12.6199 11.7917 12.405 12.0625 12.1342L15.8842 8.3125C16.1185 8.07809 16.2502 7.76021 16.2502 7.42875C16.2502 7.0973 16.1185 6.77941 15.8842 6.545Z" fill="#3457DC" />
-                        </svg>
+                <div className="relative">
+                    <div 
+                        className="bg-[#1e1e24] flex items-center relative cursor-pointer hover:bg-[#2a2a30] transition-colors" 
+                        style={{ gap: '0.625vw', padding: '1.16vh 0.83vw', borderRadius: '0.625vw' }}
+                        onClick={() => setShowDropdown(!showDropdown)}
+                    >
+                        <div className="flex items-center justify-center -rotate-90 -scale-y-100" style={{ width: '1.04vw', height: '1.04vw' }}>
+                            <svg className="size-full" fill="none" viewBox="0 0 20 20">
+                                <path d="M15.8842 6.545C15.7681 6.42884 15.6302 6.3367 15.4785 6.27383C15.3268 6.21096 15.1642 6.1786 15 6.1786C14.8358 6.1786 14.6732 6.21096 14.5215 6.27383C14.3698 6.3367 14.2319 6.42884 14.1158 6.545L10.2942 10.3658C10.216 10.4439 10.1101 10.4878 9.99958 10.4878C9.8891 10.4878 9.78314 10.4439 9.705 10.3658L5.88417 6.545C5.64978 6.3105 5.33184 6.17872 5.00029 6.17864C4.66875 6.17857 4.35075 6.3102 4.11625 6.54458C3.88175 6.77897 3.74997 7.09691 3.74989 7.42846C3.74982 7.76 3.88145 8.078 4.11583 8.3125L7.9375 12.1342C8.20834 12.405 8.52989 12.6199 8.88377 12.7665C9.23766 12.9131 9.61695 12.9885 10 12.9885C10.383 12.9885 10.7623 12.9131 11.1162 12.7665C11.4701 12.6199 11.7917 12.405 12.0625 12.1342L15.8842 8.3125C16.1185 8.07809 16.2502 7.76021 16.2502 7.42875C16.2502 7.0973 16.1185 6.77941 15.8842 6.545Z" fill="#3457DC" />
+                            </svg>
+                        </div>
+                        <p className="text-white whitespace-nowrap" style={{ fontSize: '0.8vw' }}>
+                            {t.periods[currentPeriod] || t.periods[6]}
+                        </p>
+                        <div className="flex items-center justify-center -rotate-90" style={{ width: '1.04vw', height: '1.04vw' }}>
+                            <svg className="size-full" fill="none" viewBox="0 0 20 20">
+                                <path d="M15.8842 6.545C15.7681 6.42884 15.6302 6.3367 15.4785 6.27383C15.3268 6.21096 15.1642 6.1786 15 6.1786C14.8358 6.1786 14.6732 6.21096 14.5215 6.27383C14.3698 6.3367 14.2319 6.42884 14.1158 6.545L10.2942 10.3658C10.216 10.4439 10.1101 10.4878 9.99958 10.4878C9.8891 10.4878 9.78314 10.4439 9.705 10.3658L5.88417 6.545C5.64978 6.3105 5.33184 6.17872 5.00029 6.17864C4.66875 6.17857 4.35075 6.3102 4.11625 6.54458C3.88175 6.77897 3.74997 7.09691 3.74989 7.42846C3.74982 7.76 3.88145 8.078 4.11583 8.3125L7.9375 12.1342C8.20834 12.405 8.52989 12.6199 8.88377 12.7665C9.23766 12.9131 9.61695 12.9885 10 12.9885C10.383 12.9885 10.7623 12.9131 11.1162 12.7665C11.4701 12.6199 11.7917 12.405 12.0625 12.1342L15.8842 8.3125C16.1185 8.07809 16.2502 7.76021 16.2502 7.42875C16.2502 7.0973 16.1185 6.77941 15.8842 6.545Z" fill="#3457DC" />
+                            </svg>
+                        </div>
                     </div>
-                    <p className="text-white whitespace-nowrap" style={{ fontSize: '0.8vw' }}>
-                        {t.period}
-                    </p>
-                    <div className="flex items-center justify-center -rotate-90" style={{ width: '1.04vw', height: '1.04vw' }}>
-                        <svg className="size-full" fill="none" viewBox="0 0 20 20">
-                            <path d="M15.8842 6.545C15.7681 6.42884 15.6302 6.3367 15.4785 6.27383C15.3268 6.21096 15.1642 6.1786 15 6.1786C14.8358 6.1786 14.6732 6.21096 14.5215 6.27383C14.3698 6.3367 14.2319 6.42884 14.1158 6.545L10.2942 10.3658C10.216 10.4439 10.1101 10.4878 9.99958 10.4878C9.8891 10.4878 9.78314 10.4439 9.705 10.3658L5.88417 6.545C5.64978 6.3105 5.33184 6.17872 5.00029 6.17864C4.66875 6.17857 4.35075 6.3102 4.11625 6.54458C3.88175 6.77897 3.74997 7.09691 3.74989 7.42846C3.74982 7.76 3.88145 8.078 4.11583 8.3125L7.9375 12.1342C8.20834 12.405 8.52989 12.6199 8.88377 12.7665C9.23766 12.9131 9.61695 12.9885 10 12.9885C10.383 12.9885 10.7623 12.9131 11.1162 12.7665C11.4701 12.6199 11.7917 12.405 12.0625 12.1342L15.8842 8.3125C16.1185 8.07809 16.2502 7.76021 16.2502 7.42875C16.2502 7.0973 16.1185 6.77941 15.8842 6.545Z" fill="#3457DC" />
-                        </svg>
-                    </div>
+
+                    {showDropdown && (
+                        <div className="absolute top-full right-0 mt-2 w-full bg-[#1e1e24] border border-[#2a2a30] rounded-[0.625vw] shadow-xl z-50 overflow-hidden">
+                            {[3, 6, 12].map(p => (
+                                <div 
+                                    key={p} 
+                                    className="px-[0.83vw] py-[1vh] hover:bg-white/5 cursor-pointer text-white text-[0.8vw]"
+                                    onClick={() => {
+                                        window.dispatchEvent(new CustomEvent('changePubPeriod', { detail: p }));
+                                        setShowDropdown(false);
+                                    }}
+                                >
+                                    {t.periods[p]}
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -602,7 +640,7 @@ const PublicationsAnalysis = ({ language = 'en' }) => {
                             <div
                                 className="absolute bg-[#3457dc] opacity-80 transition-all duration-300"
                                 style={{
-                                    inset: `${data.h}% 0.4vw 0 0.4vw`,
+                                    inset: `${data.h === 100 ? 98 : data.h}% 0.4vw 0 0.4vw`,
                                     borderTopLeftRadius: '0.42vw',
                                     borderTopRightRadius: '0.42vw'
                                 }}
@@ -634,6 +672,43 @@ const PublicationsAnalysis = ({ language = 'en' }) => {
 
 const Overview = () => {
     const { language } = useLanguage();
+    const [period, setPeriod] = useState(6);
+    const [stats, setStats] = useState({
+        members: 0,
+        publications: 0,
+        projects: 0,
+        views: 0,
+        lastPublication: null,
+        lastProjects: [],
+        monthlyStats: [],
+        avgMonthly: 0,
+        avgViews: 0,
+        teamName: ""
+    });
+
+    useEffect(() => {
+        const handlePeriodChange = (e) => setPeriod(e.detail);
+        window.addEventListener('changePubPeriod', handlePeriodChange);
+        return () => window.removeEventListener('changePubPeriod', handlePeriodChange);
+    }, []);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`http://localhost:5000/api/stats/overview?period=${period}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setStats(data);
+                }
+            } catch (error) {
+                console.error('Error fetching stats:', error);
+            }
+        };
+        fetchStats();
+    }, [period]);
 
     return (
         <div className="w-full text-white font-poppins pb-10 animate-in fade-in duration-500">
@@ -646,23 +721,24 @@ const Overview = () => {
                 minHeight: 'fit-content'
             }}>
                 <LocalStatCard
-                    title="Team members"
-                    value="7"
+                    title={stats.teamName || "Team members"}
+                    value={stats.members.toString()}
+                    subValue="Members"
                     icon={<img src={TeamIcon} alt="Team" className="w-[1.25vw] h-[1.25vw] object-contain" />}
                 />
                 <LocalStatCard
                     title="Publications"
-                    value="120"
+                    value={stats.publications.toString()}
                     icon={<img src={PublicationsIcon} alt="Publications" className="w-[1.25vw] h-[1.25vw] object-contain" />}
                 />
                 <LocalStatCard
                     title="Projects"
-                    value="4"
+                    value={stats.projects.toString()}
                     icon={<img src={ProjectsIcon} alt="Projects" className="w-[1.25vw] h-[1.25vw] object-contain" />}
                 />
                 <LocalStatCard
                     title="Engagement"
-                    value="8 Views"
+                    value={`${stats.views} Views`}
                     icon={<img src={EngagementIcon} alt="Engagement" className="w-[1.25vw] h-[1.25vw] object-contain" />}
                 />
             </div>
@@ -679,14 +755,14 @@ const Overview = () => {
             <div className="mt-[6vh] w-full grid grid-cols-1 md:grid-cols-12 gap-[1vw] items-start">
                 {/* Left Column: Project Hub + Last Projects - Spans 5 columns */}
                 <div className="md:col-span-12 lg:col-span-5 flex flex-col gap-[1vw]">
-                    <ActivePlans language={language} />
-                    <LastProjects language={language} />
+                    <ActivePlans language={language} projectStats={stats.projectStats} />
+                    <LastProjects language={language} data={stats.lastProjects} />
                 </div>
 
                 {/* Right Column: Last Publication - Spans 7 columns */}
                 <div className="md:col-span-12 lg:col-span-7 flex flex-col gap-[1vw]">
-                    <LastPublication language={language} />
-                    <PublicationsAnalysis language={language} />
+                    <LastPublication language={language} data={stats.lastPublication} avgViews={stats.avgViews} />
+                    <PublicationsAnalysis language={language} data={stats.monthlyStats} avg={stats.avgMonthly} currentPeriod={period} />
                 </div>
             </div>
 

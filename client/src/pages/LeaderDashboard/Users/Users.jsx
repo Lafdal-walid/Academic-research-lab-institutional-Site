@@ -233,7 +233,8 @@ const ManageUsersTable = () => {
 
     // --- Filter and Sort Logic ---
     const filteredUsers = React.useMemo(() => {
-        let result = [...users];
+        // Exclude admin and superadmin from this table
+        let result = users.filter(u => u.role !== 'admin' && u.role !== 'superadmin');
 
         // Search
         if (searchTerm) {
@@ -360,7 +361,7 @@ const ManageUsersTable = () => {
                 {/* Dropdowns */}
                 {[
                     { id: 'sort', current: selectedSort, options: ['Newest first', 'Oldest first'], setter: setSelectedSort },
-                    { id: 'role', current: selectedRole, options: ['By Role', 'guest', 'user', 'admin', 'superadmin'], setter: setSelectedRole },
+                    { id: 'role', current: selectedRole, options: ['By Role', 'guest', 'user'], setter: setSelectedRole },
                     { id: 'team', current: selectedTeam, options: availableTeams, setter: setSelectedTeam },
                     { id: 'status', current: selectedStatus, options: ['Status', 'In Project', 'Without Project'], setter: setSelectedStatus }
                 ].map(drop => (
@@ -533,6 +534,7 @@ const ManageUsersTable = () => {
                 onClose={() => setIsChangeRoleModalOpen(false)}
                 user={selectedUser}
                 onUpdate={handleRoleUpdate}
+                allowedRoles={['guest', 'user']}
             />
 
             <AssignTeamModal

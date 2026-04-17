@@ -1,32 +1,83 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RiCloseLine, RiEyeLine, RiEyeOffLine, RiArrowDownSLine } from 'react-icons/ri';
+import { RiCloseLine, RiSearch2Line, RiArrowDownSLine, RiUserAddLine } from 'react-icons/ri';
 
 const AddAdminModal = ({ isOpen, onClose, onAdd }) => {
-    const [email, setEmail] = useState('');
-    const [name, setName] = useState('');
+    const [users, setUsers] = useState([]);
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
     const [role, setRole] = useState('Select a role');
-    const [password, setPassword] = useState('Xq7f1gZ9wA2@');
-    const [showPassword, setShowPassword] = useState(false);
+    const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
     const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
-    if (!isOpen) return null;
+    const dropdownRef = useRef(null);
 
-    const handleCreate = () => {
-        if (onAdd) {
-            onAdd({ name, email, role });
-            // Reset for next time
-            setEmail('');
-            setName('');
+    useEffect(() => {
+        if (isOpen) {
+            fetchUsers();
+        } else {
+            // Reset state on close
+            setSelectedUser(null);
+            setSearchTerm('');
             setRole('Select a role');
+        }
+    }, [isOpen]);
+
+    const fetchUsers = async () => {
+        setIsLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('http://localhost:5000/api/auth/admin/users', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                // Filter out existing admins
+                setUsers(data.filter(u => u.role === 'guest' || u.role === 'user'));
+            }
+        } catch (err) { console.error(err); }
+        finally { setIsLoading(false); }
+    };
+
+    const handlePromote = async () => {
+        if (!selectedUser || role === 'Select a role') return;
+        
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`http://localhost:5000/api/auth/admin/users/${selectedUser._id}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ role })
+            });
+            
+            if (res.ok) {
+                onAdd && onAdd();
+                onClose();
+            } else {
+                const data = await res.json();
+                alert(data.message || 'Promotion failed');
+            }
+        } catch (err) {
+            alert('Connection failed');
         }
     };
 
-    const isFormValid = email.trim() !== '' && name.trim() !== '' && role !== 'Select a role';
+    const filteredUsers = users.filter(u => 
+        u.username.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        u.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    if (!isOpen) return null;
+
+    const isFormValid = selectedUser && role !== 'Select a role';
 
     return (
         <AnimatePresence>
-            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+            <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
                 <motion.div 
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -48,52 +99,108 @@ const AddAdminModal = ({ isOpen, onClose, onAdd }) => {
 
                     {/* Description */}
                     <p className="font-['Poppins',sans-serif] text-[14px] text-[#a5a5b2] w-full leading-[1.6]">
-                        Add a new Leader by setting their login details and access.
+                         Add a new Leader by promoting an existing member.
                     </p>
 
                     {/* Form Fields */}
-                    <div className="flex flex-col gap-[20px] items-start w-full">
-                        {/* Admin Email */}
-                        <div className="flex flex-col gap-[12px] w-full">
+                    <div className="flex flex-col gap-[20px] items-start w-full" ref={dropdownRef}>
+                        {/* Search/Select User */}
+                        <div className="flex flex-col gap-[12px] w-full relative">
+                            <label className="font-['Poppins',sans-serif] text-[#80808a] text-[14px]">Search Member</label>
+                            <div 
+                                className={`bg-[rgba(255,255,255,0.01)] h-[41px] relative rounded-[8px] w-full border ${isUserDropdownOpen ? 'border-[#3457DC]' : 'border-[#2a2a30]'} px-[14px] flex items-center justify-between cursor-pointer transition-colors`}
+                                onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                            >
+                                <span className={`${!selectedUser ? 'text-[#a5a5b2]' : 'text-white'} text-[14px] font-['Poppins',sans-serif]`}>
+                                    {selectedUser ? selectedUser.username : 'Search /'}
+                                </span>
+                                <RiArrowDownSLine className={`text-[#3457DC] transition-transform ${isUserDropdownOpen ? 'rotate-180' : ''}`} size="20px" />
+                            </div>
+                            
+                            <AnimatePresence>
+                                {isUserDropdownOpen && (
+                                    <motion.div 
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        className="absolute top-[100%] left-0 right-0 mt-2 bg-[#1e1e24] border border-[#2a2a30] rounded-[8px] overflow-hidden z-[110] shadow-2xl flex flex-col"
+                                    >
+                                        <div className="p-3 border-b border-[#2a2a30] flex items-center gap-2">
+                                            <RiSearch2Line className="text-[#3457DC]" />
+                                            <input 
+                                                autoFocus
+                                                type="text"
+                                                placeholder="Type to search..."
+                                                className="bg-transparent border-none outline-none text-white text-[14px] w-full"
+                                                value={searchTerm}
+                                                onChange={(e) => setSearchTerm(e.target.value)}
+                                                onClick={(e) => e.stopPropagation()}
+                                            />
+                                        </div>
+                                        <div className="max-h-[200px] overflow-y-auto custom-scrollbar">
+                                            {isLoading ? (
+                                                <div className="p-4 text-center text-[#a5a5b2] text-[13px]">Loading...</div>
+                                            ) : filteredUsers.length === 0 ? (
+                                                <div className="p-4 text-center text-[#a5a5b2] text-[13px]">No members found</div>
+                                            ) : (
+                                                filteredUsers.map((u) => (
+                                                    <div 
+                                                        key={u._id}
+                                                        className="px-[14px] py-[10px] hover:bg-[#3457DC] cursor-pointer transition-colors flex flex-col gap-1"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setSelectedUser(u);
+                                                            setIsUserDropdownOpen(false);
+                                                        }}
+                                                    >
+                                                        <span className="text-white text-[14px]">{u.username}</span>
+                                                        <span className="text-[#a5a5b2] text-[12px]">{u.email}</span>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+
+                        {/* Admin Email (Readonly Display) */}
+                        <div className="flex flex-col gap-[12px] w-full opacity-60">
                             <label className="font-['Poppins',sans-serif] text-[#80808a] text-[14px]">Admin Email</label>
-                            <div className="bg-[rgba(255,255,255,0.01)] h-[41px] relative rounded-[8px] w-full border border-[#2a2a30] px-[14px] flex items-center focus-within:border-[#3457DC] transition-colors">
+                            <div className="bg-[rgba(255,255,255,0.01)] h-[41px] relative rounded-[8px] w-full border border-[#2a2a30] px-[14px] flex items-center">
                                 <input 
-                                    type="email" 
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    type="text" 
+                                    readOnly 
+                                    value={selectedUser?.email || ''} 
                                     placeholder="e.g walid@email.com"
                                     className="bg-transparent border-none outline-none text-white w-full text-[14px] font-['Poppins',sans-serif] placeholder:text-[#a5a5b2]"
                                 />
                             </div>
                         </div>
 
-                        {/* Full Name */}
-                        <div className="flex flex-col gap-[12px] w-full">
+                        {/* Full Name (Readonly Display) */}
+                        <div className="flex flex-col gap-[12px] w-full opacity-60">
                             <label className="font-['Poppins',sans-serif] text-[#80808a] text-[14px]">Full Name</label>
-                            <div className="bg-[rgba(255,255,255,0.01)] h-[41px] relative rounded-[8px] w-full border border-[#2a2a30] px-[14px] flex items-center focus-within:border-[#3457DC] transition-colors">
+                            <div className="bg-[rgba(255,255,255,0.01)] h-[41px] relative rounded-[8px] w-full border border-[#2a2a30] px-[14px] flex items-center">
                                 <input 
                                     type="text" 
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
+                                    readOnly 
+                                    value={selectedUser?.username || ''} 
                                     placeholder="e.g walid barka"
                                     className="bg-transparent border-none outline-none text-white w-full text-[14px] font-['Poppins',sans-serif] placeholder:text-[#a5a5b2]"
                                 />
                             </div>
                         </div>
 
-                        {/* Role */}
+                        {/* Role Selection */}
                         <div className="flex flex-col gap-[12px] w-full relative">
                             <label className="font-['Poppins',sans-serif] text-[#80808a] text-[14px]">Role</label>
                             <div 
                                 className={`bg-[rgba(255,255,255,0.01)] h-[41px] relative rounded-[8px] w-full border ${isRoleDropdownOpen ? 'border-[#3457DC]' : 'border-[#2a2a30]'} px-[14px] flex items-center justify-between cursor-pointer transition-colors`}
                                 onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
                             >
-                                <span className={`${role === 'Select a role' ? 'text-[#a5a5b2]' : 'text-white'} text-[14px] font-['Poppins',sans-serif]`}>{role}</span>
-                                <div className={`text-[#3457DC] transition-transform duration-300 ${isRoleDropdownOpen ? 'rotate-180' : ''}`}>
-                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                        <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                    </svg>
-                                </div>
+                                <span className={`${role === 'Select a role' ? 'text-[#a5a5b2]' : 'text-white'} text-[14px] font-['Poppins',sans-serif] capitalize`}>{role}</span>
+                                <RiArrowDownSLine className={`text-[#3457DC] transition-transform ${isRoleDropdownOpen ? 'rotate-180' : ''}`} size="20px" />
                             </div>
                             <AnimatePresence>
                                 {isRoleDropdownOpen && (
@@ -103,16 +210,17 @@ const AddAdminModal = ({ isOpen, onClose, onAdd }) => {
                                         exit={{ opacity: 0, y: -10 }}
                                         className="absolute top-[100%] left-0 right-0 mt-2 bg-[#1e1e24] border border-[#2a2a30] rounded-[8px] overflow-hidden z-[110] shadow-2xl"
                                     >
-                                        {['guest', 'user', 'admin', 'superadmin'].map((option) => (
+                                        {['admin', 'superadmin'].map((opt) => (
                                             <div 
-                                                key={option}
-                                                className="px-[14px] py-[10px] text-white text-[14px] font-['Poppins',sans-serif] hover:bg-[#3457DC] cursor-pointer transition-colors"
-                                                onClick={() => {
-                                                    setRole(option);
+                                                key={opt}
+                                                className="px-[14px] py-[10px] text-white text-[14px] font-['Poppins',sans-serif] hover:bg-[#3457DC] cursor-pointer transition-colors capitalize"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setRole(opt);
                                                     setIsRoleDropdownOpen(false);
                                                 }}
                                             >
-                                                {option}
+                                                {opt}
                                             </div>
                                         ))}
                                     </motion.div>
@@ -120,35 +228,18 @@ const AddAdminModal = ({ isOpen, onClose, onAdd }) => {
                             </AnimatePresence>
                         </div>
 
-                        {/* Set Password */}
-                        <div className="flex flex-col gap-[12px] w-full">
-                            <label className="font-['Poppins',sans-serif] text-[#80808a] text-[14px]">Set Password</label>
-                            <div className="bg-[rgba(255,255,255,0.01)] h-[41px] relative rounded-[8px] w-full border border-[#2a2a30] px-[14px] flex items-center justify-between focus-within:border-[#3457DC] transition-colors">
-                                <input 
-                                    type={showPassword ? "text" : "password"}
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="bg-transparent border-none outline-none text-white text-[14px] font-['Poppins',sans-serif] w-full"
-                                />
-                                <div 
-                                    className="text-[#3457DC] cursor-pointer"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                >
-                                    {showPassword ? <RiEyeLine size="20px" /> : <RiEyeOffLine size="20px" />}
-                                </div>
+                        {/* Note */}
+                        <div className="flex gap-[8px] items-start w-full opacity-70 mt-2">
+                            <div className="text-[#A5A5B2] mt-[2px]">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                    <path d="M8 14.6667C11.6819 14.6667 14.6667 11.6819 14.6667 8C14.6667 4.3181 11.6819 1.33333 8 1.33333C4.3181 1.33333 1.33333 4.3181 1.33333 8C1.33333 11.6819 4.3181 14.6667 8 14.6667Z" stroke="currentColor" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M8 10.6667V8" stroke="currentColor" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M8 5.33333H8.00667" stroke="currentColor" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
                             </div>
-                            <div className="flex gap-[8px] items-start w-full">
-                                <div className="text-[#A5A5B2] mt-[2px]">
-                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                        <path d="M8 14.6667C11.6819 14.6667 14.6667 11.6819 14.6667 8C14.6667 4.3181 11.6819 1.33333 8 1.33333C4.3181 1.33333 1.33333 4.3181 1.33333 8C1.33333 11.6819 4.3181 14.6667 8 14.6667Z" stroke="currentColor" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round"/>
-                                        <path d="M8 10.6667V8" stroke="currentColor" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round"/>
-                                        <path d="M8 5.33333H8.00667" stroke="currentColor" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round"/>
-                                    </svg>
-                                </div>
-                                <p className="font-['Poppins',sans-serif] text-[#a5a5b2] text-[12px] flex-1">
-                                    A secure password has been generated. You can replace it before saving.
-                                </p>
-                            </div>
+                            <p className="font-['Poppins',sans-serif] text-[#a5a5b2] text-[12px] flex-1">
+                                Promoting a user will give them access to administrative tools immediately. They will use their existing password to log in.
+                            </p>
                         </div>
 
                         {/* Buttons */}
@@ -160,7 +251,7 @@ const AddAdminModal = ({ isOpen, onClose, onAdd }) => {
                                 Cancel
                             </button>
                             <button 
-                                onClick={handleCreate}
+                                onClick={handlePromote}
                                 className={`flex-1 ${isFormValid ? 'bg-[#3457DC] text-white hover:bg-[#4a6dec]' : 'bg-[#1e1e24] text-[#373735] cursor-not-allowed'} h-[50px] rounded-[16px] font-['Poppins',sans-serif] font-medium text-[14px] transition-all`}
                                 disabled={!isFormValid}
                             >

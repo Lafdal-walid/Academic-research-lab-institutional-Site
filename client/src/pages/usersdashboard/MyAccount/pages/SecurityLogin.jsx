@@ -44,6 +44,45 @@ export default function SecurityLogin() {
     const [showPassword, setShowPassword] = useState({ current: false, new: false });
     const [hasActiveSubscription, setHasActiveSubscription] = useState(true);
 
+    const [passwordData, setPasswordData] = useState({
+        currentPassword: '',
+        newPassword: ''
+    });
+    const [passwordMessage, setPasswordMessage] = useState({ type: '', text: '' });
+
+    const handlePasswordChange = async () => {
+        if (!passwordData.currentPassword || !passwordData.newPassword) {
+            setPasswordMessage({ type: 'error', text: t('fields_required') || 'Both fields are required' });
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('http://localhost:5000/api/auth/change-password', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    currentPassword: passwordData.currentPassword,
+                    newPassword: passwordData.newPassword
+                })
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                setPasswordMessage({ type: 'success', text: t('password_updated') || 'Password updated successfully' });
+                setPasswordData({ currentPassword: '', newPassword: '' });
+                setTimeout(() => setPasswordMessage({ type: '', text: '' }), 5000);
+            } else {
+                setPasswordMessage({ type: 'error', text: data.message || 'Failed to update password' });
+            }
+        } catch (error) {
+            setPasswordMessage({ type: 'error', text: 'Server error' });
+        }
+    };
+
     return (
         <>
             <style>{`
@@ -408,6 +447,8 @@ export default function SecurityLogin() {
                                             type={showPassword.current ? "text" : "password"}
                                             placeholder={t('enter_password')}
                                             className="security-input"
+                                            value={passwordData.currentPassword}
+                                            onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
                                         />
                                         <button onClick={() => setShowPassword({ ...showPassword, current: !showPassword.current })} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>
                                             <img
@@ -432,6 +473,8 @@ export default function SecurityLogin() {
                                             type={showPassword.new ? "text" : "password"}
                                             placeholder={t('enter_new_password')}
                                             className="security-input"
+                                            value={passwordData.newPassword}
+                                            onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
                                         />
                                         <button onClick={() => setShowPassword({ ...showPassword, new: !showPassword.new })} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>
                                             <img
@@ -450,8 +493,14 @@ export default function SecurityLogin() {
                             </div>
                         </div>
 
+                        {passwordMessage.text && (
+                            <p style={{ color: passwordMessage.type === 'error' ? theme.error : '#4caf50', fontSize: '14px', fontFamily: 'Poppins, sans-serif', marginTop: '10px' }}>
+                                {passwordMessage.text}
+                            </p>
+                        )}
+
                         {/* Save changes button */}
-                        <button className="security-btn-save">
+                        <button className="security-btn-save" onClick={handlePasswordChange}>
                             <p>{t('save_changes')}</p>
                         </button>
 

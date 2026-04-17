@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Link } from 'react-router-dom';
@@ -27,11 +28,35 @@ const theme = {
     hoverBg: '#2a2a30',
 };
 
+const APP_COUNTRIES = [
+    { name: 'Algeria', code: '+213' },
+    { name: 'Saudi Arabia', code: '+966' },
+    { name: 'Egypt', code: '+20' },
+    { name: 'United Arab Emirates', code: '+971' },
+    { name: 'United States', code: '+1' },
+    { name: 'United Kingdom', code: '+44' },
+    { name: 'France', code: '+33' },
+    { name: 'Germany', code: '+49' },
+    { name: 'Canada', code: '+1' },
+    { name: 'Australia', code: '+61' },
+    { name: 'Morocco', code: '+212' },
+    { name: 'Tunisia', code: '+216' },
+    { name: 'Qatar', code: '+974' },
+    { name: 'Kuwait', code: '+965' },
+    { name: 'Oman', code: '+968' },
+    { name: 'Bahrain', code: '+973' },
+    { name: 'Jordan', code: '+962' },
+    { name: 'Lebanon', code: '+961' },
+    { name: 'Palestine', code: '+970' },
+    { name: 'Iraq', code: '+964' },
+    { name: 'Syria', code: '+963' },
+    { name: 'Yemen', code: '+967' },
+];
+
 export default function PersonalInfo() {
     const { language } = useLanguage();
     const { t } = useTranslation('personalInfo');
-    const rawCountries = t('countries');
-    const countries = Array.isArray(rawCountries) ? rawCountries : [];
+    const countries = APP_COUNTRIES;
     const isRTL = language === 'ar';
 
     const [profileImageUrl, setProfileImageUrl] = useState(profilePic);
@@ -77,16 +102,34 @@ export default function PersonalInfo() {
         c.name.toLowerCase().includes(countrySearch.toLowerCase())
     );
 
+    const { user, setUser } = useAuth();
+
     const [formData, setFormData] = useState({
-        firstName: 'Mohamed',
-        lastName: 'bnl',
-        username: 'Moes r',
-        email: 'Moes@iq.com',
-        country: 'Saudi arabia',
-        countryCode: '+966',
-        phone: '5487154547',
-        googleEmail: 'Moes bn@gmail.com'
+        firstName: '',
+        lastName: '',
+        username: '',
+        email: '',
+        country: '',
+        countryCode: '',
+        phone: '',
+        googleEmail: ''
     });
+
+    useEffect(() => {
+        if (user) {
+            setFormData({
+                firstName: user.firstName || '',
+                lastName: user.lastName || '',
+                username: user.username || '',
+                email: user.email || '',
+                country: user.country || '',
+                countryCode: APP_COUNTRIES.find(c => c.name === user.country)?.code || '',
+                phone: user.phoneNumber || '',
+                googleEmail: ''
+            });
+        }
+    }, [user]);
+
     const displayCountry = countries.find(c => c.code === formData?.countryCode)?.name || formData?.country;
 
 
@@ -96,6 +139,44 @@ export default function PersonalInfo() {
             setFormData(prev => ({ ...prev, email: confirmedEmail }));
         }
     }, [confirmedEmail]);
+
+    const handleSaveProfile = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('http://localhost:5000/api/auth/profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    username: formData.username,
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    email: formData.email,
+                    phoneNumber: formData.phone,
+                    country: formData.country,
+                })
+            });
+
+            if (res.ok) {
+                const updatedUser = await res.json();
+                if (setUser) {
+                    setUser(updatedUser);
+                    localStorage.setItem('user', JSON.stringify(updatedUser));
+                }
+                setShowSavedFeedback(true);
+                setTimeout(() => setShowSavedFeedback(false), 3000);
+            } else {
+                const data = await res.json();
+                console.error(data.message);
+                alert(data.message || 'Failed to update profile');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error connecting to server');
+        }
+    };
 
     return (
         <div className="w-full flex-1">
@@ -507,7 +588,7 @@ export default function PersonalInfo() {
                         gap: 1.7vh;
                     }
                     .country-row {
-                        width: 50%;
+                        width: 100%;
                     }
                 }
 
@@ -566,6 +647,7 @@ export default function PersonalInfo() {
                     align-items: center;
                     justify-content: space-between;
                     position: relative;
+                    flex: 1;
                 }
 
                 .custom-input input, .custom-input select {
@@ -588,6 +670,9 @@ export default function PersonalInfo() {
                 .dropdown-container {
                     position: relative;
                     width: 100%;
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
                 }
                 .dropdown-list {
                     position: absolute;
@@ -687,6 +772,7 @@ export default function PersonalInfo() {
                     display: flex;
                     gap: 8px;
                     align-items: center;
+                    flex: 1;
                 }
 
                 .divider-v {
@@ -1199,10 +1285,7 @@ height: 1.92vh;                    }
                         <button
                             type="button"
                             className={`edit-btn ${showSavedFeedback ? 'success' : ''}`}
-                            onClick={() => {
-                                // Trigger 'edited' feedback without timeout
-                                setShowSavedFeedback(true);
-                            }}
+                            onClick={handleSaveProfile}
                         >
                             <p>{showSavedFeedback ? (isRTL ? 'تم الحفظ' : t('edited')) : (isRTL ? 'تعديل' : t('edit'))}</p>
                             <img src={showSavedFeedback ? trueIcon : editIcon} alt="Edit" />

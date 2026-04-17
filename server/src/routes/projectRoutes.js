@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-const { getProjects, createProject, addMilestone } = require('../controllers/projectController');
+const { getProjects, createProject, addMilestone, updateProject } = require('../controllers/projectController');
 const { protect } = require('../midddlewares/authMiddleware');
 
 const storage = multer.diskStorage({
@@ -30,6 +30,7 @@ const upload = multer({
 
 router.get('/', protect, getProjects);
 router.post('/', protect, upload.single('image'), createProject);
+router.put('/:id', protect, upload.single('image'), updateProject);
 router.post('/:id/milestones', protect, addMilestone);
 
 module.exports = router;

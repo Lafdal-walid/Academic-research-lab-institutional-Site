@@ -51,6 +51,10 @@ const publicationSchema = new mongoose.Schema({
     project: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Project'
+    },
+    views: {
+        type: Number,
+        default: 0
     }
 }, { timestamps: true });
 

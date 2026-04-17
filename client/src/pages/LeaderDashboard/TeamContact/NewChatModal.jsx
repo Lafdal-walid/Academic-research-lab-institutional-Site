@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 const svgPaths = {
   angleDown: "M15.5917 6.84167C15.5142 6.76356 15.422 6.70156 15.3205 6.65926C15.2189 6.61695 15.11 6.59517 15 6.59517C14.89 6.59517 14.7811 6.61695 14.6795 6.65926C14.578 6.70156 14.4858 6.76356 14.4083 6.84167L10.5917 10.6583C10.5142 10.7364 10.422 10.7984 10.3205 10.8407C10.2189 10.8831 10.110 10.9048 10 10.9048C9.88999 10.9048 9.78107 10.8831 9.67952 10.8407C9.57797 10.7984 9.4858 10.7364 9.40833 10.6583L5.59167 6.84167C5.5142 6.76356 5.42203 6.70156 5.32048 6.65926C5.21893 6.61695 5.11001 6.59517 5 6.59517C4.88999 6.59517 4.78107 6.61695 4.67952 6.65926C4.57797 6.70156 4.4858 6.76356 4.40833 6.84167C4.25312 6.9978 4.16601 7.20901 4.16601 7.42917C4.16601 7.64932 4.25312 7.86053 4.40833 8.01667L8.23333 11.8417C8.70208 12.3098 9.3375 12.5728 10 12.5728C10.6625 12.5728 11.2979 12.3098 11.7667 11.8417L15.5917 8.01667C15.7469 7.86053 15.834 7.64932 15.834 7.42917C15.834 7.20901 15.7469 6.9978 15.5917 6.84167Z",
@@ -15,28 +15,53 @@ const svgPaths = {
 };
 
 const NewChatModal = ({ isOpen, onClose, onSend }) => {
-  const [recipient, setRecipient] = useState('Walid 1');
+  const [recipients, setRecipients] = useState([]);
+  const [selectedRecipient, setSelectedRecipient] = useState(null);
   const [message, setMessage] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const fileInputRef = useRef(null);
 
-  const availableRecipients = [
-    { id: 1, name: 'Walid 1', role: 'Researcher' },
-    { id: 2, name: 'Walid 2', role: 'Doctorat' },
-    { id: 3, name: 'Serine', role: 'Researcher' },
-    { id: 4, name: 'Prof. Sarah', role: 'Lab Head' },
-    { id: 5, name: 'Prof. Ahmed', role: 'Senior Professor' }
-  ];
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('http://localhost:5000/api/teams', { // Reusing teams to find members or maybe a generic users endpoint
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const teams = await res.json();
+          // Extract unique members from all teams
+          const allUsers = [];
+          const userIds = new Set();
+          teams.forEach(t => {
+            if (t.leader && !userIds.has(t.leader._id)) {
+                allUsers.push(t.leader);
+                userIds.add(t.leader._id);
+            }
+            t.members.forEach(m => {
+                if (!userIds.has(m._id)) {
+                    allUsers.push(m);
+                    userIds.add(m._id);
+                }
+            });
+          });
+          setRecipients(allUsers);
+          if (allUsers.length > 0) setSelectedRecipient(allUsers[0]);
+        }
+      } catch (err) { console.error(err); }
+    };
+    if (isOpen) fetchUsers();
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   const handleSend = () => {
-    if (onSend && (message.trim() || selectedFile)) {
+    if (onSend && selectedRecipient && (message.trim() || selectedFile)) {
       onSend({ 
-        recipient, 
+        recipientId: selectedRecipient._id, 
         message, 
-        file: selectedFile ? { name: selectedFile.name, size: (selectedFile.size / 1024 / 1024).toFixed(2) + ' MB' } : null 
+        file: selectedFile 
       });
     }
   };
@@ -58,8 +83,8 @@ const NewChatModal = ({ isOpen, onClose, onSend }) => {
     fileInputRef.current?.click();
   };
 
-  const handleSelectRecipient = (name) => {
-    setRecipient(name);
+  const handleSelectRecipient = (user) => {
+    setSelectedRecipient(user);
     setIsDropdownOpen(false);
   };
 
@@ -88,9 +113,9 @@ const NewChatModal = ({ isOpen, onClose, onSend }) => {
               <div className="flex items-center" style={{ gap: '0.8vw' }}>
                  <div className="bg-[#3457dc]/20 flex items-center justify-center rounded-full border border-[#3457dc]/30" 
                       style={{ width: '1.8vw', height: '1.8vw', fontSize: '0.7vw', fontWeight: 'bold', color: '#3457dc' }}>
-                   {recipient.charAt(0)}
+                   {selectedRecipient?.username?.charAt(0) || '?'}
                  </div>
-                 <span className="text-white font-poppins" style={{ fontSize: '0.85vw' }}>{recipient}</span>
+                 <span className="text-white font-poppins" style={{ fontSize: '0.85vw' }}>{selectedRecipient?.username || 'Select Recipient'}</span>
               </div>
               <svg viewBox="0 0 20 20" style={{ width: '1.1vw', height: '1.1vw', transition: 'transform 0.3s', transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }} className="pointer-events-none">
                  <path d={svgPaths.angleDown} fill="#3457DC" />
@@ -104,24 +129,24 @@ const NewChatModal = ({ isOpen, onClose, onSend }) => {
                 style={{ top: 'calc(100% + 0.5vh)', borderRadius: '0.8vw', maxHeight: '25vh' }}
               >
                 <div className="flex flex-col overflow-y-auto custom-scrollbar h-full">
-                  {availableRecipients.map((person) => (
+                  {recipients.map((person) => (
                     <div 
-                      key={person.id}
-                      onClick={() => handleSelectRecipient(person.name)}
+                      key={person._id}
+                      onClick={() => handleSelectRecipient(person)}
                       className="flex items-center justify-between hover:bg-[#3457dc]/10 cursor-pointer transition-colors border-b border-white/5 last:border-none"
                       style={{ padding: '1.5vh 1vw', gap: '1vw' }}
                     >
                       <div className="flex items-center" style={{ gap: '0.8vw' }}>
                         <div className="bg-[#2a2a30] flex items-center justify-center rounded-full border border-white/5" 
                              style={{ width: '1.6vw', height: '1.6vw', fontSize: '0.65vw', color: '#a5a5b2' }}>
-                          {person.name.charAt(0)}
+                          {person.username?.charAt(0)}
                         </div>
                         <div className="flex flex-col">
-                           <span className="text-white font-medium" style={{ fontSize: '0.8vw' }}>{person.name}</span>
+                           <span className="text-white font-medium" style={{ fontSize: '0.8vw' }}>{person.username}</span>
                            <span className="text-[#80808a]" style={{ fontSize: '0.65vw' }}>{person.role}</span>
                         </div>
                       </div>
-                      {recipient === person.name && (
+                      {selectedRecipient?._id === person._id && (
                         <div className="bg-[#3457dc]" style={{ width: '0.4vw', height: '0.4vw', borderRadius: '50%' }} />
                       )}
                     </div>
