@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RiAddLine, RiSubtractLine } from "react-icons/ri"; 
+import { RiAddLine, RiSubtractLine, RiExternalLinkLine } from "react-icons/ri";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
 const faqData = [
   {
@@ -8,96 +9,133 @@ const faqData = [
     question: "What are the team's primary research areas?",
     answer: "We focus on Big Data analysis, predictive modelling using Machine Learning, and optimizing Warehouse Management Systems (WMS) to enhance logistics efficiency through data-driven insights."
   },
-  { id: "02", question: "Which technologies and frameworks do we utilize?", answer: "React, Node.js, Python, and various AI frameworks." },
-  { id: "03", question: "How does competitive programming influence our work?", answer: "It sharpens our problem-solving skills and algorithm efficiency." }
+  { id: "02", question: "Which technologies and frameworks do we utilize?", answer: "Our tech stack includes React.js for frontend, Node.js for backend, and Python for data science and AI. We also leverage Docker and Kubernetes for cloud orchestration." },
+  { id: "03", question: "How does competitive programming influence our work?", answer: "Competitive programming sharpens our algorithm design and problem-solving speed, ensuring that the software we build is highly optimized and can handle large-scale data efficiently." },
+  { id: "04", question: "Are we open to professional collaborations?", answer: "Absolutely. We collaborate with academic institutions and industry partners on research projects, technology transfer, and innovative software development." },
+  { id: "05", question: "What makes our software solutions unique?", answer: "Our solutions are research-driven. We don't just build apps; we integrate advanced mathematical models and AI to solve complex industrial problems that standard software cannot address." },
+  { id: "06", question: "Where can I access our publications and source code?", answer: "You can find our research papers in the 'Publications' section of this site. Most of our open-source projects are available on our official GitHub repository." }
 ];
 
 const Support = () => {
   const [activeId, setActiveId] = useState("01");
-  
-  return (
-    <div className="min-h-screen bg-[#050505] text-white py-20 px-4 font-sans selection:bg-blue-500/30">
-      
-    {/* Hero Section */}
-      <section className="relative flex flex-col items-center justify-center text-center mb-24">
-        {/* Corner Accents (Decorative) */}
-        <div className="absolute top-0 left-1/4 w-32 h-[2px] bg-blue-600 blur-sm hidden md:block"></div>
-        <div className="absolute bottom-0 right-1/4 w-32 h-[2px] bg-blue-600 blur-sm hidden md:block"></div>
 
-        <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-none z-10">
-          FREQUENTLY <br /> 
-          <span className="text-blue-600 drop-shadow-[0_0_15px_rgba(37,99,235,0.6)]">ASKED</span> QUESTION
-        </h1>
-        
-        {/* Large Question Mark Background */}
-        <div className="absolute inset-0 flex items-center justify-center -z-0">
-          <span className="text-[15rem] md:text-[20rem] font-bold text-blue-700/10 blur-[2px] select-none">?</span>
+  return (
+    <div className="min-h-screen bg-[#020203] text-white font-sans selection:bg-blue-500/30 overflow-x-hidden">
+      
+      {/* 1. HERO SECTION */}
+      <section className="relative max-w-6xl mx-auto pt-32 pb-20 px-6 flex flex-col items-center">
+        {/* Blue Glow Background */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+          <span className="text-[20rem] md:text-[28rem] font-bold text-blue-600/10 blur-[80px] select-none">?</span>
+        </div>
+
+        <div className="relative z-10 text-center">
+          <p className="text-blue-500 font-mono text-[10px] md:text-xs mb-4 tracking-[0.3em] uppercase opacity-80">
+            — Aka. FAQ
+          </p>
+          <h1 className="text-5xl md:text-[84px] font-[900] tracking-tighter leading-[0.85] uppercase italic italic-sub">
+            FREQUENTLY <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-b from-blue-400 via-blue-600 to-blue-800 drop-shadow-[0_0_30px_rgba(37,99,235,0.3)]">ASKED</span> <br />
+            QUESTION
+          </h1>
+          <p className="max-w-[280px] mx-auto mt-8 text-zinc-500 text-[13px] leading-relaxed font-medium">
+            Find quick answers to the most common questions about ID Optimizer.
+          </p>
+        </div>
+
+        {/* Figma Corners Decorations */}
+        <div className="absolute top-48 left-10 w-10 h-10 border-t border-l border-zinc-800/50 hidden lg:block"></div>
+        <div className="absolute top-48 right-10 w-10 h-10 border-t border-r border-zinc-800/50 hidden lg:block"></div>
+      </section>
+
+      {/* 2. FAQ ACCORDION SECTION (Frame 8567) */}
+      <section className="max-w-[640px] mx-auto px-6 pb-20 relative z-10">
+        <div className="flex flex-col gap-[20px]">
+          {faqData.map((item) => (
+            <div 
+              key={item.id} 
+              className={`transition-all duration-500 rounded-[12px] border ${
+                activeId === item.id 
+                ? 'border-blue-600/50 bg-[#0a0c12] shadow-[0_0_40px_rgba(37,99,235,0.05)]' 
+                : 'border-zinc-800/40 bg-[#050506] hover:border-zinc-700'
+              }`}
+            >
+              <button 
+                className="w-full flex items-center p-5 text-left group"
+                onClick={() => setActiveId(activeId === item.id ? null : item.id)}
+              >
+                <span className={`text-[11px] font-mono mr-5 transition-colors ${activeId === item.id ? 'text-blue-500' : 'text-zinc-600'}`}>
+                  {item.id}
+                </span>
+                <span className={`flex-1 text-[15px] md:text-[16px] font-bold tracking-tight transition-colors ${activeId === item.id ? 'text-white' : 'text-zinc-300'}`}>
+                  {item.question}
+                </span>
+                <div className="ml-4">
+                   {activeId === item.id 
+                    ? <RiSubtractLine className="text-blue-500 text-xl" /> 
+                    : <RiAddLine className="text-zinc-500 text-xl" />
+                   }
+                </div>
+              </button>
+
+              <AnimatePresence>
+                {activeId === item.id && (
+                  <motion.div 
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-14 pb-6">
+                        <div className="h-[1px] w-full bg-white/5 mb-4"></div>
+                        <p className="text-zinc-400 text-sm leading-relaxed font-medium">
+                        <span className="text-zinc-600 font-bold block mb-1 text-[10px] uppercase tracking-wider">Content:</span>
+                        {item.answer}
+                        </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ))}
+        </div>
+
+        {/* Pagination (Figma details) */}
+        <div className="flex justify-center items-center mt-10 gap-5">
+          <button className="w-10 h-10 rounded-full border border-blue-600/20 flex items-center justify-center text-blue-600 hover:bg-blue-600/10 transition-all">
+            <FiChevronLeft size={20} />
+          </button>
+          <span className="text-[11px] text-zinc-600 font-bold tracking-widest uppercase">
+            <span className="text-zinc-400">{activeId || '01'}</span> out of 4
+          </span>
+          <button className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-[0_10px_20px_rgba(37,99,235,0.3)] hover:scale-105 transition-all">
+            <FiChevronRight size={20} />
+          </button>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <div className="max-w-3xl mx-auto space-y-4">
-        {faqData.map((item) => (
-          <div 
-            key={item.id} 
-            className={`group border rounded-xl transition-all duration-300 ${
-              activeId === item.id ? 'border-blue-600 bg-[#0d0d0d]' : 'border-white/10 bg-[#080808] hover:border-white/20'
-            }`}
-          >
-            <button 
-              className="w-full flex items-center gap-6 p-6 text-left focus:outline-none"
-              onClick={() => setActiveId(activeId === item.id ? null : item.id)}
-            >
-              <span className={`text-sm font-mono transition-colors ${activeId === item.id ? 'text-blue-500' : 'text-zinc-600'}`}>
-                {item.id}
-              </span>
-              <span className="flex-1 font-semibold text-lg md:text-xl tracking-tight text-zinc-200">
-                {item.question}
-              </span>
-              <span className={`text-2xl transition-transform duration-300 ${activeId === item.id ? 'rotate-180 text-blue-500' : 'text-zinc-500'}`}>
-                {activeId === item.id ? <RiSubtractLine /> : <RiAddLine />}
-              </span>
-            </button>
-
-            <AnimatePresence>
-              {activeId === item.id && (
-                <motion.div 
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="overflow-hidden"
-                >
-                  <div className="px-6 pb-6 pt-0 ml-11 text-zinc-400 leading-relaxed border-t border-white/5 mt-2 py-4">
-                    {item.answer}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        ))}
-      </div>
-
-      {/* Contact Card */}
-      <section className="max-w-3xl mx-auto mt-32">
-        <div className="relative p-12 rounded-3xl border border-white/10 bg-gradient-to-br from-[#0a0a0a] to-[#050505] overflow-hidden text-center">
-          {/* Subtle Glow Background */}
-          <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-600/10 blur-[100px] rounded-full"></div>
+      {/* 3. CONTACT CARD (Group 443) */}
+      <section className="max-w-[573px] mx-auto px-6 pb-40">
+        <div className="relative p-10 rounded-[24px] border border-white/[0.08] bg-gradient-to-b from-[#08080a] to-[#020203] text-center overflow-hidden group">
           
-          <h3 className="text-2xl font-bold mb-8 relative z-10 text-zinc-200">
+          {/* Grid Background Effect */}
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[grid-white_1px] [mask-image:radial-gradient(ellipse_at_center,black,transparent)]"></div>
+
+          <h3 className="text-lg md:text-xl font-bold mb-8 text-zinc-100 relative z-10">
             Didn't find the answer you were looking for?
           </h3>
           
-          <div className="flex flex-col md:flex-row gap-4 justify-center relative z-10">
-            <button className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-all active:scale-95 shadow-[0_0_20px_rgba(37,99,235,0.3)]">
-              Contact us
+          <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
+            <button className="px-7 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-[10px] flex items-center justify-center gap-2 transition-all shadow-[0_0_25px_rgba(37,99,235,0.2)] active:scale-95">
+              Contact us <RiExternalLinkLine />
             </button>
-            <button className="px-8 py-3 bg-zinc-900 hover:bg-zinc-800 border border-white/10 text-white font-bold rounded-lg transition-all active:scale-95">
+            <button className="px-7 py-3 bg-zinc-900/50 hover:bg-zinc-800 text-white text-sm font-bold rounded-[10px] border border-white/5 transition-all active:scale-95">
               Join Community
             </button>
           </div>
         </div>
       </section>
+
     </div>
   );
 };
