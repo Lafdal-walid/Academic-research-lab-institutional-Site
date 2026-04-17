@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Minus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 import { useLanguage } from '@/contexts/LanguageContext';
-import enHome from './locales/en/home.json';
-import arHome from './locales/ar/home.json';
 import flecheDown from './assets/flecheDown.png';
 import flecheUp from './assets/flecheup.png';
 import './assets/fonts.css';
@@ -12,20 +11,9 @@ import './assets/fonts.css';
 const ITEMS_PER_PAGE = 6;
 
 const FAQSection = () => {
+    const { t } = useTranslation('home');
     const { language } = useLanguage();
     const isRTL = language === 'ar';
-    const tData = isRTL ? arHome : enHome;
-    
-    // Helper to get nested keys like 'faq.q1'
-    const t = (path) => {
-        const parts = path.split('.');
-        let current = tData;
-        for (const part of parts) {
-            if (current[part] === undefined) return path;
-            current = current[part];
-        }
-        return current;
-    };
     const [openIndex, setOpenIndex] = useState(0);
     const [page, setPage] = useState(0);
 
@@ -33,11 +21,19 @@ const FAQSection = () => {
         { question: t('faq.q1'), answer: t('faq.a1') },
         { question: t('faq.q2'), answer: t('faq.a2') },
         { question: t('faq.q3'), answer: t('faq.a3') },
-        { question: t('faq.q4'), answer: t('faq.a4') },
-        { question: t('faq.q5'), answer: t('faq.a5') },
-        { question: t('faq.q6'), answer: t('faq.a6') }
+        {
+            question: isRTL ? 'هل يمكنني التراجع عن التغييرات إذا حدث خطأ ما؟' : 'Can I revert the changes if something goes wrong?',
+            answer: isRTL ? 'نعم ، يمكنك دائمًا الاستعادة إلى الإعدادات الافتراضية للنظام بنقرة واحدة.' : 'Yes, you can always restore to system defaults with one click.',
+        },
+        {
+            question: isRTL ? 'هل سيساعد هذا إذا كان لدي جهاز كمبيوتر متطور بالفعل؟' : 'Will this help if I already have a high-end PC?',
+            answer: isRTL ? 'بالتأكيد ، حتى أجهزة الكمبيوتر المتطورة يمكن أن تعاني من استنزاف الموارد في الخلفية.' : 'Absolutely, even high-end PCs can suffer from background resource drain.',
+        },
+        {
+            question: isRTL ? 'هل يعمل هذا على تحسين شبكتي (بينج ، الكمون)؟' : 'Does it optimize my network (ping, latency)?',
+            answer: isRTL ? 'نعم ، نقوم بتحسين إعدادات الشبكة لتقليل التأخير.' : 'Yes, we optimize network settings to reduce delay.',
+        },
     ];
-
 
     const totalPages = Math.ceil(allFaqs.length / ITEMS_PER_PAGE);
     const pageFaqs = allFaqs.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);

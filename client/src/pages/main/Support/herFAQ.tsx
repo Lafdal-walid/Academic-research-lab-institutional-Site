@@ -1,8 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { useLanguage } from "@/contexts/LanguageContext";
-import enFaq from "./locales/en/faq.json";
-import arFaq from "./locales/ar/faq.json";
+import { useTranslation } from "@/hooks/useTranslation";
 import carreFAQ from "./assets/carreFAQ.png";
 import QstFAQ from "./assets/QstFAQ.png";
 import flecheDown from "./assets/flecheDown.png";
@@ -17,19 +15,8 @@ const CarreIcon = ({ className }: { className?: string }) => (
 );
 
 const HerFAQ: React.FC = () => {
-  const { language } = useLanguage();
+  const { t, language } = useTranslation("faq");
   const isRTL = language === "ar";
-  const tData: any = isRTL ? arFaq : enFaq;
-
-  const t = (path: string) => {
-    const parts = path.split('.');
-    let current = tData;
-    for (const part of parts) {
-        if (current[part] === undefined) return path;
-        current = current[part];
-    }
-    return current;
-  };
 
   return (
     <section
