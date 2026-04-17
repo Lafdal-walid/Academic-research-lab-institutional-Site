@@ -26,7 +26,7 @@ const NewChatModal = ({ isOpen, onClose, onSend }) => {
     const fetchUsers = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch('http://localhost:5000/api/teams', { // Reusing teams to find members or maybe a generic users endpoint
+        const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/teams', { // Reusing teams to find members or maybe a generic users endpoint
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {

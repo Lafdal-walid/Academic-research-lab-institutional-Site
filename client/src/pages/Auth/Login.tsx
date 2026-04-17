@@ -146,7 +146,7 @@ const Login = () => {
         setIsSubmitting(true);
 
         try {
-            const res = await fetch('http://localhost:5000/api/auth/login', {
+            const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
@@ -196,7 +196,7 @@ const Login = () => {
         onSuccess: async (tokenResponse) => {
             setIsSubmitting(true);
             try {
-                const res = await fetch('http://localhost:5000/api/auth/google-login', {
+                const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/auth/google-login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token: tokenResponse.access_token })

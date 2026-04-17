@@ -28,7 +28,7 @@ const AddAdminModal = ({ isOpen, onClose, onAdd }) => {
         setIsLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/auth/admin/users', {
+            const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/auth/admin/users', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
@@ -45,7 +45,7 @@ const AddAdminModal = ({ isOpen, onClose, onAdd }) => {
         
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/auth/admin/users/${selectedUser._id}`, {
+            const res = await fetch(`https://academic-research-lab-institutional-site.onrender.com/api/auth/admin/users/${selectedUser._id}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,

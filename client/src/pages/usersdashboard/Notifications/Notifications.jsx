@@ -60,7 +60,7 @@ const Notifications = () => {
     const fetchMyNotifications = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch('http://localhost:5000/api/notifications/my', {
+        const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/notifications/my', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {

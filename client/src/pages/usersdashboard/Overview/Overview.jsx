@@ -341,7 +341,7 @@ const LastProjects = ({ language = 'en', style = {}, data = [] }) => {
             date: new Date(p.createdAt).toLocaleDateString(),
             complet: completLabel,
             approval: approvalLabel,
-            img: p.imageUrl ? `http://localhost:5000${p.imageUrl}` : Project1Img
+            img: p.imageUrl ? `https://academic-research-lab-institutional-site.onrender.com${p.imageUrl}` : Project1Img
         };
     });
 
@@ -696,7 +696,7 @@ const Overview = () => {
         const fetchStats = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const res = await fetch(`http://localhost:5000/api/stats/overview?period=${period}`, {
+                const res = await fetch(`https://academic-research-lab-institutional-site.onrender.com/api/stats/overview?period=${period}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {

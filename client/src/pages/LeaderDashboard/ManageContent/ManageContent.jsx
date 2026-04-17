@@ -49,7 +49,7 @@ const NewsGalleryTable = ({ onEdit }) => {
 
     const fetchNews = async () => {
         try {
-            const res = await fetch('http://localhost:5000/api/news');
+            const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/news');
             if (res.ok) {
                 const data = await res.json();
                 setNewsData(data);
@@ -65,7 +65,7 @@ const NewsGalleryTable = ({ onEdit }) => {
         if (!window.confirm('Are you sure you want to delete this news?')) return;
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/news/${id}`, {
+            const res = await fetch(`https://academic-research-lab-institutional-site.onrender.com/api/news/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -231,7 +231,7 @@ const AddNewsForm = ({ onPublished, editData }) => {
     React.useEffect(() => {
         const fetchTeams = async () => {
             try {
-                const res = await fetch('http://localhost:5000/api/teams');
+                const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/teams');
                 if (res.ok) {
                     const data = await res.json();
                     setTeams(data);
@@ -244,7 +244,7 @@ const AddNewsForm = ({ onPublished, editData }) => {
             setTitle(editData.title || '');
             setDescription(editData.description || '');
             setTeamId(editData.team?._id || editData.team || '');
-            if (editData.imageUrl) setImagePreview(`http://localhost:5000${editData.imageUrl}`);
+            if (editData.imageUrl) setImagePreview(`https://academic-research-lab-institutional-site.onrender.com${editData.imageUrl}`);
         }
     }, [editData]);
 
@@ -275,7 +275,7 @@ const AddNewsForm = ({ onPublished, editData }) => {
             formData.append('team', teamId);
             if (image) formData.append('image', image);
 
-            const url = editData ? `http://localhost:5000/api/news/${editData._id}` : 'http://localhost:5000/api/news';
+            const url = editData ? `https://academic-research-lab-institutional-site.onrender.com/api/news/${editData._id}` : 'https://academic-research-lab-institutional-site.onrender.com/api/news';
             const method = editData ? 'PUT' : 'POST';
 
             const res = await fetch(url, {
