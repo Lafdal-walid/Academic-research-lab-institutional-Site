@@ -82,7 +82,7 @@ const TeamContact = () => {
     const fetchChats = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/messages/list', {
+            const res = await fetch('http://localhost:5000/api/messages/list', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -101,7 +101,7 @@ const TeamContact = () => {
         setIsLoadingMsgs(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`https://academic-research-lab-institutional-site.onrender.com/api/messages/conversation/${otherId}`, {
+            const res = await fetch(`http://localhost:5000/api/messages/conversation/${otherId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -151,7 +151,7 @@ const TeamContact = () => {
             formData.append('type', 'text');
         }
 
-        const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/messages/send', {
+        const res = await fetch('http://localhost:5000/api/messages/send', {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` },
             body: formData
@@ -187,7 +187,7 @@ const TeamContact = () => {
             formData.append('fileSize', (file.size / 1024 / 1024).toFixed(2) + ' mo');
         }
 
-        const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/messages/send', {
+        const res = await fetch('http://localhost:5000/api/messages/send', {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` },
             body: formData

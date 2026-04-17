@@ -33,7 +33,7 @@ const AddPublicationContent = () => {
             try {
                 const token = localStorage.getItem('token');
                 // Fetch members
-                const membersRes = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/auth/members', {
+                const membersRes = await fetch('http://localhost:5000/api/auth/members', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (membersRes.ok) {
@@ -42,7 +42,7 @@ const AddPublicationContent = () => {
                 }
 
                 // Fetch projects
-                const projectsRes = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/projects', {
+                const projectsRes = await fetch('http://localhost:5000/api/projects', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (projectsRes.ok) {
@@ -101,7 +101,7 @@ const AddPublicationContent = () => {
                 formData.append('document', selectedFile);
             }
 
-            const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/publications', {
+            const res = await fetch('http://localhost:5000/api/publications', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`

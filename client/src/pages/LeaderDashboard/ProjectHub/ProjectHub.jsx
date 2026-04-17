@@ -113,7 +113,7 @@ const ProjectTimeline = ({ projectName, projectId, milestones = [], onRefresh })
         setIsSaving(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`https://academic-research-lab-institutional-site.onrender.com/api/projects/${projectId}/milestones`, {
+            const res = await fetch(`http://localhost:5000/api/projects/${projectId}/milestones`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -352,7 +352,7 @@ const EditProjectModal = ({ isOpen, onClose, project, teams, users, onUpdate }) 
         setIsLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`https://academic-research-lab-institutional-site.onrender.com/api/projects/${project.id}`, {
+            const res = await fetch(`http://localhost:5000/api/projects/${project.id}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -452,8 +452,8 @@ const ProjectsTable = ({ projects = [], selectedId, onSelect, onRefresh }) => {
         const fetchMeta = async () => {
             const token = localStorage.getItem('token');
             const [tRes, uRes] = await Promise.all([
-                fetch('https://academic-research-lab-institutional-site.onrender.com/api/teams', { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch('https://academic-research-lab-institutional-site.onrender.com/api/auth/admin/users', { headers: { 'Authorization': `Bearer ${token}` } })
+                fetch('http://localhost:5000/api/teams', { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch('http://localhost:5000/api/auth/admin/users', { headers: { 'Authorization': `Bearer ${token}` } })
             ]);
             if (tRes.ok) setTeams(await tRes.json());
             if (uRes.ok) {
@@ -890,7 +890,7 @@ const AddProject = ({ onPublished }) => {
             const currentUser = userStr ? JSON.parse(userStr) : null;
 
             // Fetch teams
-            const teamsRes = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/teams', {
+            const teamsRes = await fetch('http://localhost:5000/api/teams', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const teamsData = await teamsRes.json();
@@ -907,7 +907,7 @@ const AddProject = ({ onPublished }) => {
             }
 
             // Fetch users
-            const usersRes = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/auth/admin/users', {
+            const usersRes = await fetch('http://localhost:5000/api/auth/admin/users', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const usersData = await usersRes.json();
@@ -969,7 +969,7 @@ const AddProject = ({ onPublished }) => {
         if (formData.endDate) dataToSend.append('endDate', formData.endDate);
         if (imageFile) dataToSend.append('image', imageFile);
 
-        const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/projects', {
+        const res = await fetch('http://localhost:5000/api/projects', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -1353,8 +1353,8 @@ const AddTeam = () => {
         try {
             const token = localStorage.getItem('token');
             const [teamsRes, projectsRes] = await Promise.all([
-                fetch('https://academic-research-lab-institutional-site.onrender.com/api/teams', { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch('https://academic-research-lab-institutional-site.onrender.com/api/projects', { headers: { 'Authorization': `Bearer ${token}` } })
+                fetch('http://localhost:5000/api/teams', { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch('http://localhost:5000/api/projects', { headers: { 'Authorization': `Bearer ${token}` } })
             ]);
             
             const teamsData = await teamsRes.json();
@@ -1373,7 +1373,7 @@ const AddTeam = () => {
     const fetchUsers = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/auth/admin/users', {
+            const res = await fetch('http://localhost:5000/api/auth/admin/users', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
@@ -1416,7 +1416,7 @@ const AddTeam = () => {
         try {
             const token = localStorage.getItem('token');
             const isEdit = !!formData._id;
-            const url = isEdit ? `https://academic-research-lab-institutional-site.onrender.com/api/teams/${formData._id}` : 'https://academic-research-lab-institutional-site.onrender.com/api/teams';
+            const url = isEdit ? `http://localhost:5000/api/teams/${formData._id}` : 'http://localhost:5000/api/teams';
             
             const res = await fetch(url, {
                 method: isEdit ? 'PUT' : 'POST',
@@ -1452,7 +1452,7 @@ const AddTeam = () => {
         if (!window.confirm('Are you sure you want to delete this team?')) return;
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`https://academic-research-lab-institutional-site.onrender.com/api/teams/${id}`, {
+            const res = await fetch(`http://localhost:5000/api/teams/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -1562,7 +1562,7 @@ const ProjectHub = () => {
         setIsLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/projects', {
+            const res = await fetch('http://localhost:5000/api/projects', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
@@ -1575,7 +1575,7 @@ const ProjectHub = () => {
                     deadline: p.endDate ? new Date(p.endDate).toLocaleDateString() : 'No deadline',
                     progress: `${Math.round(((p.milestones?.filter(m => m.completed).length || 0) + 1) / ((p.milestones?.length || 0) + 1) * 100)}%`, 
                     status: p.status === 'Proposed' ? 'On going' : p.status,
-                    img: p.imageUrl ? `https://academic-research-lab-institutional-site.onrender.com${p.imageUrl}` : img1,
+                    img: p.imageUrl ? `http://localhost:5000${p.imageUrl}` : img1,
                     teamName: p.team?.name || 'No Team',
                     milestones: p.milestones || [],
                     raw: p
@@ -1583,7 +1583,7 @@ const ProjectHub = () => {
                 setProjects(formatted);
 
                 // Fetch total views and other system stats
-                const statsRes = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/stats/overview', {
+                const statsRes = await fetch('http://localhost:5000/api/stats/overview', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const sData = await statsRes.json();

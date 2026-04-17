@@ -83,7 +83,7 @@ const ProjectsTable = ({ projects, selectedProject, setSelectedProject }) => {
               <div className="flex items-center w-[20vw]" style={{ gap: '1.2vw' }}>
                  <div className="overflow-hidden bg-white/5 shrink-0 border border-white/5"
                       style={{ width: '2.5vw', height: '8vh', borderRadius: '0.4vw' }}>
-                    <img src={project.imageUrl ? `https://academic-research-lab-institutional-site.onrender.com${project.imageUrl}` : img1} alt={project.title} className="w-full h-full object-cover" />
+                    <img src={project.imageUrl ? `http://localhost:5000${project.imageUrl}` : img1} alt={project.title} className="w-full h-full object-cover" />
                  </div>
                  <div className="flex flex-col" style={{ gap: '0.3vh' }}>
                     <p className="font-bold text-white m-0" style={{ fontSize: '0.95vw', fontFamily: 'Gilroy, Poppins, sans-serif' }}>{project.title}</p>
@@ -291,7 +291,7 @@ const Progress = () => {
     const fetchProjects = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/projects', {
+        const res = await fetch('http://localhost:5000/api/projects', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {

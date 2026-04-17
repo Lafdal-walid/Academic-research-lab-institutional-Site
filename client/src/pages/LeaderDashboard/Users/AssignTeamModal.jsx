@@ -19,7 +19,7 @@ const AssignTeamModal = ({ isOpen, onClose, user, onUpdate }) => {
         setIsFetchingTeams(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/teams', {
+            const res = await fetch('http://localhost:5000/api/teams', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
@@ -46,7 +46,7 @@ const AssignTeamModal = ({ isOpen, onClose, user, onUpdate }) => {
         setIsLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`https://academic-research-lab-institutional-site.onrender.com/api/auth/admin/users/${user.id}`, {
+            const res = await fetch(`http://localhost:5000/api/auth/admin/users/${user.id}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,

@@ -16,7 +16,7 @@ const AdminTools = () => {
         setIsLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/auth/admin/users', {
+            const res = await fetch('http://localhost:5000/api/auth/admin/users', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
@@ -51,7 +51,7 @@ const AdminTools = () => {
     const handleUpdateAdmin = async (adminId, updateData) => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`https://academic-research-lab-institutional-site.onrender.com/api/auth/admin/users/${adminId}`, {
+            const res = await fetch(`http://localhost:5000/api/auth/admin/users/${adminId}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -70,7 +70,7 @@ const AdminTools = () => {
         if (!window.confirm('Are you sure you want to demote this admin to Guest?')) return;
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`https://academic-research-lab-institutional-site.onrender.com/api/auth/admin/users/${adminId}`, {
+            const res = await fetch(`http://localhost:5000/api/auth/admin/users/${adminId}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,

@@ -69,7 +69,7 @@ const Register: React.FC = () => {
         }
         setIsSubmitting(true);
         try {
-            const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/auth/send-email-otp', {
+            const res = await fetch('http://localhost:5000/api/auth/send-email-otp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: formData.email })
@@ -93,7 +93,7 @@ const Register: React.FC = () => {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/auth/send-phone-otp', {
+            const res = await fetch('http://localhost:5000/api/auth/send-phone-otp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phoneNumber: selectedCountry.code + phoneNumber })
@@ -131,7 +131,7 @@ const Register: React.FC = () => {
         setIsSubmitting(true);
         const code = otp.join('');
         try {
-            const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/auth/register', {
+            const res = await fetch('http://localhost:5000/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -161,7 +161,7 @@ const Register: React.FC = () => {
         setIsSubmitting(true);
         const code = otp.join('');
         try {
-            const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/auth/verify-email-otp', {
+            const res = await fetch('http://localhost:5000/api/auth/verify-email-otp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: formData.email, otp: code })
@@ -183,7 +183,7 @@ const Register: React.FC = () => {
     const handleRegisterLater = async () => {
         setIsSubmitting(true);
         try {
-            const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/auth/register-later', {
+            const res = await fetch('http://localhost:5000/api/auth/register-later', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

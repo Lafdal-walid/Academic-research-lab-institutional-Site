@@ -158,13 +158,13 @@ const ManageUsersTable = () => {
                 const token = localStorage.getItem('token');
                 
                 // Fetch Users
-                const usersRes = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/auth/admin/users', {
+                const usersRes = await fetch('http://localhost:5000/api/auth/admin/users', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const usersData = await usersRes.json();
                 
                 // Fetch Teams
-                const teamsRes = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/teams', {
+                const teamsRes = await fetch('http://localhost:5000/api/teams', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const teamsData = await teamsRes.json();
@@ -206,7 +206,7 @@ const ManageUsersTable = () => {
     const handleRoleUpdate = async (userId, updateData) => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`https://academic-research-lab-institutional-site.onrender.com/api/auth/admin/users/${userId}`, {
+            const res = await fetch(`http://localhost:5000/api/auth/admin/users/${userId}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -624,7 +624,7 @@ const UsersPublicationsTable = () => {
             setIsLoading(true);
             try {
                 const token = localStorage.getItem('token');
-                const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/publications', {
+                const res = await fetch('http://localhost:5000/api/publications', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 
@@ -1094,7 +1094,7 @@ const UsersTrackTable = ({ records = [], selectedId, onSelect, onUpdateStatus })
                                 <td style={{ padding: '2.5vh 0.5vw', textAlign: 'right' }}>
                                     <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1.2vw' }}>
                                         <a
-                                            href={row.fileUrl ? `https://academic-research-lab-institutional-site.onrender.com${row.fileUrl}` : '#'}
+                                            href={row.fileUrl ? `http://localhost:5000${row.fileUrl}` : '#'}
                                             download
                                             target="_blank"
                                             rel="noreferrer"
@@ -1154,7 +1154,7 @@ const UsersTrackManager = () => {
     const fetchReports = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/reports', {
+            const res = await fetch('http://localhost:5000/api/reports', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -1215,7 +1215,7 @@ const UsersTrackManager = () => {
     const handleUpdateStatus = async (id, newStatus) => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`https://academic-research-lab-institutional-site.onrender.com/api/reports/${id}`, {
+            const res = await fetch(`http://localhost:5000/api/reports/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1263,7 +1263,7 @@ const Users = () => {
         const fetchStats = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/auth/admin/stats', {
+                const res = await fetch('http://localhost:5000/api/auth/admin/stats', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await res.json();

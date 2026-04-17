@@ -196,7 +196,7 @@ const TeamPublicationContent = () => {
     useEffect(() => {
         const fetchPublications = async () => {
             try {
-                const res = await fetch('https://academic-research-lab-institutional-site.onrender.com/api/publications');
+                const res = await fetch('http://localhost:5000/api/publications');
                 if (res.ok) {
                     const data = await res.json();
                     setPublications(data);
@@ -378,7 +378,7 @@ const TeamPublicationContent = () => {
                             journal={pub.publisher}
                             description={pub.contribution}
                             tags={pub.tags}
-                            link={pub.documentUrl ? `https://academic-research-lab-institutional-site.onrender.com${pub.documentUrl}` : '#'}
+                            link={pub.documentUrl ? `http://localhost:5000${pub.documentUrl}` : '#'}
                         />
                     ))
                 )}
