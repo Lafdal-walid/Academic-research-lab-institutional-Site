@@ -36,7 +36,16 @@ const projectSchema = new mongoose.Schema({
     },
     endDate: {
         type: Date
-    }
+    },
+    imageUrl: {
+        type: String,
+        trim: true
+    },
+    milestones: [{
+        title: { type: String, required: true },
+        date: { type: String },
+        completed: { type: Boolean, default: false }
+    }]
 }, { timestamps: true });
 
 module.exports = mongoose.model('Project', projectSchema);

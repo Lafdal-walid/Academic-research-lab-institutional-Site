@@ -284,10 +284,16 @@ const ReportsHistoryTable = ({ direction = 'ltr', reportsList, setReportsList })
                                     </span>
                                 </td>
                                 <td style={{ padding: '2.8vh 1.5vw 2.8vh 0.5vw', textAlign: 'right' }}>
-                                    <button style={{ backgroundColor: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.55vw', justifyContent: 'flex-end', marginLeft: 'auto' }}>
+                                    <a
+                                        href={row.fileUrl ? `http://localhost:5000${row.fileUrl}` : '#'}
+                                        download
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        style={{ backgroundColor: 'transparent', border: 'none', cursor: row.fileUrl ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', gap: '0.55vw', justifyContent: 'flex-end', marginLeft: 'auto', textDecoration: 'none', opacity: row.fileUrl ? 1 : 0.4 }}
+                                    >
                                         <img src={DownloadIcon} alt="download" style={{ width: '1.1vw' }} />
                                         <span style={{ color: '#3457DC', fontSize: '0.85vw', fontWeight: 600, marginTop: '0.3vh' }}>Download</span>
-                                    </button>
+                                    </a>
                                 </td>
                             </tr>
                         ))}
@@ -641,6 +647,7 @@ const EditProgressForm = ({ onSave }) => {
     const [isWilayaDropdownOpen, setIsWilayaDropdownOpen] = useState(false);
     const [wilayaSearchTerm, setWilayaSearchTerm] = useState('');
     const [degreeTitle, setDegreeTitle] = useState('P.h.d');
+    const [selectedFile, setSelectedFile] = useState(null);
 
     const uniDropdownRef = useRef(null);
     const wilayaDropdownRef = useRef(null);
@@ -698,6 +705,7 @@ const EditProgressForm = ({ onSave }) => {
     const handleClearFile = (e) => {
         e.stopPropagation();
         setFileName('No file selected');
+        setSelectedFile(null);
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
@@ -783,7 +791,10 @@ const EditProgressForm = ({ onSave }) => {
             {/* Hidden Inputs */}
             <input type="file" ref={imageInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleImageChange} />
             <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept=".pdf,.png,.jpg" onChange={(e) => {
-                if (e.target.files?.[0]) setFileName(e.target.files[0].name);
+                if (e.target.files?.[0]) {
+                    setFileName(e.target.files[0].name);
+                    setSelectedFile(e.target.files[0]);
+                }
             }} />
 
             {/* Header */}
@@ -1092,7 +1103,8 @@ const EditProgressForm = ({ onSave }) => {
                         onSave({
                             document: degreeTitle,
                             university: selectedUniversity,
-                            dateTime: new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(new Date()) + ' – ' + new Date().getHours() + ':' + new Date().getMinutes().toString().padStart(2, '0')
+                            dateTime: new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(new Date()) + ' – ' + new Date().getHours() + ':' + new Date().getMinutes().toString().padStart(2, '0'),
+                            file: selectedFile
                         });
                     }
                 }}
@@ -1116,41 +1128,100 @@ const EditProgressForm = ({ onSave }) => {
 const PhdTracker = () => {
     const [activeTab, setActiveTab] = useState('Team Tracker');
     const [showReportsTable, setShowReportsTable] = useState(false);
-
-    // State for Team Tracker (Mock Data)
-    const [teamReports, setTeamReports] = useState([
-        { id: 1, dateTime: 'Avril 4 2026 – 14:23', document: 'Doctorat graduation', university: 'Blida 1', status: 'Accepted', checked: false },
-        { id: 2, dateTime: 'Avril 4 2026 – 14:23', document: 'Engineering graduation', university: 'USTHB', status: 'Accepted', checked: false },
-        { id: 3, dateTime: 'Avril 4 2026 – 14:23', document: 'Doctorat graduation', university: 'ensia', status: 'Refused', checked: false },
-        { id: 4, dateTime: 'Avril 4 2026 – 14:23', document: 'Doctorat graduation', university: 'esi', status: 'In Progress', checked: false },
-    ]);
-
-    // State for Your Track (User Data)
+    const [teamReports, setTeamReports] = useState([]);
     const [userReports, setUserReports] = useState([]);
 
     const [academicPhases, setAcademicPhases] = useState([
         { date: 'april 2026', title: 'Joining the team', completed: true },
     ]);
 
-    const handleAddReport = (formData) => {
-        const newReport = {
-            id: userReports.length + 1,
-            dateTime: formData.dateTime,
-            document: formData.document + ' graduation',
-            university: formData.university,
-            status: 'In Progress',
-            checked: false
-        };
+    useEffect(() => {
+        const fetchReports = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch('http://localhost:5000/api/reports', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const formatted = data.map(rep => ({
+                        id: rep._id,
+                        dateTime: rep.dateTimeString || new Date(rep.createdAt).toLocaleString(),
+                        document: rep.document,
+                        university: rep.university,
+                        status: rep.status,
+                        fileUrl: rep.fileUrl || '',
+                        checked: false
+                    }));
+                    setTeamReports(formatted);
+                    setUserReports(formatted);
+                    
+                    const initialPhase = [{
+                        date: data.length > 0 ? new Date(data[0].user?.createdAt || data[0].createdAt).toLocaleString('en-US', { month: 'long', year: 'numeric' }).toLowerCase() : 'april 2026',
+                        title: 'Joining the team',
+                        completed: true
+                    }];
 
-        const newPhase = {
-            date: formData.dateTime.split(' – ')[0].toLowerCase(),
-            title: formData.document + ' graduation',
-            completed: true
+                    const dynamicPhases = data
+                        .filter(rep => rep.status !== 'Refused')
+                        .map(rep => ({
+                            date: rep.dateTimeString ? rep.dateTimeString.split(' \u2013 ')[0].toLowerCase() : '',
+                            title: rep.document,
+                            completed: rep.status === 'Accepted'
+                        }));
+                    setAcademicPhases([...initialPhase, ...dynamicPhases]);
+                }
+            } catch (err) {
+                console.error(err);
+            }
         };
+        fetchReports();
+    }, []);
 
-        setUserReports(prev => [...prev, newReport]);
-        setAcademicPhases(prev => [...prev, newPhase]);
-        setShowReportsTable(true);
+    const handleAddReport = async (formData) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('http://localhost:5000/api/reports', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: (() => {
+                    const fd = new FormData();
+                    fd.append('document', formData.document + ' graduation');
+                    fd.append('university', formData.university);
+                    fd.append('dateTime', formData.dateTime);
+                    if (formData.file) fd.append('benchmarkFile', formData.file);
+                    return fd;
+                })()
+            });
+
+            if (res.ok) {
+                const rep = await res.json();
+                const newReport = {
+                    id: rep._id,
+                    dateTime: rep.dateTimeString,
+                    document: rep.document,
+                    university: rep.university,
+                    status: rep.status,
+                    fileUrl: rep.fileUrl || '',
+                    checked: false
+                };
+
+                const newPhase = {
+                    date: formData.dateTime.split(' – ')[0].toLowerCase(),
+                    title: newReport.document,
+                    completed: false
+                };
+
+                setUserReports(prev => [newReport, ...prev]);
+                setTeamReports(prev => [newReport, ...prev]);
+                setAcademicPhases(prev => [...prev, newPhase]);
+                setShowReportsTable(true);
+            }
+        } catch (error) {
+            console.error('Failed to save report', error);
+        }
     };
 
     const overviewStats = [

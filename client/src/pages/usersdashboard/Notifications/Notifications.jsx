@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const svgPaths = {
   angleSmallDown: "M15.8842 6.545C15.7681 6.42884 15.6302 6.3367 15.4785 6.27383C15.3268 6.21096 15.1642 6.1786 15 6.1786C14.8358 6.1786 14.6732 6.21096 14.5215 6.27383C14.3698 6.3367 14.2319 6.42884 14.1158 6.545L10.2942 10.3658C10.216 10.4439 10.1101 10.4878 9.99958 10.4878C9.8891 10.4878 9.78314 10.4439 9.705 10.3658L5.88417 6.545C5.64978 6.3105 5.33184 6.17872 5.00029 6.17864C4.66875 6.17857 4.35075 6.3102 4.11625 6.54458C3.88175 6.77897 3.74997 7.09691 3.74989 7.42846C3.74982 7.76 3.88145 8.078 4.11583 8.3125L7.9375 12.1342C8.20834 12.405 8.52989 12.6199 8.88377 12.7665C9.23766 12.9131 9.61695 12.9885 10 12.9885C10.383 12.9885 10.7623 12.9131 11.1162 12.7665C11.4701 12.6199 11.7917 12.405 12.0625 12.1342L15.8842 8.3125C16.1185 8.07809 16.2502 7.76021 16.2502 7.42875C16.2502 7.0973 16.1185 6.77941 15.8842 6.545Z",
@@ -53,18 +53,40 @@ const NotificationItem = ({ title, message, time, unread, isLast }) => (
 
 const Notifications = () => {
   const [unreadOnly, setUnreadOnly] = useState(false);
-  
-  const allNotifications = [
-    { id: 1, title: 'Scientific Seminar', message: "The deadline for the 'AI in Data Science' seminar submissions has been extended to May 20th.", time: '2 minutes ago', unread: false },
-    { id: 2, title: 'Project Milestone', message: "The 'Smart Safety Risk Detection' project has reached 80% completion. New datasets are now available for review.", time: '1 hour ago', unread: true },
-    { id: 3, title: 'Access Granted', message: "You have been granted administrative access to the Central Research Database. Please verify your credentials.", time: 'Yesterday at 4:11 PM', unread: true },
-    { id: 4, title: 'Publication Alert', message: "Your latest paper on 'Clustering Algorithms' has been successfully indexed in the Lab's digital library.", time: 'June 29, 6:03 PM', unread: false },
-    { id: 5, title: 'Grant Approval', message: "The quarterly research budget for the 'IQ Optimizer' module has been approved and allocated to your team.", time: 'June 1, 9:00 AM', unread: false },
-  ];
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMyNotifications = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('http://localhost:5000/api/notifications/my', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          // Format data to match mock if needed
+          const formatted = data.map(n => ({
+            id: n._id,
+            title: n.title,
+            message: n.message,
+            time: new Date(n.createdAt).toLocaleString(),
+            unread: false // For now, we don't have unread status in DB
+          }));
+          setNotifications(formatted);
+        }
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMyNotifications();
+  }, []);
 
   const displayedNotifications = unreadOnly 
-    ? allNotifications.filter(n => n.unread) 
-    : allNotifications;
+    ? notifications.filter(n => n.unread) 
+    : notifications;
 
   return (
     <div className="w-full text-white font-poppins pb-[6vh] animate-in fade-in duration-500">

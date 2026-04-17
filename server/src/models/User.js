@@ -30,6 +30,11 @@ const userSchema = new mongoose.Schema({
     degree: {
         type: String,
         default: 'unknown'
+    },
+    team: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Team',
+        default: null
     }
 }, { timestamps: true });
 

@@ -107,6 +107,26 @@ const Header = ({ onToggleSidebar, title, navItems }) => {
     const [openNoti, setOpenNoti] = useState(false);
     const [openMobileSidebar, setOpenMobileSidebar] = useState(false);
     const [mobileMenuView, setMobileMenuView] = useState('main');
+    const [notifications, setNotifications] = useState([]);
+
+    useEffect(() => {
+        const fetchNavNotifications = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+                const res = await fetch('http://localhost:5000/api/notifications/my', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setNotifications(data);
+                }
+            } catch (error) {
+                console.error('Error fetching nav notifications:', error);
+            }
+        };
+        fetchNavNotifications();
+    }, []);
 
     const { t } = useTranslation('header');
     const { language, setLanguage } = useLanguage();
@@ -404,30 +424,34 @@ const Header = ({ onToggleSidebar, title, navItems }) => {
 
                             <div ref={notiRef} className={`absolute right-0 top-full mt-[1.2vh] w-[23vw] bg-[#121217] border border-[#2a2a30] rounded-xl overflow-hidden transition-all duration-200 z-50 shadow-2xl flex flex-col ${openNoti ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'}`} role="dialog" aria-hidden={!openNoti}>
                                 <div className="p-[1vw] border-b border-[#2a2a30] font-semibold text-white tracking-wide" style={{ fontSize: '1.05vw' }}>{t('recentNotifications')}</div>
-                                <div className="flex flex-col max-h-[300px] overflow-y-auto">
-                                    <div className="p-[1vw] hover:bg-white/5 cursor-pointer border-b border-[#2a2a30]/50" onClick={() => { navigate(`/usersdashboard/notifications`); setOpenNoti(false); }}>
-                                        <div className="font-medium text-white mb-[0.2vh]" style={{ fontSize: '1vw' }}>Scientific Seminar</div>
-                                        <div className="text-white/60 mb-[0.4vh]" style={{ fontSize: '0.94vw' }}>The deadline for the 'AI in Data Science' seminar submissions has been extended to May 20th.</div>
-                                        <div className="text-white/40" style={{ fontSize: '0.8vw' }}>2 minutes ago</div>
-                                    </div>
-                                    <div className="p-[1vw] hover:bg-white/5 cursor-pointer border-b border-[#2a2a30]/50" onClick={() => { navigate(`/usersdashboard/notifications`); setOpenNoti(false); }}>
-                                        <div>
-                                            <div className="font-medium text-white mb-[0.2vh]" style={{ fontSize: '1vw' }}>Project Milestone</div>
-                                            <div className="text-white/60 mb-[0.4vh]" style={{ fontSize: '0.94vw' }}>The 'Smart Safety Risk Detection' project has reached 80% completion. New datasets are now available for review.</div>
-                                            <div className="text-white/40" style={{ fontSize: '0.8vw' }}>1 hour ago</div>
-                                        </div>
-                                    </div>
-                                    <div className="p-[1vw] hover:bg-white/5 cursor-pointer flex gap-[0.5vw]" onClick={() => { navigate(`/usersdashboard/notifications`); setOpenNoti(false); }}>
-                                        <div>
-                                            <div className="font-medium text-white mb-[0.2vh]" style={{ fontSize: '1vw' }}>Access Granted</div>
-                                            <div className="text-white/60 mb-[0.4vh]" style={{ fontSize: '0.94vw' }}>You have been granted administrative access to the Central Research Database. Please verify your credentials.</div>
-                                            <div className="text-white/40" style={{ fontSize: '0.8vw' }}>Yesterday at 4:11 PM</div>
-                                        </div>
-                                    </div>
+                                <div className="flex flex-col max-h-[300px] overflow-y-auto custom-scrollbar">
+                                    {notifications && notifications.length > 0 ? (
+                                        notifications.slice(0, 5).map((noti) => (
+                                            <div 
+                                                key={noti._id} 
+                                                className="p-[1vw] hover:bg-white/5 cursor-pointer border-b border-[#2a2a30]/50" 
+                                                onClick={() => { 
+                                                    const target = location.pathname.includes('/leaderdashboard') ? '/leaderdashboard/notifications' : '/usersdashboard/notifications';
+                                                    navigate(target); 
+                                                    setOpenNoti(false); 
+                                                }}
+                                            >
+                                                <div className="font-medium text-white mb-[0.2vh]" style={{ fontSize: '1vw' }}>{noti.title}</div>
+                                                <div className="text-white/60 mb-[0.4vh] line-clamp-2" style={{ fontSize: '0.94vw' }}>{noti.message}</div>
+                                                <div className="text-white/40" style={{ fontSize: '0.8vw' }}>{new Date(noti.createdAt).toLocaleString()}</div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="p-[2vw] text-center text-white/40" style={{ fontSize: '0.9vw' }}>No new notifications</div>
+                                    )}
                                 </div>
                                 <div className="p-[0.8vw] border-t border-[#2a2a30] text-center w-full">
                                     <button 
-                                        onClick={() => { navigate(`/usersdashboard/notifications`); setOpenNoti(false); }}
+                                        onClick={() => { 
+                                            const target = location.pathname.includes('/leaderdashboard') ? '/leaderdashboard/notifications' : '/usersdashboard/notifications';
+                                            navigate(target); 
+                                            setOpenNoti(false); 
+                                        }}
                                         className="font-medium text-[#3457DC] hover:text-[#3457DC]/80 w-full outline-none" 
                                         style={{ fontSize: '0.94vw' }}
                                     >

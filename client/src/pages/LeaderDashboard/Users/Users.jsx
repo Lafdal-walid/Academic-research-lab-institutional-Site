@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RiCheckLine, RiArrowRightSLine, RiSearch2Line, RiArrowDownSLine, RiUserAddLine, RiArrowLeftSLine, RiDeleteBinLine } from 'react-icons/ri';
+import ChangeRoleModal from './ChangeRoleModal';
+import AssignTeamModal from './AssignTeamModal';
+import { RiCheckLine, RiArrowRightSLine, RiSearch2Line, RiArrowDownSLine, RiUserAddLine, RiArrowLeftSLine, RiDeleteBinLine, RiUserSettingsLine, RiTeamLine } from 'react-icons/ri';
 
 // --- Assets Icons ---
 import DropdownIcon from "@/assets/svg/userDashboard/PhdTracker/angle-small-down 1.svg";
@@ -134,10 +136,15 @@ const ManageUsersTable = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [selectedSort, setSelectedSort] = useState('Newest first');
-    const [selectedPlan, setSelectedPlan] = useState('Plan Type');
+    const [selectedTeam, setSelectedTeam] = useState('By Team');
     const [selectedStatus, setSelectedStatus] = useState('Status');
-    const [selectedIQ, setSelectedIQ] = useState('IQ Version');
+    const [selectedRole, setSelectedRole] = useState('By Role');
+    const [availableTeams, setAvailableTeams] = useState(['By Team']);
     const [currentPage, setCurrentPage] = useState(2);
+    const [activeActionMenu, setActiveActionMenu] = useState(null);
+    const [isChangeRoleModalOpen, setIsChangeRoleModalOpen] = useState(false);
+    const [isAssignTeamModalOpen, setIsAssignTeamModalOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState(null);
     const totalPages = 12;
 
     const [users, setUsers] = useState([]);
@@ -145,32 +152,43 @@ const ManageUsersTable = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchUsers = async () => {
+        const fetchInitialData = async () => {
             setIsLoading(true);
             try {
                 const token = localStorage.getItem('token');
-                const res = await fetch('http://localhost:5000/api/auth/admin/users', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                
+                // Fetch Users
+                const usersRes = await fetch('http://localhost:5000/api/auth/admin/users', {
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
-                const data = await res.json();
-                if (res.ok) {
-                    const formattedUsers = data.map(user => ({
+                const usersData = await usersRes.json();
+                
+                // Fetch Teams
+                const teamsRes = await fetch('http://localhost:5000/api/teams', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const teamsData = await teamsRes.json();
+
+                if (usersRes.ok) {
+                    const formattedUsers = usersData.map(user => ({
                         id: user._id,
                         userId: `ID-${user._id.toString().slice(-4).toUpperCase()}`,
                         email: user.email,
                         username: user.username,
                         role: user.role,
                         degree: user.degree || 'unknown',
-                        team: 'Not Assigned',
-                        status: 'Without Project',
+                        team: user.team ? user.team.name || 'Assigned' : 'Not Assigned',
+                        status: user.team ? 'In Project' : 'Without Project',
                         checked: false
                     }));
                     setUsers(formattedUsers);
-                } else {
-                    setError(data.message || 'Failed to fetch users');
                 }
+
+                if (teamsRes.ok) {
+                    const teamNames = teamsData.map(t => t.name);
+                    setAvailableTeams(['By Team', ...teamNames]);
+                }
+
             } catch (err) {
                 setError('Connection failed');
             } finally {
@@ -178,19 +196,89 @@ const ManageUsersTable = () => {
             }
         };
 
-        fetchUsers();
+        fetchInitialData();
     }, []);
 
     const handleToggleRow = (id) => {
         setUsers(prev => prev.map(u => u.id === id ? { ...u, checked: !u.checked } : u));
     };
 
+    const handleRoleUpdate = async (userId, updateData) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`http://localhost:5000/api/auth/admin/users/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updateData)
+            });
+            const data = await res.json();
+            if (res.ok) {
+                // Update local state
+                setUsers(prev => prev.map(u => u.id === userId ? { 
+                    ...u, 
+                    role: data.role, 
+                    degree: data.degree 
+                } : u));
+                setIsChangeRoleModalOpen(false);
+            } else {
+                alert(data.message || 'Update failed');
+            }
+        } catch (err) {
+            alert('Connection failed');
+        }
+    };
+
+    // --- Filter and Sort Logic ---
+    const filteredUsers = React.useMemo(() => {
+        let result = [...users];
+
+        // Search
+        if (searchTerm) {
+            const lowerSearch = searchTerm.toLowerCase();
+            result = result.filter(u => 
+                u.username.toLowerCase().includes(lowerSearch) || 
+                u.email.toLowerCase().includes(lowerSearch) ||
+                u.userId.toLowerCase().includes(lowerSearch)
+            );
+        }
+
+        // Filter: Role
+        if (selectedRole !== 'By Role') {
+            result = result.filter(u => u.role === selectedRole);
+        }
+
+        // Filter: Team
+        if (selectedTeam !== 'By Team') {
+            result = result.filter(u => u.team === selectedTeam);
+        }
+
+        // Filter: Status (Real logic based on team assignment)
+        if (selectedStatus !== 'Status') {
+            result = result.filter(u => u.status === selectedStatus);
+        }
+
+        // Sort
+        result.sort((a, b) => {
+            if (selectedSort === 'Newest first') {
+                return b.id.localeCompare(a.id); // Assuming IDs are roughly chronological (ObjectId)
+            } else {
+                return a.id.localeCompare(b.id);
+            }
+        });
+
+        return result;
+    }, [users, searchTerm, selectedSort, selectedRole, selectedTeam, selectedStatus]);
+
     const dropdownRef = useRef(null);
 
     useEffect(() => {
         const handleClickOutside = (e) => {
-            if (activeDropdown && dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+            if ((activeDropdown || activeActionMenu) && dropdownRef.current && !dropdownRef.current.contains(e.target)) {
                 setActiveDropdown(null);
+                setActiveActionMenu(null);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -272,9 +360,9 @@ const ManageUsersTable = () => {
                 {/* Dropdowns */}
                 {[
                     { id: 'sort', current: selectedSort, options: ['Newest first', 'Oldest first'], setter: setSelectedSort },
-                    { id: 'iq', current: selectedIQ, options: ['IQ V1', 'IQ V2'], setter: setSelectedIQ },
-                    { id: 'plan', current: selectedPlan, options: ['Free', 'Premium'], setter: setSelectedPlan },
-                    { id: 'status', current: selectedStatus, options: ['In Project', 'Without Project'], setter: setSelectedStatus }
+                    { id: 'role', current: selectedRole, options: ['By Role', 'guest', 'user', 'admin', 'superadmin'], setter: setSelectedRole },
+                    { id: 'team', current: selectedTeam, options: availableTeams, setter: setSelectedTeam },
+                    { id: 'status', current: selectedStatus, options: ['Status', 'In Project', 'Without Project'], setter: setSelectedStatus }
                 ].map(drop => (
                     <div key={drop.id} style={{ ...filterItemStyle, position: 'relative' }} onClick={() => setActiveDropdown(activeDropdown === drop.id ? null : drop.id)}>
                         <span style={{ fontSize: '14px', color: '#f0f0f2', flex: 1 }}>{drop.current}</span>
@@ -317,11 +405,11 @@ const ManageUsersTable = () => {
                             <tr>
                                 <td colSpan="9" style={{ textAlign: 'center', padding: '5vh', color: '#eb5757' }}>{error}</td>
                             </tr>
-                        ) : users.length === 0 ? (
+                        ) : filteredUsers.length === 0 ? (
                             <tr>
                                 <td colSpan="9" style={{ textAlign: 'center', padding: '5vh', color: '#a5a5b2' }}>No users found</td>
                             </tr>
-                        ) : users.map((user) => (
+                        ) : filteredUsers.map((user) => (
                             <tr key={user.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', height: '8vh' }}>
                                 <td style={{ padding: '0 0.5vw' }}>
                                     <div onClick={() => handleToggleRow(user.id)}
@@ -363,10 +451,45 @@ const ManageUsersTable = () => {
                                         {user.status}
                                     </span>
                                 </td>
-                                <td style={{ padding: '0 0.5vw', textAlign: 'center' }}>
-                                    <button style={{ backgroundColor: 'transparent', border: 'none', cursor: 'pointer' }}>
+                                <td style={{ padding: '0 0.5vw', textAlign: 'center', position: 'relative' }}>
+                                    <button 
+                                        onClick={() => setActiveActionMenu(activeActionMenu === user.id ? null : user.id)}
+                                        style={{ backgroundColor: 'transparent', border: 'none', cursor: 'pointer' }}
+                                    >
                                         <img src={DetailsIcon} alt="details" style={{ width: '1.8vw', height: '1.8vw', objectFit: 'contain' }} />
                                     </button>
+                                    {activeActionMenu === user.id && (
+                                        <div style={{ 
+                                            ...dropdownMenuStyle, 
+                                            right: '1.5vw', 
+                                            left: 'auto', 
+                                            top: '70%', 
+                                            width: '10vw',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: '4px'
+                                        }}>
+                                            <div style={{...dropdownItemStyle(false), display: 'flex', alignItems: 'center', gap: '8px'}} onClick={() => { 
+                                                setSelectedUser(user);
+                                                setIsChangeRoleModalOpen(true); 
+                                                setActiveActionMenu(null); 
+                                            }}>
+                                                <RiUserSettingsLine size="1vw" />
+                                                <span>Change Role</span>
+                                            </div>
+                                            <div 
+                                                style={{...dropdownItemStyle(false), display: 'flex', alignItems: 'center', gap: '8px'}} 
+                                                onClick={() => { 
+                                                    setSelectedUser(user);
+                                                    setIsAssignTeamModalOpen(true); 
+                                                    setActiveActionMenu(null); 
+                                                }}
+                                            >
+                                                <RiTeamLine size="1vw" />
+                                                <span>Assign Team</span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </td>
                             </tr>
                         ))}
@@ -404,6 +527,26 @@ const ManageUsersTable = () => {
                     </div>
                 </div>
             </div>
+
+            <ChangeRoleModal 
+                isOpen={isChangeRoleModalOpen}
+                onClose={() => setIsChangeRoleModalOpen(false)}
+                user={selectedUser}
+                onUpdate={handleRoleUpdate}
+            />
+
+            <AssignTeamModal
+                isOpen={isAssignTeamModalOpen}
+                onClose={() => setIsAssignTeamModalOpen(false)}
+                user={selectedUser}
+                onUpdate={(userId, data) => {
+                    setUsers(prev => prev.map(u => u.id === userId ? { 
+                        ...u, 
+                        team: data.team,
+                        status: data.team !== 'Not Assigned' ? 'In Project' : 'Without Project'
+                    } : u));
+                }}
+            />
         </div>
     );
 };
@@ -412,8 +555,8 @@ const UsersPublicationsTable = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [selectedSort, setSelectedSort] = useState('Newest first');
-    const [selectedReview, setSelectedReview] = useState('All reviews');
-    const [selectedRating, setSelectedRating] = useState('Rating');
+    const [selectedProject, setSelectedProject] = useState('Project');
+    const [selectedTeam, setSelectedTeam] = useState('Team');
     const [selectedStatus, setSelectedStatus] = useState('Status');
     
     const [activeRowAction, setActiveRowAction] = useState(null);
@@ -470,16 +613,98 @@ const UsersPublicationsTable = () => {
         transition: '0.2s', marginBottom: '2px'
     });
 
-    const [publications, setPublications] = useState([
-        { id: 1, name: 'walid', pub: 'Publication 1 : Lorem ipsum dolor sit amet consectetur. Orci ac habitant vestibulum egestas. Tristique malesuada vel lectus interdum rutrum in sed ac...', status: 'Waiting ...', date: 'Aug 18, 2025', tooltip: 'publication updated', checked: true },
-        { id: 2, name: 'walid', pub: 'Publication 2', status: 'Waiting ...', date: 'Aug 18, 2025', checked: false },
-        { id: 3, name: 'walid', pub: 'Publication 3', status: 'Waiting ...', date: 'Aug 18, 2025', checked: false },
-        { id: 4, name: 'walid', pub: 'Publication 4', status: 'Waiting ...', date: 'Aug 18, 2025', checked: false },
-    ]);
+    const [publications, setPublications] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchPublications = async () => {
+            setIsLoading(true);
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch('http://localhost:5000/api/publications', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    const formatted = data.map(pub => ({
+                        id: pub._id,
+                        name: pub.user ? pub.user.username : 'Unknown',
+                        pub: pub.title || pub.content || 'Untitled',
+                        project: pub.project ? pub.project.title : 'Not in project',
+                        team: pub.team ? pub.team.name : 'Not in team',
+                        status: pub.status || 'Waiting ...',
+                        date: new Date(pub.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                        rawDate: pub.createdAt,
+                        checked: false
+                    }));
+                    setPublications(formatted);
+                } else {
+                    setError('Failed to fetch publications');
+                }
+            } catch (err) {
+                setError('Connection failed');
+                console.error(err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchPublications();
+    }, []);
 
     const handleToggleRow = (id) => {
         setPublications(prev => prev.map(p => p.id === id ? { ...p, checked: !p.checked } : p));
     };
+
+    const availableProjects = React.useMemo(() => {
+        const projs = new Set(publications.map(p => p.project));
+        return ['Project', ...Array.from(projs)];
+    }, [publications]);
+
+    const availableTeams = React.useMemo(() => {
+        const teams = new Set(publications.map(p => p.team));
+        return ['Team', ...Array.from(teams)];
+    }, [publications]);
+
+    const filteredPublications = React.useMemo(() => {
+        let result = [...publications];
+
+        if (searchTerm) {
+            const lowerSearch = searchTerm.toLowerCase();
+            result = result.filter(p => 
+                p.name.toLowerCase().includes(lowerSearch) || 
+                p.pub.toLowerCase().includes(lowerSearch) ||
+                p.project.toLowerCase().includes(lowerSearch) ||
+                p.team.toLowerCase().includes(lowerSearch)
+            );
+        }
+
+        if (selectedProject !== 'Project') {
+            result = result.filter(p => p.project === selectedProject);
+        }
+
+        if (selectedTeam !== 'Team') {
+            result = result.filter(p => p.team === selectedTeam);
+        }
+
+        if (selectedStatus !== 'Status') {
+            result = result.filter(p => p.status === selectedStatus);
+        }
+
+        result.sort((a, b) => {
+            const dateA = a.rawDate ? new Date(a.rawDate).getTime() : 0;
+            const dateB = b.rawDate ? new Date(b.rawDate).getTime() : 0;
+            if (selectedSort === 'Newest first') {
+                return dateB - dateA;
+            } else {
+                return dateA - dateB;
+            }
+        });
+
+        return result;
+    }, [publications, searchTerm, selectedSort, selectedProject, selectedTeam, selectedStatus]);
 
     return (
         <div style={{
@@ -513,9 +738,9 @@ const UsersPublicationsTable = () => {
                 {/* Dropdowns */}
                 {[
                     { id: 'sort', current: selectedSort, options: ['Newest first', 'Oldest first'], setter: setSelectedSort },
-                    { id: 'reviews', current: selectedReview, options: ['All reviews', 'With comments'], setter: setSelectedReview },
-                    { id: 'rating', current: selectedRating, options: ['Rating', '5 Stars', '4 Stars'], setter: setSelectedRating },
-                    { id: 'status', current: selectedStatus, options: ['Status', 'Waiting ...', 'Approved'], setter: setSelectedStatus }
+                    { id: 'project', current: selectedProject, options: availableProjects, setter: setSelectedProject },
+                    { id: 'team', current: selectedTeam, options: availableTeams, setter: setSelectedTeam },
+                    { id: 'status', current: selectedStatus, options: ['Status', 'Waiting ...', 'Approved', 'Rejected'], setter: setSelectedStatus }
                 ].map(drop => (
                     <div key={drop.id} style={{ ...filterItemStyle, position: 'relative' }} onClick={() => setActiveDropdown(activeDropdown === drop.id ? null : drop.id)}>
                         <span style={{ fontSize: '14px', color: '#f0f0f2', flex: 1 }}>{drop.current}</span>
@@ -547,13 +772,27 @@ const UsersPublicationsTable = () => {
                             <th style={{ padding: '1.5vh 0.5vw', width: '3vw' }}></th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Name</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Publication</th>
+                            <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Project</th>
+                            <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Team</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, textAlign: 'center' }}>Status</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Date</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, textAlign: 'center' }}>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {publications.map((row) => (
+                        {isLoading ? (
+                            <tr>
+                                <td colSpan="8" style={{ textAlign: 'center', padding: '5vh', color: '#a5a5b2' }}>Loading publications...</td>
+                            </tr>
+                        ) : error ? (
+                            <tr>
+                                <td colSpan="8" style={{ textAlign: 'center', padding: '5vh', color: '#eb5757' }}>{error}</td>
+                            </tr>
+                        ) : filteredPublications.length === 0 ? (
+                            <tr>
+                                <td colSpan="8" style={{ textAlign: 'center', padding: '5vh', color: '#a5a5b2' }}>No publications found</td>
+                            </tr>
+                        ) : filteredPublications.map((row) => (
                             <tr key={row.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
                                 <td style={{ padding: '2.5vh 0.5vw' }}>
                                     <div onClick={() => handleToggleRow(row.id)}
@@ -562,7 +801,9 @@ const UsersPublicationsTable = () => {
                                     </div>
                                 </td>
                                 <td style={{ padding: '2.5vh 0.5vw', fontSize: '0.85vw', color: 'white' }}>{row.name}</td>
-                                <td style={{ padding: '2.5vh 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)', maxWidth: '25vw', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.pub}</td>
+                                <td style={{ padding: '2.5vh 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)', maxWidth: '20vw', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.pub}</td>
+                                <td style={{ padding: '2.5vh 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{row.project}</td>
+                                <td style={{ padding: '2.5vh 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{row.team}</td>
                                 <td style={{ padding: '2.5vh 0.5vw', textAlign: 'center' }}>
                                     <span style={{
                                         display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
@@ -658,7 +899,7 @@ const UsersPublicationsTable = () => {
     );
 };
 
-const UsersTrackTimeline = ({ phases = [] }) => {
+const UsersTrackTimeline = ({ phases = [], username, degree }) => {
 
     return (
         <div style={{
@@ -678,7 +919,9 @@ const UsersTrackTimeline = ({ phases = [] }) => {
                     position: 'absolute', left: '50%', transform: 'translateX(-50%)',
                     display: 'flex', flexDirection: 'column', gap: '0.4vw', alignItems: 'center'
                 }}>
-                    <span style={{ fontSize: '0.9vw', color: '#3457DC', fontWeight: 600, textDecoration: 'underline' }}>You're Doctorat</span>
+                    <span style={{ fontSize: '0.9vw', color: '#3457DC', fontWeight: 600, textDecoration: 'underline' }}>
+                        {username ? `${username} is ${degree}` : "You're Doctorat"}
+                    </span>
                 </div>
             </div>
 
@@ -732,7 +975,7 @@ const UsersTrackTimeline = ({ phases = [] }) => {
     );
 };
 
-const UsersTrackTable = ({ records = [], selectedId, onSelect }) => {
+const UsersTrackTable = ({ records = [], selectedId, onSelect, onUpdateStatus }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [activeRowAction, setActiveRowAction] = useState(null);
@@ -813,6 +1056,7 @@ const UsersTrackTable = ({ records = [], selectedId, onSelect }) => {
                     <thead>
                         <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                             <th style={{ padding: '1.5vh 0.5vw', width: '3vw' }}></th>
+                            <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>User</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Date & Time</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Document</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>University</th>
@@ -831,6 +1075,7 @@ const UsersTrackTable = ({ records = [], selectedId, onSelect }) => {
                                         {selectedId === row.id && <RiCheckLine color="white" size="0.8vw" />}
                                     </div>
                                 </td>
+                                <td style={{ padding: '2.5vh 0.5vw', fontSize: '0.85vw', color: 'white', fontWeight: 500 }}>{row.user}</td>
                                 <td style={{ padding: '2.5vh 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{row.dateTime}</td>
                                 <td style={{ padding: '2.5vh 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{row.document}</td>
                                 <td style={{ padding: '2.5vh 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{row.university}</td>
@@ -846,10 +1091,16 @@ const UsersTrackTable = ({ records = [], selectedId, onSelect }) => {
                                 </td>
                                 <td style={{ padding: '2.5vh 0.5vw', textAlign: 'right' }}>
                                     <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1.2vw' }}>
-                                        <button style={{ backgroundColor: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4vw' }}>
+                                        <a
+                                            href={row.fileUrl ? `http://localhost:5000${row.fileUrl}` : '#'}
+                                            download
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            style={{ backgroundColor: 'transparent', border: 'none', cursor: row.fileUrl ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', gap: '0.4vw', textDecoration: 'none', opacity: row.fileUrl ? 1 : 0.4 }}
+                                        >
                                             <img src={DownloadIcon} alt="download" style={{ width: '1.2vw' }} />
                                             <span style={{ color: '#3457DC', fontSize: '0.85vw', fontWeight: 600 }}>Download</span>
-                                        </button>
+                                        </a>
                                         <div style={{ position: 'relative' }}>
                                             <button 
                                                 style={{ backgroundColor: 'transparent', border: 'none', cursor: 'pointer' }}
@@ -859,8 +1110,8 @@ const UsersTrackTable = ({ records = [], selectedId, onSelect }) => {
                                             </button>
                                             {activeRowAction === row.id && (
                                                 <div ref={rowActionRef} style={{ ...rowActionMenuStyle, top: '100%', right: '0' }}>
-                                                    <div style={dropdownItemStyle(false)} onClick={() => setActiveRowAction(null)}>Accept degree</div>
-                                                    <div style={dropdownItemStyle(false)} onClick={() => setActiveRowAction(null)}>Reject degree</div>
+                                                    <div style={dropdownItemStyle(false)} onClick={() => { onUpdateStatus(row.id, 'Accepted'); setActiveRowAction(null); }}>Accept degree</div>
+                                                    <div style={dropdownItemStyle(false)} onClick={() => { onUpdateStatus(row.id, 'Refused'); setActiveRowAction(null); }}>Reject degree</div>
                                                 </div>
                                             )}
                                         </div>
@@ -894,28 +1145,92 @@ const UsersTrackTable = ({ records = [], selectedId, onSelect }) => {
 };
 
 const UsersTrackManager = () => {
-    const [selectedId, setSelectedId] = useState(1);
-    
-    const records = [
-        { id: 1, dateTime: 'Avril 4 2026 – 14:23', document: 'Doctorat graduation', university: 'Blida 1', status: 'Accepted' },
-        { id: 2, dateTime: 'Avril 4 2026 – 14:23', document: 'Engineering graduation', university: 'USTHB', status: 'Accepted' },
-        { id: 3, dateTime: 'Avril 4 2026 – 14:23', document: 'Doctorat graduation', university: 'ensia', status: 'Refused' },
-        { id: 4, dateTime: 'Avril 4 2026 – 14:23', document: 'Doctorat graduation', university: 'esi', status: 'In Progress' },
-    ];
+    const [selectedId, setSelectedId] = useState(null);
+    const [records, setRecords] = useState([]);
+    const [timelineData, setTimelineData] = useState({});
 
-    const timelineData = {
-        1: [
-            { date: 'april 2026', title: 'Joining the team', completed: true },
-            { date: 'april 16, 2026', title: 'P.h.d graduation', completed: false }
-        ],
-        2: [
-            { date: 'sep 2025', title: 'Enrollment', completed: true },
-            { date: 'Avril 4, 2026', title: 'Engineering Thesis', completed: true }
-        ],
-        // Adding defaults for others
-        3: [{ date: 'Avril 4, 2026', title: 'Refusal Appeal', completed: false }],
-        4: [{ date: 'Avril 4, 2026', title: 'Review in Progress', completed: false }]
+    const fetchReports = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('http://localhost:5000/api/reports', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                const formatted = data.map(rep => ({
+                    id: rep._id,
+                    userId: rep.user ? rep.user._id : 'unknown',
+                    user: rep.user ? rep.user.username : 'Unknown',
+                    dateTime: rep.dateTimeString || new Date(rep.createdAt).toLocaleString(),
+                    document: rep.document,
+                    university: rep.university,
+                    status: rep.status,
+                    fileUrl: rep.fileUrl || '',
+                    checked: false
+                }));
+                setRecords(formatted);
+                if (formatted.length > 0 && !selectedId) {
+                    setSelectedId(formatted[0].id);
+                }
+
+                // Group all reports per user to build full timelines
+                const userTimelines = {};
+                data.forEach(rep => {
+                    const uid = rep.user ? rep.user._id : 'unknown';
+                    if (!userTimelines[uid]) {
+                        const joiningDate = new Date(rep.user?.createdAt || rep.createdAt)
+                            .toLocaleString('en-US', { month: 'long', year: 'numeric' }).toLowerCase();
+                        userTimelines[uid] = [
+                            { date: joiningDate, title: 'Joining the team', completed: true }
+                        ];
+                    }
+                    // Only add to timeline if not refused
+                    if (rep.status !== 'Refused') {
+                        userTimelines[uid].push({
+                            date: rep.dateTimeString ? rep.dateTimeString.split(' \u2013 ')[0].toLowerCase() : '',
+                            title: rep.document,
+                            completed: rep.status === 'Accepted'
+                        });
+                    }
+                });
+
+                // Map each record._id to its user's full timeline
+                const tlData = {};
+                formatted.forEach(rec => {
+                    tlData[rec.id] = userTimelines[rec.userId] || [];
+                });
+                setTimelineData(tlData);
+            }
+        } catch (err) {
+            console.error(err);
+        }
     };
+
+    useEffect(() => {
+        fetchReports();
+    }, []);
+
+    const handleUpdateStatus = async (id, newStatus) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`http://localhost:5000/api/reports/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ status: newStatus })
+            });
+
+            if (res.ok) {
+                fetchReports();
+            }
+        } catch (error) {
+            console.error('Failed to update status', error);
+        }
+    };
+
+    const selectedRecord = records.find(r => r.id === selectedId);
 
     return (
         <motion.div
@@ -927,9 +1242,12 @@ const UsersTrackManager = () => {
                 records={records} 
                 selectedId={selectedId} 
                 onSelect={setSelectedId} 
+                onUpdateStatus={handleUpdateStatus}
             />
             <UsersTrackTimeline 
                 phases={timelineData[selectedId] || []} 
+                username={selectedRecord ? selectedRecord.user : ''}
+                degree={selectedRecord ? selectedRecord.document : ''}
             />
         </motion.div>
     );
@@ -937,21 +1255,40 @@ const UsersTrackManager = () => {
 
 const Users = () => {
     const [activeTab, setActiveTab] = useState('Users list');
+    const [stats, setStats] = useState({ totalUsers: 0, totalPublications: 0, totalProjects: 0 });
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch('http://localhost:5000/api/auth/admin/stats', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    setStats(data);
+                }
+            } catch (err) {
+                console.error('Failed to fetch stats:', err);
+            }
+        };
+        fetchStats();
+    }, []);
 
     const overviewStats = [
         {
             title: "Total users",
-            value: "2,345",
+            value: stats.totalUsers.toLocaleString(),
             icon: <img src={TeamIcon} alt="Team" style={{ width: '1.25vw', height: '1.25vw', objectFit: 'contain' }} />
         },
         {
             title: "Publications",
-            value: "200",
+            value: stats.totalPublications.toLocaleString(),
             icon: <img src={PublicationsIcon} alt="Publications" style={{ width: '1.25vw', height: '1.25vw', objectFit: 'contain' }} />
         },
         {
             title: "Projects",
-            value: "7",
+            value: stats.totalProjects.toLocaleString(),
             icon: <img src={ProjectsIcon} alt="Projects" style={{ width: '1.25vw', height: '1.25vw', objectFit: 'contain' }} />
         },
         {

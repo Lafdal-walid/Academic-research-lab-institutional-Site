@@ -6,6 +6,7 @@ import maskRightImg from "./assets/Group 446.svg";
 import labIcon1 from "./assets/New folder/Gemini_Generated_Image_rl2hmmrl2hmmrl2h-removebg-preview 1.svg";
 import labIcon2 from "./assets/New folder/Hex Lab.svg";
 import labIcon3 from "./assets/New folder/Circle.svg";
+import libIcon from "./assets/lib.svg";
 import { IoIosArrowRoundDown } from "react-icons/io";
 
 const Welcome = () => {
@@ -98,11 +99,11 @@ const Welcome = () => {
                     </h2>
                     <div className="relative flex w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 bg-[#3457DC] rounded-full items-center justify-center shadow-[0_0_30px_rgba(52,87,220,0.5)] flex-shrink-0">
                         {/* Focused Glow Layer */}
-                        <div className="flex items-end gap-1.5 h-6 md:h-8">
-                            <div className="w-1 md:w-1.5 h-3 md:h-4 bg-white rounded-full"></div>
-                            <div className="w-1 md:w-1.5 h-6 md:h-8 bg-white rounded-full"></div>
-                            <div className="w-1 md:w-1.5 h-4 md:h-6 bg-white rounded-full"></div>
-                        </div>
+                        <img 
+                            src={libIcon} 
+                            alt="library icon" 
+                            className="w-[50%] h-[50%] object-contain brightness-0 invert" 
+                        />
                     </div>
                 </div>
 

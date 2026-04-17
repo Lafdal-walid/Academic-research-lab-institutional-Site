@@ -53,9 +53,105 @@ const Tab = ({ label, isActive, onClick }) => {
     );
 };
 
-const NewNotification = () => {
+const NewNotification = ({ onNotificationSent, editData }) => {
     const [audienceType, setAudienceType] = useState('teams'); // 'teams' or 'filters'
     const [deliveryType, setDeliveryType] = useState('later'); // 'now' or 'later'
+    const [title, setTitle] = useState('');
+    const [message, setMessage] = useState('');
+    const [team, setTeam] = useState('All Teams');
+    const [isSending, setIsSending] = useState(false);
+    const [availableTeams, setAvailableTeams] = useState([]);
+    const [selectedMembers, setSelectedMembers] = useState([]); // Array of user emails or IDs
+    const [scheduledAt, setScheduledAt] = useState('');
+
+    useEffect(() => {
+        if (editData) {
+            setTitle(editData.title || '');
+            setMessage(editData.message || '');
+            setTeam(editData.team || 'All Teams');
+            setAudienceType(editData.audienceType || 'teams');
+            setSelectedMembers(editData.specificUsers || []);
+            if (editData.scheduledAt) {
+                setDeliveryType('later');
+                setScheduledAt(new Date(editData.scheduledAt).toISOString().slice(0, 16));
+            }
+        }
+    }, [editData]);
+
+    useEffect(() => {
+        const fetchTeams = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch('http://localhost:5000/api/teams', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setAvailableTeams(data);
+                }
+            } catch (error) {
+                console.error('Error fetching teams:', error);
+            }
+        };
+        fetchTeams();
+    }, []);
+
+    const currentTeamData = availableTeams.find(t => t.name === team);
+
+    const toggleMember = (email) => {
+        setSelectedMembers(prev => 
+            prev.includes(email) ? prev.filter(e => e !== email) : [...prev, email]
+        );
+    };
+
+    const handleSendNotification = async () => {
+        if (!title || !message) {
+            alert('Please fill in both the title and the message.');
+            return;
+        }
+
+        const isEdit = editData && editData._id;
+        const url = isEdit 
+            ? `http://localhost:5000/api/notifications/${editData._id}` 
+            : 'http://localhost:5000/api/notifications';
+
+        setIsSending(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(url, {
+                method: isEdit ? 'PUT' : 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    title,
+                    message,
+                    audienceType,
+                    team: team || 'All Teams',
+                    specificUsers: selectedMembers,
+                    createdBy: 'Admin',
+                    scheduledAt: deliveryType === 'later' ? scheduledAt : null
+                })
+            });
+
+            if (res.ok) {
+                alert('Notification sent successfully!');
+                setTitle('');
+                setMessage('');
+                setTeam('');
+                if (onNotificationSent) onNotificationSent();
+            } else {
+                const errorData = await res.json();
+                alert(`Failed to send notification: ${errorData.message}`);
+            }
+        } catch (error) {
+            console.error('Error sending notification:', error);
+            alert('An error occurred while sending the notification.');
+        } finally {
+            setIsSending(false);
+        }
+    };
 
     return (
     <div className="flex flex-col gap-6 w-full animate-in fade-in duration-500">
@@ -115,24 +211,74 @@ const NewNotification = () => {
                     <div className="content-stretch flex flex-col gap-[20px] items-start w-full">
                       {/* Team identifiers */}
                       <div className="content-stretch flex flex-col gap-[12px] items-start w-full">
-                          <p className="font-['Poppins',sans-serif] leading-[normal] not-italic text-[#80808a] text-[14px] w-full">Team identifiers</p>
+                          <p className="font-['Poppins',sans-serif] leading-[normal] not-italic text-[#80808a] text-[14px] w-full">Target Team</p>
                           <div className="bg-[rgba(255,255,255,0.01)] h-[45px] relative rounded-[8px] w-full border border-[#2a2a30] transition-all hover:border-white/10 focus-within:border-[#3457dc]">
-                            <input 
-                                type="text"
-                                className="bg-transparent border-none outline-none size-full px-[14px] text-white font-['Poppins',sans-serif] text-[14px]"
-                                placeholder="Type usernames or emails"
-                            />
+                            <select 
+                                className="bg-transparent border-none outline-none size-full px-[14px] text-white font-['Poppins',sans-serif] text-[14px] appearance-none"
+                                value={team}
+                                onChange={(e) => {
+                                    setTeam(e.target.value);
+                                    setSelectedMembers([]); // Reset selected members when team changes
+                                }}
+                            >
+                                <option value="All Teams" className="bg-[#151519]">All Teams</option>
+                                {availableTeams.map(t => (
+                                    <option key={t._id} value={t.name} className="bg-[#151519]">{t.name}</option>
+                                ))}
+                            </select>
+                            <div className="absolute right-[14px] top-1/2 -translate-y-1/2 pointer-events-none">
+                                <RiArrowDownSLine color="#a5a5b2" />
+                            </div>
                           </div>
                       </div>
 
-                      {/* Upload user list */}
+                      {/* Team Members List (Only shown if a specific team is selected) */}
+                      {team !== 'All Teams' && currentTeamData && (
+                        <div className="content-stretch flex flex-col gap-[12px] items-start w-full animate-in slide-in-from-top-2 duration-300">
+                            <div className="flex justify-between items-center w-full">
+                                <p className="font-['Poppins',sans-serif] leading-[normal] not-italic text-[#80808a] text-[14px]">
+                                    Select Team Members (Optional)
+                                </p>
+                                <button 
+                                    className="text-[#3457dc] text-[12px] hover:underline"
+                                    onClick={() => setSelectedMembers(currentTeamData.members.map(m => m.email))}
+                                >
+                                    Select All
+                                </button>
+                            </div>
+                            <div className="bg-[#1a1a20] rounded-[12px] p-4 w-full border border-[#2a2a30] flex flex-wrap gap-2 max-h-[150px] overflow-y-auto custom-scrollbar">
+                                {currentTeamData.members.map(member => {
+                                    const isSelected = selectedMembers.includes(member.email);
+                                    return (
+                                        <div 
+                                            key={member._id}
+                                            onClick={() => toggleMember(member.email)}
+                                            className={`px-3 py-1.5 rounded-full text-[12px] font-['Poppins',sans-serif] cursor-pointer transition-all flex items-center gap-2 ${
+                                                isSelected 
+                                                ? 'bg-[#3457dc] text-white' 
+                                                : 'bg-[#25252b] text-[#a5a5b2] hover:bg-[#2e2e36]'
+                                            }`}
+                                        >
+                                            {isSelected && <RiCheckLine size={14} />}
+                                            {member.username || member.email}
+                                        </div>
+                                    );
+                                })}
+                                {currentTeamData.members.length === 0 && (
+                                    <p className="text-[#a5a5b2] text-[13px] italic">No members found in this team.</p>
+                                )}
+                            </div>
+                        </div>
+                      )}
+
+                      {/* Upload user list / Specific Emails */}
                       <div className="content-stretch flex flex-col gap-[12px] items-start w-full">
-                        <p className="font-['Poppins',sans-serif] leading-[normal] not-italic text-[#80808a] text-[14px] w-full">Upload user list</p>
+                        <p className="font-['Poppins',sans-serif] leading-[normal] not-italic text-[#80808a] text-[14px] w-full">Additional specific recipients / Upload list</p>
                         <div className="bg-[rgba(255,255,255,0.01)] h-[45px] relative rounded-[8px] w-full border border-[#2a2a30] transition-all hover:border-white/10 focus-within:border-[#3457dc]">
                           <input 
                                 type="text"
                                 className="bg-transparent border-none outline-none size-full px-[14px] text-white font-['Poppins',sans-serif] text-[14px]"
-                                placeholder="write here Users Emails & names ..."
+                                placeholder="Paste emails separated by commas or type specific names..."
                             />
                         </div>
                       </div>
@@ -161,6 +307,8 @@ const NewNotification = () => {
                                 type="text"
                                 className="bg-transparent border-none outline-none size-full px-[14px] text-white font-['Poppins',sans-serif] text-[14px]"
                                 placeholder="e.g New update available"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
                             />
                         </div>
                     </div>
@@ -190,6 +338,8 @@ const NewNotification = () => {
                              <textarea 
                                 className="bg-transparent border-none outline-none w-full flex-1 text-white font-['Poppins',sans-serif] text-[14px] resize-none"
                                 placeholder="Write the message you want users to see…"
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
                             />
                             <div className="flex justify-end">
                                 <svg className="size-[12px]" fill="none" viewBox="0 0 12 12">
@@ -285,8 +435,14 @@ const NewNotification = () => {
                     </div>
                 </button>
 
-                <button className="bg-[#3457dc] content-stretch flex items-center justify-center px-[32px] py-[14px] relative rounded-[16px] transition-all hover:bg-[#2a46b3] active:scale-95">
-                    <p className="font-['Poppins',sans-serif] font-medium leading-[normal] not-italic text-[14px] text-white whitespace-nowrap">Send notification</p>
+                <button 
+                    className="bg-[#3457dc] content-stretch flex items-center justify-center px-[32px] py-[14px] relative rounded-[16px] transition-all hover:bg-[#2a46b3] active:scale-95 disabled:opacity-50"
+                    onClick={handleSendNotification}
+                    disabled={isSending}
+                >
+                    <p className="font-['Poppins',sans-serif] font-medium leading-[normal] not-italic text-[14px] text-white whitespace-nowrap">
+                        {isSending ? 'Sending...' : 'Send notification'}
+                    </p>
                 </button>
               </div>
 
@@ -298,7 +454,7 @@ const NewNotification = () => {
                         <path d={svgPaths.p2286e900} fill="#3457dc" />
                     </svg>
                     </div>
-                    <p className="font-['Poppins',sans-serif] leading-[normal] not-italic text-[14px] text-[#a5a5b2]">Users to notify: <span className="text-white font-medium">Team A+</span></p>
+                    <p className="font-['Poppins',sans-serif] leading-[normal] not-italic text-[14px] text-[#a5a5b2]">Users to notify: <span className="text-white font-medium">{selectedMembers.length > 0 ? `${selectedMembers.length} specific members` : (team || 'All Teams')}</span></p>
                 </div>
 
                 <div className="flex gap-[12px] items-center">
@@ -307,7 +463,7 @@ const NewNotification = () => {
                         <path d={svgPaths.p3b8f8870} fill="#3457dc" />
                     </svg>
                     </div>
-                    <p className="font-['Poppins',sans-serif] leading-[normal] not-italic text-[14px] text-[#a5a5b2]">Scheduled for <span className="text-white font-medium">Sept 25, 2025 at 10:00 AM</span></p>
+                    <p className="font-['Poppins',sans-serif] leading-[normal] not-italic text-[14px] text-[#a5a5b2]">Scheduled for <span className="text-white font-medium">{deliveryType === 'now' ? 'Immediately' : 'Later'}</span></p>
                 </div>
               </div>
             </div>
@@ -363,12 +519,17 @@ const NewNotification = () => {
                       </div>
                     </div>
 
-                    {/* Date & time picker */}
                     <div className="content-stretch flex flex-col gap-[12px] items-start w-full">
                         <p className="font-['Poppins',sans-serif] leading-[normal] not-italic text-[#80808a] text-[14px] w-full">Date & time picker</p>
-                        <div className="bg-[rgba(255,255,255,0.01)] h-[45px] relative rounded-[8px] w-full border border-[#2a2a30] flex items-center justify-between px-[14px] transition-all hover:border-white/10">
-                              <span className="font-['Poppins',sans-serif] text-[#a5a5b2] text-[14px]">Select date & time</span>
-                              <div className="relative shrink-0 size-[20px]">
+                        <div className={`bg-[rgba(255,255,255,0.01)] h-[45px] relative rounded-[8px] w-full border border-[#2a2a30] flex items-center justify-between px-[14px] transition-all hover:border-white/10 ${deliveryType === 'now' ? 'opacity-50 pointer-events-none' : ''}`}>
+                              <input 
+                                type="datetime-local" 
+                                className="bg-transparent border-none outline-none size-full text-white font-['Poppins',sans-serif] text-[14px] custom-datetime-picker"
+                                value={scheduledAt}
+                                onChange={(e) => setScheduledAt(e.target.value)}
+                                disabled={deliveryType === 'now'}
+                              />
+                              <div className="relative shrink-0 size-[20px] pointer-events-none ml-2">
                                 <svg className="size-full" fill="none" viewBox="0 0 20 20">
                                     <path d={svgPaths.p3b8f8870} fill="#3457DC" />
                                 </svg>
@@ -386,21 +547,16 @@ const NewNotification = () => {
     );
 };
 
-const NotificationsHistoryTable = () => {
+const NotificationsHistoryTable = ({ notifications, onDelete, onEdit }) => {
     const [searchTerm, setSearchTerm] = useState('');
-    const [currentPage, setCurrentPage] = useState(2);
-    const totalPages = 12;
+    const [currentPage, setCurrentPage] = useState(1);
+    const totalPages = 1; // Simplification
 
-    const [notifications, setNotifications] = useState([
-        { id: 1, added: 'July 25, 2025', createdBy: 'Moesr', team: 'A+ Team', lastUsed: '2 hours ago', checked: true },
-        { id: 2, added: 'July 24, 2025', createdBy: 'Moesr', team: 'A+ Team', lastUsed: '1 day ago', checked: false },
-        { id: 3, added: 'July 23, 2025', createdBy: 'Moesr', team: 'B+ Team', lastUsed: '3 days ago', checked: false },
-        { id: 4, added: 'July 22, 2025', createdBy: 'Moesr', team: 'All Teams', lastUsed: '1 week ago', checked: false },
-    ]);
-
-    const handleToggleRow = (id) => {
-        setNotifications(prev => prev.map(n => n.id === id ? { ...n, checked: !n.checked } : n));
-    };
+    const filteredNotifications = notifications.filter(n => 
+        n.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        n.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        n.team.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     const filterItemStyle = {
         backgroundColor: 'rgba(255,255,255,0.01)',
@@ -453,6 +609,7 @@ const NotificationsHistoryTable = () => {
                                 </div>
                             </th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Added</th>
+                            <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Title</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Created by</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 Target Team <RiInformationLine size="14px" />
@@ -462,24 +619,29 @@ const NotificationsHistoryTable = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {notifications.map((row) => (
-                            <tr key={row.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', height: '8vh' }}>
+                        {filteredNotifications.map((row) => (
+                            <tr key={row._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', height: '8vh' }}>
                                 <td style={{ padding: '0 0.5vw' }}>
-                                    <div onClick={() => handleToggleRow(row.id)}
-                                        style={{ width: '1.1vw', height: '1.1vw', borderRadius: '4px', border: row.checked ? 'none' : '1px solid #2a2a30', backgroundColor: row.checked ? '#3457DC' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                                        {row.checked && <RiCheckLine color="white" size="0.8vw" />}
+                                    <div style={{ width: '1.1vw', height: '1.1vw', borderRadius: '4px', border: '1px solid #2a2a30', backgroundColor: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                                     </div>
                                 </td>
-                                <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{row.added}</td>
-                                <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{row.createdBy}</td>
+                                <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{new Date(row.createdAt).toLocaleDateString()}</td>
+                                <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'white', fontWeight: 500 }}>{row.title}</td>
+                                <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{row.createdBy?.email || 'System'}</td>
                                 <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'white' }}>{row.team}</td>
-                                <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{row.lastUsed}</td>
+                                <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{new Date(row.lastUsed).toLocaleDateString()}</td>
                                 <td style={{ padding: '0 0.5vw', textAlign: 'right' }}>
                                     <div className="flex items-center justify-end gap-3">
-                                        <button className="bg-transparent border-none cursor-pointer hover:scale-110 transition-transform">
+                                        <button 
+                                            className="bg-transparent border-none cursor-pointer hover:scale-110 transition-transform"
+                                            onClick={() => onEdit(row)}
+                                        >
                                             <img src={EditIcon} alt="edit" className="w-[1.2vw]" />
                                         </button>
-                                        <button className="bg-transparent border-none cursor-pointer hover:scale-110 transition-transform">
+                                        <button 
+                                            className="bg-transparent border-none cursor-pointer hover:scale-110 transition-transform"
+                                            onClick={() => onDelete(row._id)}
+                                        >
                                             <img src={TrashIcon} alt="delete" className="w-[1.2vw]" />
                                         </button>
                                     </div>
@@ -526,13 +688,70 @@ const NotificationsHistoryTable = () => {
 
 const Notifications = () => {
     const [activeTab, setActiveTab] = useState('Notifications history');
+    const [notifications, setNotifications] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [editingNotification, setEditingNotification] = useState(null);
+
+    const fetchNotifications = async () => {
+        try {
+            const res = await fetch('http://localhost:5000/api/notifications');
+            if (res.ok) {
+                const data = await res.json();
+                setNotifications(data);
+            }
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteNotification = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this notification?')) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`http://localhost:5000/api/notifications/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (res.ok) {
+                setNotifications(notifications.filter(n => n._id !== id));
+            }
+        } catch (error) {
+            console.error('Error deleting notification:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchNotifications();
+    }, []);
 
     const renderTabContent = () => {
+        if (loading) return <div className="p-10 text-center">Loading notifications...</div>;
+
         switch (activeTab) {
             case 'Notifications history':
-                return <NotificationsHistoryTable />;
+                return <NotificationsHistoryTable 
+                            notifications={notifications} 
+                            onDelete={handleDeleteNotification} 
+                            onEdit={(data) => {
+                                setEditingNotification(data);
+                                setActiveTab('New Notification');
+                            }}
+                        />;
             case 'New Notification':
-                return <NewNotification />;
+                return <NewNotification 
+                            editData={editingNotification}
+                            onNotificationSent={() => {
+                                fetchNotifications();
+                                setEditingNotification(null);
+                                setActiveTab('Notifications history');
+                            }} 
+                        />;
             default: return null;
         }
     };
@@ -572,3 +791,4 @@ const Notifications = () => {
 };
 
 export default Notifications;
+

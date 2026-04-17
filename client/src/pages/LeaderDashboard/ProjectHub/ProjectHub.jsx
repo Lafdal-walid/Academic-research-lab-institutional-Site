@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RiSearch2Line, RiArrowLeftSLine, RiArrowRightSLine } from 'react-icons/ri';
+import { RiSearch2Line, RiArrowLeftSLine, RiArrowRightSLine, RiCheckLine } from 'react-icons/ri';
 
 // Assets
 import ProjectsIcon from "@/assets/svg/LeaderDashboard/users/Vector-1.svg";
@@ -103,113 +103,228 @@ const StatCard = ({ icon, title, value }) => {
     );
 };
 
-const ProjectTimeline = ({ projectName = "Ai magazine", milestones = [] }) => {
+const ProjectTimeline = ({ projectName, projectId, milestones = [], onRefresh }) => {
+    const [isAdding, setIsAdding] = useState(false);
+    const [newM, setNewM] = useState({ title: '', date: '' });
+    const [isSaving, setIsSaving] = useState(false);
+
+    const handleAddMilestone = async () => {
+        if (!newM.title) return alert('Please enter a title');
+        setIsSaving(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`http://localhost:5000/api/projects/${projectId}/milestones`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newM)
+            });
+            if (res.ok) {
+                setIsAdding(false);
+                setNewM({ title: '', date: '' });
+                if (onRefresh) onRefresh();
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     return (
         <div style={{
-            marginTop: '5vh',
             backgroundColor: '#151519', border: '1px solid #1e1d22',
-            borderRadius: '1vw', padding: '1.5vw', display: 'flex',
-            flexDirection: 'column', gap: '2.5vh', width: '100%',
-            position: 'relative'
+            borderRadius: '16px', padding: '24px', display: 'flex',
+            flexDirection: 'column', gap: '24px', width: '100%'
         }}>
             {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'flex-end', position: 'relative', width: '100%' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8vh' }}>
-                    <h3 style={{ margin: 0, fontSize: '0.95vw', fontWeight: 800, color: 'white', fontFamily: 'Gilroy, sans-serif' }}>{projectName} Project Roadmap</h3>
-                    <p style={{ margin: 0, fontSize: '0.75vw', color: '#a5a5b2' }}>Key Objectives & Milestones.</p>
+            <div style={{ display: 'flex', alignItems: 'flex-end', position: 'relative', width: '100%', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'white', fontFamily: 'Gilroy, sans-serif' }}>
+                        {projectName} Project Roadmap
+                    </h3>
+                    <p style={{ margin: 0, fontSize: '14px', color: '#a5a5b2' }}>Key Objectives & Milestones.</p>
                 </div>
-    
+                
                 {/* Absolutely Centered Status */}
                 <div style={{
                     position: 'absolute', left: '50%', transform: 'translateX(-50%)',
-                    display: 'flex', flexDirection: 'column', gap: '0.7vh', alignItems: 'center'
+                    display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center'
                 }}>
-                    <span style={{ fontSize: '0.75vw', color: '#3457DC', fontWeight: 500, whiteSpace: 'nowrap' }}>1 of 8 Completed</span>
-                    <div style={{ width: '100%', minWidth: '4.5vw', height: '0.5vh', backgroundColor: '#1e1e24', borderRadius: '4vw', overflow: 'hidden' }}>
-                        <div style={{ width: '12.5%', height: '100%', backgroundColor: '#3457DC' }} />
+                    <span style={{ fontSize: '14px', color: '#3457DC', fontWeight: 500 }}>
+                         {milestones.filter(m => m.completed).length + 1} of {milestones.length + 1} Completed
+                    </span>
+                    <div style={{ width: '60px', height: '4px', backgroundColor: '#1e1e24', borderRadius: '400px', overflow: 'hidden' }}>
+                        <div style={{ width: '24px', height: '100%', backgroundColor: '#3457DC' }} />
                     </div>
                 </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', zIndex: 10 }}>
+                    <button 
+                        onClick={() => setIsAdding(!isAdding)}
+                        style={{
+                            backgroundColor: '#3457dc', color: 'white', padding: '10px 20px', borderRadius: '12px',
+                            fontSize: '14px', fontWeight: 'bold', border: 'none', cursor: 'pointer',
+                            transition: 'all 0.2s', whiteSpace: 'nowrap'
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#2a4ac0'}
+                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#3457dc'}
+                    >
+                        {isAdding ? 'Cancel' : '+ Add NEW Phase'}
+                    </button>
+                </div>
             </div>
-    
-            <div style={{ height: '0.1vh', backgroundColor: '#2A2A30' }} />
-    
+
+            <div style={{ height: '1px', backgroundColor: '#2A2A30' }} />
+
+            {/* Add Milestone Form */}
+            <AnimatePresence>
+                {isAdding && (
+                    <motion.div 
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        style={{ overflow: 'hidden' }}
+                    >
+                        <div style={{ 
+                            display: 'flex', gap: '20px', alignItems: 'flex-end', 
+                            backgroundColor: '#1E1E24', padding: '24px', 
+                            borderRadius: '16px', border: '1px solid #2a2a30',
+                            marginBottom: '10px'
+                        }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
+                                <span style={{ fontSize: '14px', color: '#80808a', fontWeight: 500, fontFamily: 'Poppins, sans-serif' }}>Phase Title</span>
+                                <div style={{ position: 'relative', width: '100%', height: '48px' }}>
+                                    <div style={{ position: 'absolute', inset: 0, border: '1px solid #2a2a30', borderRadius: '12px', pointerEvents: 'none', transition: 'border-color 0.2s' }} className="input-border-target" />
+                                    <input 
+                                        style={{ width: '100%', height: '100%', backgroundColor: 'rgba(255,255,255,0.01)', border: 'none', borderRadius: '12px', padding: '0 16px', color: 'white', fontSize: '14px', outline: 'none', fontFamily: 'Poppins, sans-serif', boxSizing: 'border-box' }}
+                                        placeholder="e.g. Data Collection"
+                                        value={newM.title}
+                                        onChange={(e) => setNewM({...newM, title: e.target.value})}
+                                        onFocus={(e) => e.target.previousSibling.style.borderColor = '#3457DC'}
+                                        onBlur={(e) => e.target.previousSibling.style.borderColor = '#2a2a30'}
+                                    />
+                                </div>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '220px' }}>
+                                <span style={{ fontSize: '14px', color: '#80808a', fontWeight: 500, fontFamily: 'Poppins, sans-serif' }}>Target Date</span>
+                                <div style={{ position: 'relative', width: '100%', height: '48px' }}>
+                                    <div style={{ position: 'absolute', inset: 0, border: '1px solid #2a2a30', borderRadius: '12px', pointerEvents: 'none', transition: 'border-color 0.2s' }} />
+                                    <input 
+                                        type="date"
+                                        style={{ width: '100%', height: '100%', backgroundColor: 'rgba(255,255,255,0.01)', border: 'none', borderRadius: '12px', padding: '0 16px', color: 'white', fontSize: '14px', outline: 'none', fontFamily: 'Poppins, sans-serif', colorScheme: 'dark', boxSizing: 'border-box' }}
+                                        value={newM.date}
+                                        onChange={(e) => setNewM({...newM, date: e.target.value})}
+                                        onFocus={(e) => e.target.previousSibling.style.borderColor = '#3457DC'}
+                                        onBlur={(e) => e.target.previousSibling.style.borderColor = '#2a2a30'}
+                                    />
+                                </div>
+                            </div>
+                            <button 
+                                onClick={handleAddMilestone}
+                                disabled={isSaving}
+                                style={{
+                                    backgroundColor: '#3457dc', color: 'white', padding: '0 24px', height: '48px',
+                                    borderRadius: '12px', fontSize: '14px', fontWeight: 'bold', border: 'none', cursor: 'pointer',
+                                    opacity: isSaving ? 0.5 : 1, transition: 'all 0.2s', fontFamily: 'Poppins, sans-serif',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                }}
+                                onMouseOver={(e) => { if(!isSaving) e.currentTarget.style.backgroundColor = '#2a4ac0'; }}
+                                onMouseOut={(e) => { if(!isSaving) e.currentTarget.style.backgroundColor = '#3457dc'; }}
+                            >
+                                {isSaving ? 'Saving...' : 'Save Phase'}
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Timeline Area with custom scrollbar */}
-            <div className="academic-timeline-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '3.5vh', maxHeight: '40vh', overflowY: 'auto', paddingRight: '0.8vw' }}>
-                {milestones.map((milestone, index) => (
-                    <div key={index} style={{ display: 'flex', gap: '1.5vw', alignItems: 'flex-start' }}>
-                        {/* Dot & Line Indicator */}
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '2.8vw', position: 'relative' }}>
+            <div className="academic-timeline-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '32px', maxHeight: '300px', overflowY: 'auto', paddingRight: '12px' }}>
+                {/* Default Project Creation Phase */}
+                <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '46px', position: 'relative' }}>
+                        <div style={{
+                            backgroundColor: '#3457DC',
+                            padding: '14px', borderRadius: '50%', display: 'flex',
+                            alignItems: 'center', justifyContent: 'center', zIndex: 2,
+                            position: 'relative'
+                        }}>
+                            <img src={ComputerIcon} alt="phase" style={{ width: '16px', height: '16px' }} />
+                        </div>
+                        {(milestones.length > 0) && (
                             <div style={{
-                                backgroundColor: milestone.completed ? '#3457DC' : '#1e1e24',
-                                backgroundImage: milestone.isCurrent ? 'linear-gradient(to bottom, #3457DC 50%, #1e1e24 50%)' : 'none',
-                                padding: '0.8vw', borderRadius: '50%', display: 'flex',
+                                width: '2px', height: '100px', backgroundColor: '#3457DC',
+                                position: 'absolute', top: '22px', zIndex: 1
+                            }} />
+                        )}
+                    </div>
+                    <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <span style={{ fontSize: '14px', color: '#a5a5b2', fontWeight: 500 }}>Initial phase</span>
+                            <span style={{ fontSize: '14px', color: 'white', fontWeight: 400 }}>Project Creation & Planning</span>
+                        </div>
+                        <div style={{
+                            backgroundColor: '#1e1e24', padding: '10px 24px', borderRadius: '16px',
+                            color: 'white', fontSize: '14px', fontWeight: 500, cursor: 'default'
+                        }}>
+                            Completed
+                        </div>
+                    </div>
+                </div>
+
+                {milestones.map((phase, index) => (
+                    <div key={index} style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '46px', position: 'relative' }}>
+                            <div style={{
+                                backgroundColor: phase.completed ? '#3457DC' : '#1e1e24',
+                                padding: '14px', borderRadius: '50%', display: 'flex',
                                 alignItems: 'center', justifyContent: 'center', zIndex: 2,
                                 position: 'relative'
                             }}>
-                                <img src={milestone.isCurrent ? PauseIcon : ComputerIcon} alt="phase" style={{ width: '0.9vw', height: '0.9vw' }} />
+                                <img src={ComputerIcon} alt="phase" style={{ width: '16px', height: '16px' }} />
                             </div>
                             {index !== milestones.length - 1 && (
                                 <div style={{
-                                    width: '0.1vw', 
-                                    height: '11vh', 
-                                    backgroundColor: (milestone.completed && milestones[index+1].completed) || (milestone.completed && milestones[index+1].isCurrent) ? '#3457DC' : '#1e1e24',
-                                    position: 'absolute', 
-                                    top: '2.2vh', 
-                                    zIndex: 1
+                                    width: '2px', height: '100px', backgroundColor: '#3457DC',
+                                    position: 'absolute', top: '22px', zIndex: 1
                                 }} />
                             )}
                         </div>
-    
-                        {/* Content */}
                         <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5vh' }}>
-                                <span style={{ fontSize: '0.75vw', color: '#a5a5b2', fontWeight: 500 }}>{milestone.date}</span>
-                                <span style={{ fontSize: '0.85vw', color: 'white', fontWeight: 400 }}>{milestone.title}</span>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <span style={{ fontSize: '14px', color: '#a5a5b2', fontWeight: 500 }}>{phase.date || 'TBD'}</span>
+                                <span style={{ fontSize: '14px', color: 'white', fontWeight: 400 }}>{phase.title}</span>
                             </div>
                             <div style={{
-                                backgroundColor: milestone.completed ? '#1e1e24' : 'rgba(30,30,36,0.3)', 
-                                padding: '1vh 1.4vw', 
-                                borderRadius: '0.8vw',
-                                color: milestone.completed ? 'white' : '#80808a', 
-                                fontSize: '0.8vw', fontWeight: 500, cursor: milestone.completed ? 'pointer' : 'default',
-                                display: 'flex', alignItems: 'center', gap: '0.6vw',
-                                border: milestone.completed ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(255,255,255,0.02)',
-                                transition: 'all 0.2s'
+                                backgroundColor: '#1e1e24', padding: '10px 24px', borderRadius: '16px',
+                                color: 'white', fontSize: '14px', fontWeight: 500, cursor: 'pointer'
                             }}>
-                                {milestone.completed ? 'View Details' : 'In Progress'}
-                                {!milestone.completed && (
-                                     <div style={{ display: 'flex', opacity: 0.4 }}>
-                                        <img src={LockIcon} alt="lock" style={{ width: '0.8vw', height: '0.8vw' }} />
-                                     </div>
-                                )}
+                                {phase.completed ? 'Completed' : 'View Details'}
                             </div>
                         </div>
                     </div>
                 ))}
             </div>
-    
+
             {/* Bottom HR Divider */}
-            <div style={{ padding: '2.5vh 0 1.5vh 0' }}>
-                <div style={{ height: '0.1vh', backgroundColor: '#2A2A30', width: '100%' }} />
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8vw', marginTop: '2vh' }}>
-                    <img src={InfoYellowIcon} alt="info" style={{ width: '1.3vw', height: '1.3vw', flexShrink: 0 }} />
-                    <p style={{ color: '#FCC841', fontSize: '0.75vw', margin: 0, fontFamily: 'Poppins, sans-serif' }}>
-                        You can Edit Project Progress Status
-                    </p>
-                </div>
+            <div style={{ padding: '24px 0 8px 0' }}>
+                <div style={{ height: '1px', backgroundColor: '#2A2A30', width: '100%' }} />
             </div>
-    
+            
             <style dangerouslySetInnerHTML={{
                 __html: `
                 .academic-timeline-scroll::-webkit-scrollbar {
-                    width: 0.35vw;
+                    width: 6px;
                 }
                 .academic-timeline-scroll::-webkit-scrollbar-track {
                     background: transparent;
                 }
                 .academic-timeline-scroll::-webkit-scrollbar-thumb {
                     background: #3457DC;
-                    border-radius: 1vw;
+                    border-radius: 10px;
                 }
                 .academic-timeline-scroll {
                     scrollbar-width: thin;
@@ -364,34 +479,19 @@ const ProjectsTable = ({ projects = [], selectedId, onSelect }) => {
     );
 };
 
-const ProjectHubManager = () => {
-    const [selectedProjectId, setSelectedProjectId] = useState(1);
+const ProjectHubManager = ({ projects, isLoading, onRefresh }) => {
+    const [selectedProjectId, setSelectedProjectId] = useState(null);
 
-    const projects = [
-        { id: 1, name: "Ai magasine", update: "Last update 1Hour ago", start: "April 6 2026", deadline: "June 6 2026", progress: "31%", status: "On going", img: img1 },
-        { id: 2, name: "Science", update: "Last update 1Hour ago", start: "April 6 2026", deadline: "June 6 2026", progress: "31%", status: "Completed", img: img2 },
-        { id: 3, name: "Scientific American", update: "Last update 1Hour ago", start: "April 6 2026", deadline: "June 6 2026", progress: "31%", status: "Canceled", img: img3 },
-    ];
+    React.useEffect(() => {
+        if (!selectedProjectId && projects.length > 0) {
+            setSelectedProjectId(projects[0].id);
+        }
+    }, [projects, selectedProjectId]);
 
-    const roadmapData = {
-        1: [
-            { date: "Month 1", title: "Literature Review & Data Collection", completed: true },
-            { date: "Month 2", title: "Theoretical Framework & Methodology", completed: false, isCurrent: true },
-            { date: "Month 3", title: "Experimental Setup & Testing", completed: false },
-            { date: "Month 4", title: "Data Analysis & Results Synthesis", completed: false },
-            { date: "Month 7", title: "Final Review & Submission", completed: false },
-        ],
-        2: [
-            { date: 'Month 1', title: 'Initial Research', completed: true },
-            { date: 'Month 2', title: 'Execution', completed: true }
-        ],
-        3: [
-            { date: 'Month 1', title: 'Planning', completed: true },
-            { date: 'Month 2', title: 'Terminated', completed: false }
-        ]
-    };
+    const selectedProject = projects.find(p => p.id === selectedProjectId);
+    const selectedProjectName = selectedProject?.name || "";
 
-    const selectedProjectName = projects.find(p => p.id === selectedProjectId)?.name || "Ai magazine";
+    if (isLoading) return <div className="text-center py-10">Loading projects...</div>;
 
     return (
         <div className="flex flex-col gap-[2vh]">
@@ -400,20 +500,24 @@ const ProjectHubManager = () => {
                 selectedId={selectedProjectId} 
                 onSelect={setSelectedProjectId} 
             />
-            <ProjectTimeline 
-                projectName={selectedProjectName}
-                milestones={roadmapData[selectedProjectId] || []} 
-            />
+            {selectedProjectId && (
+                <ProjectTimeline 
+                    projectName={selectedProjectName}
+                    projectId={selectedProjectId}
+                    milestones={selectedProject?.milestones || []} 
+                    onRefresh={onRefresh}
+                />
+            )}
         </div>
     );
 };
 
-const ProjectsList = () => {
+const ProjectsList = ({ projects, stats, isLoading, onRefresh }) => {
     const projectStats = [
-        { title: "Projects Completed", value: "7", icon: ProjectsIcon },
-        { title: "ongoing Projects", value: "2", icon: ProjectsIcon },
-        { title: "Canceled Projectes", value: "4", icon: ProjectsIcon },
-        { title: "Planned Projects", value: "1", icon: ProjectsIcon },
+        { title: "Projects Completed", value: stats.completed.toString(), icon: ProjectsIcon },
+        { title: "ongoing Projects", value: stats.ongoing.toString(), icon: ProjectsIcon },
+        { title: "Canceled Projectes", value: stats.canceled.toString(), icon: ProjectsIcon },
+        { title: "Planned Projects", value: stats.planned.toString(), icon: ProjectsIcon },
     ];
 
     return (
@@ -429,7 +533,7 @@ const ProjectsList = () => {
                 ))}
             </div>
             
-            <ProjectHubManager />
+            <ProjectHubManager projects={projects} isLoading={isLoading} onRefresh={onRefresh} />
         </div>
     );
 };
@@ -536,20 +640,111 @@ function FormSelect({ label, value, options = [], onSelect }) {
   );
 }
 
-const AddProject = () => {
+function FormMultiSelect({ label, selectedIds = [], options = [], onToggle }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="flex flex-col gap-[12px] items-start w-full relative">
+      <p className="font-['Poppins',sans-serif] text-[#80808a] text-[14px] w-full">{label}</p>
+      <div 
+        onClick={() => setIsOpen(!isOpen)}
+        className={`bg-[rgba(255,255,255,0.01)] flex items-center justify-between px-[14px] py-[8px] min-h-[41px] relative rounded-[8px] shrink-0 w-full border border-[#2a2a30] cursor-pointer hover:bg-white/[0.03] transition-all ${isOpen ? 'border-[#3457DC]' : ''}`}
+      >
+          <div className="flex flex-wrap gap-2 pr-4">
+            {selectedIds.length === 0 ? (
+              <p className="font-['Poppins',sans-serif] text-[#a5a5b2] text-[14px]">Select members</p>
+            ) : (
+                selectedIds.map(id => {
+                    const opt = options.find(o => o.id === id);
+                    return (
+                        <span key={id} className="bg-[#3457DC] text-white text-[11px] px-2 py-1 rounded-md">
+                            {opt?.name || id}
+                        </span>
+                    );
+                })
+            )}
+          </div>
+          <div className={`size-[20px] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+            <svg className="size-full" fill="none" viewBox="0 0 20 20">
+              <path d={svgPaths.p211f8400} fill="#3457DC" />
+            </svg>
+          </div>
+      </div>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="absolute top-[105%] left-0 w-full bg-[#1e1e24] border border-[#2a2a30] rounded-[8px] overflow-hidden z-[1000] shadow-2xl"
+          >
+            <div className="max-h-[200px] overflow-y-auto custom-scrollbar">
+              {options.map((option) => (
+                <div 
+                  key={option.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggle(option.id);
+                  }}
+                  className={`px-[14px] py-[10px] text-[14px] transition-colors cursor-pointer flex items-center justify-between ${selectedIds.includes(option.id) ? 'bg-[#3457DC]/20 text-white font-bold' : 'text-[#a5a5b2] hover:bg-[#3457DC] hover:text-white'}`}
+                >
+                  <span>{option.name}</span>
+                  {selectedIds.includes(option.id) && (
+                      <div className="w-2 h-2 rounded-full bg-[#3457DC]" />
+                  )}
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+const AddProject = ({ onPublished }) => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    team: 'A+ Team',
-    leader: 'Walid',
-    members: 'walid & Seine & ...',
-    startOption: 'later',
+    teamId: '',
+    leaderId: '',
+    members: [],
+    startOption: 'now',
     startDate: '',
     endDate: ''
   });
 
   const [previewImage, setPreviewImage] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
+  const [teams, setTeams] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const imageInputRef = useRef(null);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            // Fetch teams
+            const teamsRes = await fetch('http://localhost:5000/api/teams', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const teamsData = await teamsRes.json();
+            if (teamsRes.ok) setTeams(teamsData);
+
+            // Fetch users
+            const usersRes = await fetch('http://localhost:5000/api/auth/admin/users', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const usersData = await usersRes.json();
+            if (usersRes.ok) setUsers(usersData.map(u => ({ id: u._id, name: u.username })));
+        } catch (err) {
+            console.error('Fetch error:', err);
+        }
+    };
+    fetchData();
+  }, []);
 
   const updateField = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -562,6 +757,7 @@ const AddProject = () => {
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
+      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewImage(reader.result);
@@ -573,17 +769,67 @@ const AddProject = () => {
   const handleClearImage = (e) => {
     e.stopPropagation();
     setPreviewImage(null);
+    setImageFile(null);
     if (imageInputRef.current) imageInputRef.current.value = '';
   };
 
-  const handlePublish = () => {
-    console.log('Publishing Project:', { ...formData, image: previewImage });
-    alert(`Project "${formData.name}" published successfully!`);
+  const handlePublish = async () => {
+    if (!formData.name || !formData.description || !formData.teamId) {
+        alert('Please fill in Name, Description and Team');
+        return;
+    }
+
+    setIsLoading(true);
+    try {
+        const token = localStorage.getItem('token');
+        const dataToSend = new FormData();
+        dataToSend.append('title', formData.name);
+        dataToSend.append('description', formData.description);
+        dataToSend.append('team', formData.teamId);
+        dataToSend.append('members', formData.members.join(','));
+        dataToSend.append('startDate', formData.startOption === 'now' ? new Date().toISOString() : formData.startDate);
+        if (formData.endDate) dataToSend.append('endDate', formData.endDate);
+        if (imageFile) dataToSend.append('image', imageFile);
+
+        const res = await fetch('http://localhost:5000/api/projects', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: dataToSend
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+            alert(`Project "${formData.name}" published successfully!`);
+            setFormData({
+                name: '', description: '', teamId: '', leaderId: '', members: [],
+                startOption: 'now', startDate: '', endDate: ''
+            });
+            setPreviewImage(null);
+            setImageFile(null);
+            if (onPublished) onPublished();
+        } else {
+            alert(data.message || 'Failed to publish project');
+        }
+    } catch (err) {
+        alert('Connection error');
+    } finally {
+        setIsLoading(false);
+    }
   };
 
-  const teamOptions = ["A+ Team", "Beta Research", "Gamma Lab", "Delta Force", "AI Ethics Group"];
-  const leaderOptions = ["Walid", "Sarah", "Ahmed", "Laila", "Nadia", "Karim"];
-  const memberOptions = ["walid & Seine & Ahmed", "Sarah & Laila", "Karim & Nadia & Omar", "Research Group A", "Scientific Committee"];
+  const toggleMember = (userId) => {
+    setFormData(prev => {
+        const members = prev.members.includes(userId)
+            ? prev.members.filter(id => id !== userId)
+            : [...prev.members, userId];
+        return { ...prev, members };
+    });
+  };
+
+  const teamName = teams.find(t => t._id === formData.teamId)?.name || 'Select team';
+  const leaderName = users.find(u => u.id === formData.leaderId)?.name || 'Select leader';
 
   return (
     <div className="flex flex-col gap-[4vh] w-full relative">
@@ -606,21 +852,27 @@ const AddProject = () => {
           />
           <FormSelect 
             label="Assigned Research Team" 
-            value={formData.team} 
-            options={teamOptions}
-            onSelect={(val) => updateField('team', val)}
+            value={teamName} 
+            options={teams.map(t => t.name)}
+            onSelect={(name) => {
+                const team = teams.find(t => t.name === name);
+                if (team) updateField('teamId', team._id);
+            }}
           />
           <FormSelect 
             label="Project Leader" 
-            value={formData.leader} 
-            options={leaderOptions}
-            onSelect={(val) => updateField('leader', val)}
+            value={leaderName} 
+            options={users.map(u => u.name)}
+            onSelect={(name) => {
+                const user = users.find(u => u.name === name);
+                if (user) updateField('leaderId', user.id);
+            }}
           />
-          <FormSelect 
+          <FormMultiSelect 
             label="Member List" 
-            value={formData.members} 
-            options={memberOptions}
-            onSelect={(val) => updateField('members', val)}
+            selectedIds={formData.members} 
+            options={users}
+            onToggle={toggleMember}
           />
           
           <div className="flex flex-col gap-[12px] w-full">
@@ -717,13 +969,14 @@ const AddProject = () => {
             <p className="text-[#80808a] text-[14px]">Start Date</p>
             <div className="bg-[rgba(255,255,255,0.01)] flex items-center justify-between px-[14px] h-[41px] relative rounded-[8px] border border-[#2a2a30] hover:bg-white/[0.03] cursor-pointer">
                <input 
-                 type="text" 
+                 type="datetime-local" 
                  placeholder="Select date & time" 
-                 className="bg-transparent border-none outline-none text-[14px] text-white w-full"
+                 className="bg-transparent border-none outline-none text-[14px] text-white w-full custom-datetime-input"
                  value={formData.startDate}
                  onChange={(e) => updateField('startDate', e.target.value)}
+                 onClick={(e) => e.target.showPicker?.()}
                />
-               <div className="size-[20px]">
+               <div className="size-[20px] pointer-events-none">
                  <svg className="size-full" fill="none" viewBox="0 0 20 20">
                     <path d={svgPaths.p3b8f8870} fill="#3457DC" />
                  </svg>
@@ -735,13 +988,14 @@ const AddProject = () => {
             <p className="text-[#80808a] text-[14px]">End Date</p>
             <div className="bg-[rgba(255,255,255,0.01)] flex items-center justify-between px-[14px] h-[41px] relative rounded-[8px] border border-[#2a2a30] hover:bg-white/[0.03] cursor-pointer">
                 <input 
-                 type="text" 
+                 type="datetime-local" 
                  placeholder="Select date & time" 
-                 className="bg-transparent border-none outline-none text-[14px] text-white w-full"
+                 className="bg-transparent border-none outline-none text-[14px] text-white w-full custom-datetime-input"
                  value={formData.endDate}
                  onChange={(e) => updateField('endDate', e.target.value)}
+                 onClick={(e) => e.target.showPicker?.()}
                />
-               <div className="size-[20px]">
+               <div className="size-[20px] pointer-events-none">
                  <svg className="size-full" fill="none" viewBox="0 0 20 20">
                     <path d={svgPaths.p3b8f8870} fill="#3457DC" />
                  </svg>
@@ -777,28 +1031,210 @@ const AddProject = () => {
     </div>
   );
 };
+const AddTeam = () => {
+    const [formData, setFormData] = useState({
+        name: '',
+        focus: '',
+        leaderId: '',
+        members: [],
+        activeProjects: ''
+    });
 
+    const [users, setUsers] = useState([]);
+    const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+
+    React.useEffect(() => {
+        const fetchUsers = async () => {
+            setIsLoadingUsers(true);
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch('http://localhost:5000/api/auth/admin/users', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    setUsers(data.map(u => ({ id: u._id, name: u.username })));
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setIsLoadingUsers(false);
+            }
+        };
+        fetchUsers();
+    }, []);
+
+    const updateField = (field, value) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    const toggleMember = (userId) => {
+        setFormData(prev => {
+            const members = prev.members.includes(userId)
+                ? prev.members.filter(id => id !== userId)
+                : [...prev.members, userId];
+            return { ...prev, members };
+        });
+    };
+
+    const handleCreateTeam = async () => {
+        if (!formData.name || !formData.focus || !formData.leaderId) {
+            alert('Please fill in essential fields (Name, Focus, Leader)');
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('http://localhost:5000/api/teams', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: formData.name,
+                    focus: formData.focus,
+                    leader: formData.leaderId,
+                    members: formData.members,
+                    activeProjects: formData.activeProjects.split(',').map(p => p.trim()).filter(p => p !== '')
+                })
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                alert('Team created successfully!');
+                setFormData({ name: '', focus: '', leaderId: '', members: [], activeProjects: '' });
+            } else {
+                alert(data.message || 'Failed to create team');
+            }
+        } catch (err) {
+            alert('Connection failed');
+        }
+    };
+
+    const leaderName = users.find(u => u.id === formData.leaderId)?.name || 'Select leader';
+
+    return (
+        <div className="flex flex-col gap-[4vh] w-full relative">
+            <div className="bg-[#151519] flex flex-col items-start p-[24px] rounded-[16px] border border-[#1e1d22] w-full relative">
+                <p className="font-['Gilroy',sans-serif] font-extrabold text-[16px] text-white mb-[24px]">Create New Research Team</p>
+                
+                <div className="flex flex-col gap-[24px] w-full">
+                    <FormInput 
+                        label="Team Identity (Name)" 
+                        placeholder="e.g. AI Ethics Division" 
+                        value={formData.name}
+                        onChange={(val) => updateField('name', val)}
+                    />
+                    <FormTextArea 
+                        label="Research Focus / Core Mission" 
+                        placeholder="Describe the scientific goals of this unit..." 
+                        value={formData.focus}
+                        onChange={(val) => updateField('focus', val)}
+                    />
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-[24px] w-full">
+                         <FormSelect 
+                            label="Leadership (Professor/Senior Researcher)" 
+                            value={leaderName}
+                            options={users.map(u => u.name)}
+                            onSelect={(name) => {
+                                const user = users.find(u => u.name === name);
+                                if (user) updateField('leaderId', user.id);
+                            }}
+                        />
+                        <FormMultiSelect 
+                            label="Member List (Faculty & PhD Students)" 
+                            selectedIds={formData.members}
+                            options={users}
+                            onToggle={toggleMember}
+                        />
+                    </div>
+
+                    <FormInput 
+                        label="Active Projects (Comma separated)" 
+                        placeholder="e.g. Project-X, Neural-Scan, Bio-Data" 
+                        value={formData.activeProjects}
+                        onChange={(val) => updateField('activeProjects', val)}
+                    />
+
+                    <div className="w-full h-[1px] bg-[#2A2A30] my-[16px]" />
+
+                    <button 
+                        onClick={handleCreateTeam}
+                        className="bg-[#3457dc] text-white px-[32px] py-[14px] rounded-[16px] text-[14px] font-bold border-none cursor-pointer w-fit hover:bg-[#2a4ac0] active:scale-95 transition-all shadow-lg shadow-[#3457dc]/20"
+                    >
+                        Create Team
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
 const ProjectHub = () => {
     const [activeTab, setActiveTab] = useState('Projects');
+    const [projects, setProjects] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [stats, setStats] = useState({ completed: 0, ongoing: 0, canceled: 0, planned: 0 });
+
+    const fetchAllData = async () => {
+        setIsLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('http://localhost:5000/api/projects', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                const formatted = data.map(p => ({
+                    id: p._id,
+                    name: p.title,
+                    update: `Last update ${new Date(p.updatedAt).toLocaleDateString()}`,
+                    start: new Date(p.startDate).toLocaleDateString(),
+                    deadline: p.endDate ? new Date(p.endDate).toLocaleDateString() : 'No deadline',
+                    progress: `${Math.round(((p.milestones?.filter(m => m.completed).length || 0) + 1) / ((p.milestones?.length || 0) + 1) * 100)}%`, 
+                    status: p.status === 'Proposed' ? 'On going' : p.status,
+                    img: p.imageUrl ? `http://localhost:5000${p.imageUrl}` : img1,
+                    milestones: p.milestones || [],
+                    raw: p
+                }));
+                setProjects(formatted);
+                setStats({
+                    completed: data.filter(p => p.status === 'Completed').length,
+                    ongoing: data.filter(p => p.status === 'Ongoing' || p.status === 'Proposed').length,
+                    canceled: data.filter(p => p.status === 'Suspended').length,
+                    planned: data.filter(p => p.status === 'Proposed').length
+                });
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    React.useEffect(() => {
+        fetchAllData();
+    }, []);
 
     const renderTabContent = () => {
         switch (activeTab) {
             case 'Projects':
                 return (
-                    <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                    >
-                        <ProjectsList />
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                        <ProjectsList projects={projects} stats={stats} isLoading={isLoading} onRefresh={fetchAllData} />
                     </motion.div>
                 );
             case 'Add Project':
                 return (
-                    <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                    >
-                        <AddProject />
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                        <AddProject onPublished={() => { setActiveTab('Projects'); fetchAllData(); }} />
+                    </motion.div>
+                );
+            case 'Add Team':
+                return (
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                        <AddTeam />
                     </motion.div>
                 );
             default: return null;
@@ -820,6 +1256,11 @@ const ProjectHub = () => {
                         isActive={activeTab === 'Add Project'}
                         onClick={() => setActiveTab('Add Project')}
                     />
+                    <Tab
+                        label="Add Team"
+                        isActive={activeTab === 'Add Team'}
+                        onClick={() => setActiveTab('Add Team')}
+                    />
                 </div>
             </div>
 
@@ -835,6 +1276,24 @@ const ProjectHub = () => {
                     {renderTabContent()}
                 </motion.div>
             </AnimatePresence>
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                .custom-datetime-input::-webkit-calendar-picker-indicator {
+                    filter: invert(1);
+                    cursor: pointer;
+                    opacity: 0.5;
+                    transition: opacity 0.2s;
+                }
+                .custom-datetime-input::-webkit-calendar-picker-indicator:hover {
+                    opacity: 1;
+                }
+                .custom-datetime-input {
+                    color-scheme: dark;
+                }
+                .color-scheme-dark {
+                    color-scheme: dark;
+                }
+            `}} />
         </div>
     );
 };

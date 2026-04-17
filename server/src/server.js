@@ -12,10 +12,24 @@ const Team = require("./models/Team");
 const Publication = require("./models/Publication");
 const News = require("./models/News");
 const Project = require("./models/Project");
+const path = require('path');
 const authRoutes = require("./routes/authRoutes");
+const teamRoutes = require("./routes/teamRoutes");
+const publicationRoutes = require("./routes/publicationRoutes");
+const projectRoutes = require("./routes/projectRoutes");
+const reportRoutes = require("./routes/reportRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 app.use(cors());
 app.use('/api/auth', authRoutes);
+app.use('/api/teams', teamRoutes);
+app.use('/api/publications', publicationRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/reports', reportRoutes);
+app.use('/api/notifications', notificationRoutes);
+
+// Static uploads folder
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)

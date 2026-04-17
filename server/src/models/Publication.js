@@ -22,13 +22,36 @@ const publicationSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    documentUrl: {
+        type: String,
+        trim: true
+    },
+    abstract: {
+        type: String,
+        trim: true
+    },
+    contribution: {
+        type: String,
+        trim: true
+    },
+    field: {
+        type: String,
+        trim: true
+    },
+    members: [{
+        type: String
+    }],
     team: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Team'
     },
     tags: [{
         type: String
-    }]
+    }],
+    project: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Project'
+    }
 }, { timestamps: true });
 
 // For search optimization

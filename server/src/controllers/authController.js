@@ -1,4 +1,7 @@
 const User = require('../models/User');
+const Team = require('../models/Team');
+const Publication = require('../models/Publication');
+const Project = require('../models/Project');
 const jwt = require('jsonwebtoken');
 
 // Simple in-memory OTP store
@@ -265,7 +268,59 @@ exports.getProfile = async (req, res) => {
 };
 exports.getAllUsers = async (req, res) => {
     try {
-        const users = await User.find({}).select('-password');
+        const users = await User.find({}).populate('team').select('-password');
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+exports.updateUser = async (req, res) => {
+    try {
+        const { role, degree } = req.body;
+        const user = await User.findById(req.params.id);
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (role) user.role = role;
+        if (degree) user.degree = degree;
+        if (req.body.team) user.team = req.body.team;
+
+        const updatedUser = await user.save();
+        const populatedUser = await User.findById(updatedUser._id).populate('team');
+        
+        res.json({
+            _id: populatedUser._id,
+            username: populatedUser.username,
+            email: populatedUser.email,
+            role: populatedUser.role,
+            degree: populatedUser.degree,
+            team: populatedUser.team
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+exports.getDashboardStats = async (req, res) => {
+    try {
+        const totalUsers = await User.countDocuments();
+        const totalPublications = await Publication.countDocuments();
+        const totalProjects = await Project.countDocuments();
+        
+        res.json({
+            totalUsers,
+            totalPublications,
+            totalProjects
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+exports.getMemberSelection = async (req, res) => {
+    try {
+        const users = await User.find({}).select('username email');
         res.json(users);
     } catch (error) {
         res.status(500).json({ message: error.message });
