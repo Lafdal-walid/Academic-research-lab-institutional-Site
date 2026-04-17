@@ -11,7 +11,7 @@ const Publications = () => {
     const { language } = useLanguage();
     const isRTL = language === "ar";
     
-    // States للبحث والفلترة كيما في الصور
+    // States 
     const [searchTerm, setSearchTerm] = useState("");
     const [activeTab, setActiveTab] = useState("All");
 
@@ -19,7 +19,7 @@ const Publications = () => {
         AOS.init({ duration: 800 });
     }, []);
 
-    // بيانات تجريبية مبنية على "Scientific Publications" لي في الصور
+    // Scientific Publications
     const pubs = [
         {
             id: "01",
@@ -52,7 +52,7 @@ const Publications = () => {
 
     return (
         <main className="bg-[#020203] min-h-screen pt-32 pb-20 px-6 font-gilroy">
-            {/* 1. Header Section - بناءً على Figma */}
+            {/* 1. Header Section */}
             <div className="max-w-6xl mx-auto mb-16" data-aos="fade-down">
                 <h1 className={`text-4xl md:text-6xl font-[950] text-white uppercase italic tracking-tighter mb-4 ${isRTL ? "text-right" : "text-left"}`}>
                     {isRTL ? "المنشورات العلمية" : "Scientific Publications"}
@@ -60,7 +60,7 @@ const Publications = () => {
                 <div className="h-1 w-24 bg-blue-600 rounded-full"></div>
             </div>
 
-            {/* 2. Search & Tabs Bar (Detailed from images) */}
+            {/* 2. Search & Tabs Bar */}
             <div className="max-w-6xl mx-auto mb-12 flex flex-col md:flex-row gap-6 items-center justify-between border-b border-white/5 pb-8">
                 {/* Tabs Filter */}
                 <div className="flex gap-4 overflow-x-auto w-full md:w-auto no-scrollbar">
@@ -91,7 +91,7 @@ const Publications = () => {
                 </div>
             </div>
 
-            {/* 3. Publications List (The Table-like view from Screenshots) */}
+            {/* 3. Publications List */}
             <div className="max-w-6xl mx-auto space-y-6">
                 <AnimatePresence>
                     {pubs.map((pub, index) => (
@@ -128,7 +128,7 @@ const Publications = () => {
                                 </div>
                             </div>
 
-                            {/* Actions (The buttons in the screenshots) */}
+                            {/* Actions */}
                             <div className="flex gap-3 shrink-0">
                                 <a href={pub.link} className="p-3 rounded-xl bg-white/5 border border-white/5 text-white hover:bg-blue-600 hover:border-blue-600 transition-all">
                                     <FiDownload size={18} />
@@ -142,7 +142,7 @@ const Publications = () => {
                 </AnimatePresence>
             </div>
 
-            {/* 4. Pagination (كما في الصورة الأخيرة) */}
+            {/* 4. Pagination */}
             <div className="max-w-6xl mx-auto mt-16 flex items-center justify-center gap-4">
                 <button className="p-2 rounded-lg bg-white/5 text-zinc-500 hover:text-white transition-colors">
                     <FiChevronLeft size={20} />
