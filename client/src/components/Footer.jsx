@@ -31,13 +31,16 @@ const Footer = () => {
   const location = useLocation();
   const isProjectsMenu = location.pathname.includes('/projects');
   const isSupportPage = location.pathname.includes('/support');
+  const isPublicationsPage = location.pathname.includes('/publications');
+  const isTeamsResearchesPage = location.pathname.includes('/teams-researches');
+  const isAboutUsPage = location.pathname.includes('/about-us');
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <div className={isProjectsMenu ? "bg-[#070710]" : isSupportPage ? "bg-[#05030D]" : "bg-transparent"}>
+    <div className={isProjectsMenu || isPublicationsPage || isTeamsResearchesPage || isAboutUsPage ? "bg-[#070710]" : isSupportPage ? "bg-[#05030D]" : "bg-transparent"}>
     <footer
       className="relative pt-[90px] md:pt-[130px] pb-[28px] px-6 md:px-20 overflow-x-hidden font-poppins bg-[#121014] text-white"
       style={{

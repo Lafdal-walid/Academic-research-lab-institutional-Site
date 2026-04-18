@@ -1,182 +1,140 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useLanguage } from "../../../contexts/LanguageContext";
-import maskLeftImg from "./assets/Group 445.svg";
-import maskRightImg from "./assets/Group 446.svg";
-import labIcon1 from "./assets/New folder/Gemini_Generated_Image_rl2hmmrl2hmmrl2h-removebg-preview 1.svg";
-import labIcon2 from "./assets/New folder/Hex Lab.svg";
-import labIcon3 from "./assets/New folder/Circle.svg";
-import libIcon from "./assets/lib.svg";
 import { IoIosArrowRoundDown } from "react-icons/io";
+import { Search, Globe, Shield, Zap, BookOpen, Layers } from "lucide-react";
+
+// Fallback images if they exist, otherwise use placeholders or icons
+import libIcon from "./assets/lib.svg";
+
+const FeatureBadge = ({ icon: Icon, text }) => (
+  <div className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full backdrop-blur-md">
+    <Icon size={14} className="text-blue-500" />
+    <span className="text-[12px] font-bold text-gray-300 uppercase tracking-widest">{text}</span>
+  </div>
+);
 
 const Welcome = () => {
     const { language } = useLanguage();
     const isRTL = language === "ar";
 
-    // Fallback translations locally to avoid missing translation keys
     const text = {
-        row1: isRTL ? 'مكتبة' : 'ADVANCED',
-        row2_start: isRTL ? 'الأبـ' : 'RESE',
-        row2_end: isRTL ? 'ـحاث المتقدمة.' : 'ARCH LIBRARY.',
+        badge: isRTL ? 'مختبر الأبحاث المتقدمة' : 'Advanced Research Lab',
+        mainTitle: isRTL ? 'الأبـحاث العلمية' : 'SCIENTIFIC',
+        subTitle: isRTL ? 'والمنشورات الأكاديمية' : 'RESEARCH ARCHIVE',
         description: isRTL 
-            ? 'أرشيف متنامٍ باستمرار يضم أكثر من 1000 ورقة بحثية، جميعها مراجعة من قبل أقران لضمان التميز الأكاديمي.' 
-            : 'A constantly growing archive of 1,000+ research papers, all peer-reviewed for academic excellence.'
+            ? 'أرشيف متنامٍ باستمرار يضم أكثر من 1000 ورقة بحثية، جميعها مراجعة من قبل أقران لضمان التميز الأكاديمي والابتكار التكنولوجي.' 
+            : 'A constantly growing archive of 1,000+ research papers, all peer-reviewed for academic excellence and technological innovation.'
     };
-
-    const platformIcons = [
-        labIcon1,
-        labIcon2,
-        labIcon3,
-        labIcon1,
-        labIcon2,
-        labIcon3
-    ];
 
     return (
         <section
-            className="relative w-full min-h-screen flex items-center justify-center bg-[#0A070E] overflow-hidden"
+            className="relative w-full min-h-screen flex items-center justify-center bg-[#05030D] overflow-hidden border-b border-white/5"
             dir={isRTL ? "rtl" : "ltr"}
         >
+            {/* Mesh Gradient Background */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[800px] bg-gradient-to-b from-blue-600/10 via-[#05030D] to-transparent pointer-events-none" />
+            <div className="absolute top-[-200px] right-[-100px] w-[600px] h-[600px] bg-blue-500/10 blur-[150px] rounded-full opacity-30 pointer-events-none" />
+            <div className="absolute top-[200px] left-[-100px] w-[600px] h-[600px] bg-indigo-500/10 blur-[150px] rounded-full opacity-30 pointer-events-none" />
 
+            {/* Content Container */}
+            <div className="container mx-auto px-6 relative z-20 flex flex-col items-center text-center">
+                
+                {/* Top Badges */}
+                <motion.div 
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-wrap justify-center gap-3 mb-10"
+                >
+                    <FeatureBadge icon={Shield} text={isRTL ? 'موثق' : 'Peer Reviewed'} />
+                    <FeatureBadge icon={Globe} text={isRTL ? 'عالمي' : 'Global Impact'} />
+                    <FeatureBadge icon={Zap} text={isRTL ? 'مبتكر' : 'Ultra Fast'} />
+                </motion.div>
 
-            {/* Corner Frames */}
-            <div className={`absolute top-28 ${isRTL ? 'right-6 md:right-16 border-r' : 'left-6 md:left-16 border-l'} w-40 h-40 border-t border-white/10 ${isRTL ? 'rounded-tr-3xl' : 'rounded-tl-3xl'}`}></div>
-            <div className={`absolute bottom-28 ${isRTL ? 'left-6 md:left-16 border-l' : 'right-6 md:right-16 border-r'} w-40 h-40 border-b border-white/10 ${isRTL ? 'rounded-bl-3xl' : 'rounded-br-3xl'}`}></div>
-
-            {/* Character 1 (Originally Left) */}
-            <motion.div
-                initial={{ opacity: 0, x: isRTL ? 80 : -80 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 1 }}
-                className={`absolute ${isRTL ? 'right-[5%]' : 'left-[5%]'} bottom-0 md:w-[20%] w-[50%] max-w-[400px]  md:max-w-[350px] pointer-events-none select-none`}
-            >
-                <div className="relative">
-                    <img
-                        src={maskLeftImg}
-                        alt="Character mask"
-                        className={`relative w-full ${isRTL ? 'scale-x-[-1]' : ''}`}
-                    />
-                </div>
-            </motion.div>
-
-            {/* Character 2 (Originally Right) */}
-            <motion.div
-                initial={{ opacity: 0, x: isRTL ? -80 : 80 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 1, delay: 0.2 }}
-                className={`absolute ${isRTL ? 'pl-6 left-0' : 'pr-6 right-0'} bottom-10 md:bottom-20 md:w-[40%] w-[60%] max-w-[500px] md:max-w-[450px] pointer-events-none select-none`}
-            >
-                <div className="relative">
-                    <img
-                        src={maskRightImg}
-                        alt="Character mask"
-                        className={`relative w-full ${isRTL ? 'scale-x-[-1]' : ''}`}
-                    />
-                </div>
-            </motion.div>
-
-
-            {/* Center Content */}
-            <div className={`relative z-20 w-full max-w-7xl mx-auto px-6 md:px-20 md:py-10 bottom-20 md:bottom-0 flex flex-col items-center md:items-start text-center md:text-start gap-8 md:gap-4 ${isRTL ? 'md:right-8 font-tajawal' : 'md:left-8'}`}>
-
-                {/* Localized Row 1 Glow */}
-                <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-[#3457DC]/10 blur-[80px] rounded-full pointer-events-none -z-10"></div>
-                <div className="absolute top-20 left-20 w-[300px] h-[300px] bg-[#121634]/50 blur-[60px] rounded-full pointer-events-none -z-10"></div>
-
-                {/* Background Grid (Contained) */}
-                <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
-                    style={{
-                        backgroundImage:
-                            "linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px)",
-                        backgroundSize: "60px 60px",
-                    }}
-                />
-
-                {/* ROW 1: SUPPORTED + Blue Chart Circle */}
-                <div className="flex flex-row items-center justify-center md:justify-start gap-2 md:gap-4 w-full md:w-auto">
-                    <h2 className={`text-white tracking-wide ${isRTL ? 'text-[38px] sm:text-5xl md:text-[88px] lg:text-[95px]' : 'text-[32px] sm:text-4xl md:text-[78px] lg:text-[85px]'} font-black font-gilroy md:tracking-tighter leading-[1.1] md:leading-[0.9] uppercase`}>
-                        {text.row1}
+                {/* Main Heading */}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 1 }}
+                    className="mb-10"
+                >
+                    <h2 className="text-white text-5xl md:text-8xl lg:text-9xl font-black font-gilroy tracking-tight uppercase leading-[0.9]">
+                        {text.mainTitle}
                     </h2>
-                    <div className="relative flex w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 bg-[#3457DC] rounded-full items-center justify-center shadow-[0_0_30px_rgba(52,87,220,0.5)] flex-shrink-0">
-                        {/* Focused Glow Layer */}
-                        <img 
-                            src={libIcon} 
-                            alt="library icon" 
-                            className="w-[50%] h-[50%] object-contain brightness-0 invert" 
+                    <h1 className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-300 text-4xl md:text-7xl lg:text-8xl font-black font-gilroy tracking-tighter leading-[1.1] uppercase mt-2">
+                        {text.subTitle}
+                    </h1>
+                </motion.div>
+
+                {/* Description */}
+                <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="text-[#7b829d] text-lg md:text-xl max-w-3xl mx-auto leading-relaxed mb-12"
+                    dir={isRTL ? 'rtl' : 'ltr'}
+                >
+                    {text.description}
+                </motion.p>
+
+                {/* CTA & Search Preview */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    className="flex flex-col md:flex-row items-center gap-6 w-full max-w-2xl px-4"
+                >
+                    <div className="flex-1 w-full bg-white/[0.03] border border-white/10 rounded-2xl flex items-center px-6 py-4 focus-within:border-blue-500/50 transition-all shadow-xl group">
+                        <Search className="text-blue-500 mr-4 group-focus-within:scale-110 transition-transform" />
+                        <input 
+                            type="text" 
+                            placeholder={isRTL ? 'ابحث في أرشيف الأبحاث...' : 'Search research archive...'} 
+                            className="bg-transparent border-none outline-none text-white w-full text-lg placeholder:text-gray-600"
                         />
                     </div>
-                </div>
+                    <button className="bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-blue-500/20 whitespace-nowrap">
+                        {isRTL ? 'استكشاف الأبحاث' : 'Explore Now'}
+                    </button>
+                </motion.div>
 
-                {/* ROW 2: GA + PLATFORM PILL + MES LIBRARY. */}
-                <div className="flex flex-col md:flex-row items-center md:items-start gap-2 md:gap-x-4 mt-2 w-full md:w-auto">
-                    <div className="flex mt-[20px] items-center justify-center md:justify-start gap-2 md:gap-3 w-full md:w-auto">
-                        <h1 className={`text-white tracking-wide ${isRTL ? 'text-[34px] sm:text-4xl md:text-[88px] lg:text-[95px]' : 'text-[30px] sm:text-4xl md:text-[78px] lg:text-[85px]'} font-black font-gilroy md:tracking-tighter leading-[1.1] md:leading-[0.9] uppercase`}>
-                            {text.row2_start}
-                        </h1>
-
-                        {/* Platform Pill Carousel (Infinite Continuous) */}
-                        <div className="relative w-[100px] md:w-[150px] lg:w-[200px] h-9 md:h-[50px] lg:h-[70px] bg-[#0E0E12]/40 backdrop-blur-2xl border border-white/10 rounded-full overflow-hidden flex items-center">
-                            <motion.div
-                                className="flex items-center gap-6"
-                                animate={{ x: isRTL ? ["-50%", "0%"] : ["0%", "-50%"] }}
-                                transition={{
-                                    duration: 10,
-                                    repeat: Infinity,
-                                    ease: "linear",
-                                    repeatType: "loop"
-                                }}
-                            >
-                                {[...platformIcons, ...platformIcons, ...platformIcons, ...platformIcons].map((icon, idx) => (
-                                    <img
-                                        key={idx}
-                                        src={icon}
-                                        alt="Platform"
-                                        className="h-3 md:h-4 lg:h-5 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.2)] shrink-0"
-                                    />
-                                ))}
-                            </motion.div>
-                        </div>
-
-                        {/* MOBILE ONLY: Support for the second part of row 2 */}
-                        <h1 className="md:hidden text-white text-[28px] font-black font-gilroy uppercase tracking-tighter leading-[1.1] md:leading-[0.9]">
-                            {text.row2_end}
-                        </h1>
+                {/* Features Bottom Row */}
+                <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1 }}
+                    className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-20 mt-32"
+                >
+                    <div className="flex flex-col items-center">
+                        <div className="text-3xl font-bold text-white mb-2 font-gilroy">1K+</div>
+                        <div className="text-[#a5a5b2] text-[10px] uppercase tracking-widest font-bold">{isRTL ? 'ورقة بحثية' : 'Papers'}</div>
                     </div>
-
-                    <div className="flex flex-col items-center justify-center md:items-start md:relative md:top-4 md:translate-y-2">
-                        <h1 className={`text-white ${isRTL ? 'text-[32px] sm:text-4xl md:text-[80px] lg:text-[95px]' : 'text-[24px] sm:text-4xl md:text-[78px] lg:text-[85px]'} font-black font-gilroy tracking-tighter leading-[1.1] md:leading-[0.9] uppercase whitespace-nowrap`}>
-                            <span className="hidden md:inline">{text.row2_end}</span>
-                        </h1>
-
-                        <p
-                            className={`text-gray-200 text-sm md:text-sm lg:text-base max-w-[300px] md:max-w-[500px] leading-relaxed md:mt-0 mt-6 md:leading-[1.1] !text-center md:!text-start ${isRTL ? 'font-tajawal' : ''}`}
-                            dangerouslySetInnerHTML={{ __html: text.description }}
-                        />
+                    <div className="flex flex-col items-center">
+                        <div className="text-3xl font-bold text-white mb-2 font-gilroy">24/7</div>
+                        <div className="text-[#a5a5b2] text-[10px] uppercase tracking-widest font-bold">{isRTL ? 'دعم تقني' : 'Support'}</div>
                     </div>
-                </div>
+                    <div className="flex flex-col items-center">
+                        <div className="text-3xl font-bold text-white mb-2 font-gilroy">15+</div>
+                        <div className="text-[#a5a5b2] text-[10px] uppercase tracking-widest font-bold">{isRTL ? 'فريق بحثي' : 'Teams'}</div>
+                    </div>
+                    <div className="flex flex-col items-center">
+                        <div className="text-3xl font-bold text-white mb-2 font-gilroy">100%</div>
+                        <div className="text-[#a5a5b2] text-[10px] uppercase tracking-widest font-bold">{isRTL ? 'دقة أكاديمية' : 'Accuracy'}</div>
+                    </div>
+                </motion.div>
 
             </div>
 
-
             {/* Scroll Indicator */}
-
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 1.2 }}
-                className="absolute flex items-center md:mt-110 mt-130 justify-center"
+                transition={{ delay: 1.5 }}
+                className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
             >
-                <motion.div
-                    animate={{ y: [0, 10, 0] }}
-                    transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-                    className="relative flex items-center justify-center p-2"
-                >
-                    {/* The Glow */}
-                    <div className="absolute inset-0 bg-[#3457DC]/20 blur-[30px] rounded-full scale-150"></div>
-                    <div className="absolute inset-0 bg-[#121634]/60 blur-[20px] rounded-full scale-125"></div>
-                    <IoIosArrowRoundDown className="relative text-white text-[42px]" />
-                </motion.div>
+                <div className="h-12 w-px bg-gradient-to-b from-blue-600 to-transparent" />
+                <IoIosArrowRoundDown className="text-white/40 text-[32px] animate-bounce" />
             </motion.div>
+
             <style>{`
                 .font-gilroy {
                     font-family: "Gilroy", sans-serif;

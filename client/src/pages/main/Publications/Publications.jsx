@@ -1,168 +1,421 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiSearch, FiFileText, FiExternalLink, FiDownload, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { Search, ChevronDown, ChevronLeft, ChevronRight, Link as LinkIcon, Users as UsersIcon, Calendar as CalendarIcon, ExternalLink } from 'lucide-react';
 import AOS from "aos";
 import "aos/dist/aos.css";
-
-// Contexts & Hooks
 import { useLanguage } from "@/contexts/LanguageContext";
 
-const Publications = () => {
-    const { language } = useLanguage();
-    const isRTL = language === "ar";
-    
-    // States 
-    const [searchTerm, setSearchTerm] = useState("");
-    const [activeTab, setActiveTab] = useState("All");
+const svgPathsTeams = {
+    p11b7c570: "M8.25 10.0833C10.275 10.0833 11.9167 8.44171 11.9167 6.41667C11.9167 4.39162 10.275 2.75 8.25 2.75C6.22496 2.75 4.58333 4.39162 4.58333 6.41667C4.58333 8.44171 6.22496 10.0833 8.25 10.0833Z",
+    p1de049e0: "M20.1667 19.25V17.4167C20.1661 16.6043 19.8957 15.815 19.3979 15.173C18.9002 14.5309 18.2033 14.0723 17.4167 13.8692",
+    p35b71ef0: "M14.6667 2.86917C15.4554 3.07111 16.1545 3.52981 16.6537 4.17295C17.1529 4.81609 17.4239 5.60709 17.4239 6.42125C17.4239 7.23541 17.1529 8.02641 16.6537 8.66955C16.1545 9.31269 15.4554 9.77139 14.6667 9.97333",
+    p80127a0: "M14.6667 19.25V17.4167C14.6667 16.4442 14.2804 15.5116 13.5927 14.8239C12.9051 14.1363 11.9725 13.75 11 13.75H5.5C4.52754 13.75 3.59491 14.1363 2.90728 14.8239C2.21964 15.5116 1.83333 16.4442 1.83333 17.4167V19.25",
+};
 
-    useEffect(() => {
-        AOS.init({ duration: 800 });
-    }, []);
+const ResearchTeamCard = ({ title, leader, members, membersCount, gradient, isRTL }) => (
+    <div className="bg-white/5 border border-white/10 rounded-xl p-6 min-h-[240px] relative overflow-hidden group hover:border-[#3457DC]/40 transition-all">
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-6" style={{ backgroundImage: gradient }}>
+            <svg className="w-5 h-5 text-white" viewBox="0 0 22 22" fill="none">
+                <path d={svgPathsTeams.p80127a0} stroke="currentColor" strokeWidth="1.83" strokeLinecap="round" strokeLinejoin="round" />
+                <path d={svgPathsTeams.p11b7c570} stroke="currentColor" strokeWidth="1.83" strokeLinecap="round" strokeLinejoin="round" />
+                <path d={svgPathsTeams.p1de049e0} stroke="currentColor" strokeWidth="1.83" strokeLinecap="round" strokeLinejoin="round" />
+                <path d={svgPathsTeams.p35b71ef0} stroke="currentColor" strokeWidth="1.83" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+        </div>
+        <h3 className="text-white font-bold text-[16px] mb-2 leading-tight">{title}</h3>
+        <p className="text-[#395ed5] text-[12px] font-medium mb-1">
+            {isRTL ? 'القائد:' : 'Leader:'} <span className="text-[#7b829d] font-normal">{leader}</span>
+        </p>
+        <p className="text-[#7b829d] text-[12px] mb-4">
+            {membersCount} {isRTL ? 'أعضاء' : 'Members'}
+        </p>
+        <div className="flex flex-wrap gap-2 mt-auto">
+            {members.map((m, i) => (
+                <div key={i} className="bg-[#3457DC]/10 px-3 py-1 rounded-full border border-white/5">
+                    <span className="text-[#7b829d] text-[10px] whitespace-nowrap">{m}</span>
+                </div>
+            ))}
+        </div>
+    </div>
+);
 
-    // Scientific Publications
-    const pubs = [
-        {
-            id: "01",
-            year: "2024",
-            title: "Advanced Machine Learning for Logistics Optimization",
-            authors: "Dr. Ahmed Mansouri, Sarah Chen",
-            type: "Journal",
-            source: "IEEE Transactions on AI",
-            link: "#"
-        },
-        {
-            id: "02",
-            year: "2023",
-            title: "Blockchain Security in Supply Chain Management",
-            authors: "Prof. Lamine Touati, M. Bekhti",
-            type: "Conference",
-            source: "International Cyber-Sec Conference",
-            link: "#"
-        },
-        {
-            id: "03",
-            year: "2023",
-            title: "Real-time Data Processing in Smart Cities",
-            authors: "Yasmine Dahmani, S. Benali",
-            type: "Article",
-            source: "ScienceDirect - Tech Review",
-            link: "#"
-        }
-    ];
-
+const ResearchPaperCard = ({ title, authors, year, journal, description, tags, link }) => {
     return (
-        <main className="bg-[#020203] min-h-screen pt-32 pb-20 px-6 font-gilroy">
-            {/* 1. Header Section */}
-            <div className="max-w-6xl mx-auto mb-16" data-aos="fade-down">
-                <h1 className={`text-4xl md:text-6xl font-[950] text-white uppercase italic tracking-tighter mb-4 ${isRTL ? "text-right" : "text-left"}`}>
-                    {isRTL ? "المنشورات العلمية" : "Scientific Publications"}
-                </h1>
-                <div className="h-1 w-24 bg-blue-600 rounded-full"></div>
+        <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="bg-[#151519] border border-white/5 rounded-2xl p-6 flex flex-col gap-4 group hover:border-[#3457DC]/30 transition-all duration-300"
+        >
+            <div className="flex justify-between items-start gap-4">
+                <h3 className="text-xl font-bold text-white font-gilroy leading-tight group-hover:text-[#3457DC] transition-colors">
+                    {title}
+                </h3>
+                <a href={link} target="_blank" rel="noopener noreferrer" className="text-white/20 hover:text-white transition-colors p-1">
+                    <ExternalLink size={20} />
+                </a>
             </div>
 
-            {/* 2. Search & Tabs Bar */}
-            <div className="max-w-6xl mx-auto mb-12 flex flex-col md:flex-row gap-6 items-center justify-between border-b border-white/5 pb-8">
-                {/* Tabs Filter */}
-                <div className="flex gap-4 overflow-x-auto w-full md:w-auto no-scrollbar">
-                    {["All", "Journal", "Conference", "Article"].map((tab) => (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`px-6 py-2 rounded-full text-xs font-bold transition-all border ${
-                                activeTab === tab 
-                                ? "bg-blue-600 border-blue-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.3)]" 
-                                : "bg-transparent border-white/10 text-zinc-500 hover:border-white/30"
-                            }`}
-                        >
-                            {tab}
-                        </button>
-                    ))}
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+                <div className="flex items-center gap-2 text-white/40 text-sm">
+                    <UsersIcon size={16} />
+                    <span>{authors}</span>
                 </div>
-
-                {/* Search Input */}
-                <div className="relative w-full md:w-80">
-                    <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
-                    <input 
-                        type="text"
-                        placeholder={isRTL ? "ابحث عن منشور..." : "Search publications..."}
-                        className={`w-full bg-[#08080a] border border-white/5 rounded-xl py-3 pl-12 pr-4 text-sm text-white focus:border-blue-600/50 outline-none transition-all ${isRTL ? "text-right pr-12 pl-4" : ""}`}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
+                <div className="flex items-center gap-2 text-white/40 text-sm">
+                    <CalendarIcon size={14} />
+                    <span>{year}</span>
                 </div>
             </div>
 
-            {/* 3. Publications List */}
-            <div className="max-w-6xl mx-auto space-y-6">
-                <AnimatePresence>
-                    {pubs.map((pub, index) => (
-                        <motion.div
-                            key={pub.id}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.1 }}
-                            className="group relative bg-[#050506] border border-white/5 p-6 md:p-8 rounded-2xl flex flex-col md:flex-row items-start md:items-center gap-6 hover:bg-[#08080a] transition-all overflow-hidden"
-                        >
-                            {/* Blue Accent on hover */}
-                            <div className="absolute left-0 top-0 w-1 h-full bg-blue-600 scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
-
-                            {/* Year/ID Circle */}
-                            <div className="shrink-0 w-14 h-14 rounded-full border border-white/10 flex flex-col items-center justify-center text-white group-hover:border-blue-600/50 transition-colors">
-                                <span className="text-[10px] text-zinc-600 font-bold leading-none">{pub.year}</span>
-                                <span className="text-lg font-black">{pub.id}</span>
-                            </div>
-
-                            {/* Info */}
-                            <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-2">
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded">
-                                        {pub.type}
-                                    </span>
-                                    <span className="text-[10px] text-zinc-600 italic">{pub.source}</span>
-                                </div>
-                                <h3 className={`text-lg md:text-xl font-bold text-white mb-2 leading-tight group-hover:text-blue-500 transition-colors ${isRTL ? "text-right" : "text-left"}`}>
-                                    {pub.title}
-                                </h3>
-                                <div className={`flex items-center gap-2 text-zinc-500 text-xs ${isRTL ? "flex-row-reverse" : ""}`}>
-                                    <FiFileText size={14} className="text-zinc-700" />
-                                    <span>{pub.authors}</span>
-                                </div>
-                            </div>
-
-                            {/* Actions */}
-                            <div className="flex gap-3 shrink-0">
-                                <a href={pub.link} className="p-3 rounded-xl bg-white/5 border border-white/5 text-white hover:bg-blue-600 hover:border-blue-600 transition-all">
-                                    <FiDownload size={18} />
-                                </a>
-                                <a href={pub.link} className="p-3 rounded-xl bg-white/5 border border-white/5 text-white hover:bg-blue-600 hover:border-blue-600 transition-all">
-                                    <FiExternalLink size={18} />
-                                </a>
-                            </div>
-                        </motion.div>
-                    ))}
-                </AnimatePresence>
-            </div>
-
-            {/* 4. Pagination */}
-            <div className="max-w-6xl mx-auto mt-16 flex items-center justify-center gap-4">
-                <button className="p-2 rounded-lg bg-white/5 text-zinc-500 hover:text-white transition-colors">
-                    <FiChevronLeft size={20} />
-                </button>
-                <div className="flex gap-2">
-                    {[1, 2, 3].map(page => (
-                        <button 
-                            key={page} 
-                            className={`w-10 h-10 rounded-lg font-black text-xs transition-all ${page === 1 ? "bg-blue-600 text-white" : "bg-white/5 text-zinc-500 hover:bg-white/10"}`}
-                        >
-                            0{page}
-                        </button>
-                    ))}
+            {journal && (
+                <div className="text-sm font-medium text-blue-500/80 uppercase tracking-wide">
+                    {journal}
                 </div>
-                <button className="p-2 rounded-lg bg-white/5 text-zinc-500 hover:text-white transition-colors">
-                    <FiChevronRight size={20} />
-                </button>
+            )}
+
+            {description && (
+                <p className="text-white/60 text-sm leading-relaxed line-clamp-3">
+                    {description}
+                </p>
+            )}
+
+            <div className="flex flex-wrap gap-2 mt-2">
+                {tags && tags.map((tag, idx) => (
+                    <span key={idx} className="bg-[#3457DC]/10 px-3 py-1 rounded-full text-[#3457DC] text-[11px] font-semibold uppercase tracking-wider">
+                        {tag}
+                    </span>
+                ))}
             </div>
-        </main>
+        </motion.div>
     );
 };
 
-export default Publications;
+const STATIC_PUBLICATIONS = [
+    {
+        title: "Attention Mechanisms in Hierarchical Cognitive Architectures for Multi-Agent Reasoning",
+        authors: ["A. Benali", "S. Mansouri", "Y. Kaddour"],
+        year: "2024",
+        publisher: "IEEE Transactions on Neural Networks and Learning Systems",
+        tags: ["Vision-Machine Intelligence", "Multi-Agent Systems"],
+        contribution: "Explored attention mechanisms to improve reasoning capabilities in hierarchical cognitive models."
+    },
+    {
+        title: "Dynamic Resource Allocation in Distributed Cloud Networks using Deep Reinforcement Learning",
+        authors: ["M. Zahra", "K. Omar"],
+        year: "2023",
+        publisher: "Journal of Network and Computer Applications",
+        tags: ["Deep Learning", "Cloud Computing"],
+        contribution: "Proposed a DRL-based framework for optimizing resource distribution in cloud environments."
+    },
+    {
+        title: "Scalable Federated Learning for Privacy-Preserving Medical Imaging Analytics",
+        authors: ["A. Mansouri", "S. Dahlab", "H. Khelifi"],
+        year: "2025",
+        publisher: "AI in Medicine Journal",
+        tags: ["Federated Learning", "Privacy", "Healthcare AI"],
+        contribution: "Introduced a novel decentralized aggregation protocol that reduces communication overhead by 40% while maintaining differential privacy."
+    },
+    {
+        title: "Autonomous Path Planning in Highly Dynamic Environments using Transformer networks",
+        authors: ["Y. Benali", "M. Zahra"],
+        year: "2024",
+        publisher: "Robotics and Autonomous Systems",
+        tags: ["Robotics", "Autonomous Systems", "Transformers"],
+        contribution: "Developed a transformer-based spatial encoder that predicts obstacle trajectories with sub-centimeter precision."
+    },
+    {
+        title: "test lorem test",
+        authors: ["oualidlafdal50@gmail.com", "walidbusiness50@gmail.com", "walidbusiness10@gmail.com", "wwalidlaf@gmail.com"],
+        year: "2026",
+        publisher: "Institutional Lab",
+        tags: ["deep learning", "machine learning", "ai test"],
+        contribution: "Collaborative research on experimental AI architectures."
+    }
+];
+
+export default function Publications() {
+    const { language } = useLanguage();
+    const isRTL = language === "ar";
+    
+    const [searchTerm, setSearchTerm] = useState('');
+    const [activeDropdown, setActiveDropdown] = useState(null);
+    const [selectedSort, setSelectedSort] = useState(isRTL ? 'الأحدث' : 'sort by recent');
+    const [selectedCategory, setSelectedCategory] = useState(isRTL ? 'الفئة' : 'Categorie');
+    const [publications, setPublications] = useState(STATIC_PUBLICATIONS);
+    const [isLoading, setIsLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const totalPages = 12;
+
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        AOS.init({ duration: 1000, once: true });
+        
+        const fetchPublications = async () => {
+            try {
+                const res = await fetch('http://localhost:5000/api/publications');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.length > 0) {
+                        setPublications(data);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch publications", err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchPublications();
+
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setActiveDropdown(null);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const filteredPublications = publications.filter(pub =>
+        pub.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        pub.authors.some(auth => auth.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (pub.tags && pub.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
+    );
+
+    return (
+        <div className="w-full min-h-screen bg-[#05030D] text-white font-poppins relative overflow-x-hidden" dir={isRTL ? 'rtl' : 'ltr'}>
+            {/* Header Padding to avoid overlapping with fixed header */}
+            <div className="h-20 w-full" />
+
+            {/* Header Section */}
+            <div className="container mx-auto px-6 pt-16 pb-24 text-center relative z-10">
+                <motion.div 
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-col items-center"
+                >
+                    <span className="text-[#3457DC] text-[13px] uppercase font-bold tracking-[0.2em] mb-0">posts</span>
+                    <h1 className="font-gilroy font-extrabold text-[64px] md:text-[96px] leading-tight mb-4">Publications</h1>
+                    <p className="text-white/60 text-lg max-w-2xl mx-auto">Explore our Teams Publications</p>
+                </motion.div>
+            </div>
+
+            {/* Separator Line */}
+            <div className="w-full h-px bg-[#373735]/30 relative mb-16">
+                <div className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-[#3457DC]/50 to-transparent" />
+            </div>
+
+            {/* Toolbar Section */}
+            <div className="container mx-auto px-6 mb-12">
+                <div className="flex flex-col lg:flex-row items-center gap-5 w-full max-w-[1240px] mx-auto" ref={dropdownRef}>
+                    {/* Search Bar */}
+                    <div className="bg-[#1e1e24] flex items-center gap-4 px-6 py-3 rounded-2xl w-full lg:flex-[2] border border-white/5 focus-within:border-[#3457DC]/50 transition-all">
+                        <input
+                            type="text"
+                            placeholder={isRTL ? "ابحث هنا..." : "Search e.g Lab"}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="bg-transparent border-none outline-none text-white text-[15px] w-full placeholder:text-[#a5a5b2]"
+                        />
+                        <Search className="text-[#3457DC] shrink-0" size={20} />
+                    </div>
+
+                    {/* Filters Row */}
+                    <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:flex-[3]">
+                        {/* Sort Dropdown */}
+                        <div className="relative w-full">
+                            <button
+                                onClick={() => setActiveDropdown(activeDropdown === 'sort' ? null : 'sort')}
+                                className="bg-[#1e1e24] flex items-center justify-between px-6 py-3 rounded-2xl w-full border border-white/5 hover:bg-[#25252d] transition-all"
+                            >
+                                <span className="text-[#a5a5b2] text-[14px]">{selectedSort}</span>
+                                <ChevronDown className={`text-[#3457DC] transition-transform duration-300 ${activeDropdown === 'sort' ? 'rotate-180' : ''}`} size={20} />
+                            </button>
+                            <AnimatePresence>
+                                {activeDropdown === 'sort' && (
+                                    <motion.div 
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 10 }}
+                                        className="absolute top-full left-0 right-0 mt-2 bg-[#1e1e24] border border-white/10 rounded-xl p-2 z-50 shadow-2xl"
+                                    >
+                                        {['sort by recent', 'sort by oldest'].map(opt => (
+                                            <button
+                                                key={opt}
+                                                onClick={() => { setSelectedSort(opt); setActiveDropdown(null); }}
+                                                className={`w-full text-left px-4 py-2 rounded-lg text-sm transition-colors ${selectedSort === opt ? 'bg-[#3457DC] text-white' : 'text-[#a5a5b2] hover:bg-white/5'}`}
+                                            >
+                                                {opt}
+                                            </button>
+                                        ))}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+
+                        {/* Category Dropdown */}
+                        <div className="relative w-full">
+                            <button
+                                onClick={() => setActiveDropdown(activeDropdown === 'category' ? null : 'category')}
+                                className="bg-[#1e1e24] flex items-center justify-between px-6 py-3 rounded-2xl w-full border border-white/5 hover:bg-[#25252d] transition-all"
+                            >
+                                <span className="text-[#a5a5b2] text-[14px]">{selectedCategory}</span>
+                                <ChevronDown className={`text-[#3457DC] transition-transform duration-300 ${activeDropdown === 'category' ? 'rotate-180' : ''}`} size={20} />
+                            </button>
+                            <AnimatePresence>
+                                {activeDropdown === 'category' && (
+                                    <motion.div 
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 10 }}
+                                        className="absolute top-full left-0 right-0 mt-2 bg-[#1e1e24] border border-white/10 rounded-xl p-2 z-50 shadow-2xl"
+                                    >
+                                        {['All', 'AI & Vision', 'Networks', 'Embedded Systems'].map(opt => (
+                                            <button
+                                                key={opt}
+                                                onClick={() => { setSelectedCategory(opt); setActiveDropdown(null); }}
+                                                className={`w-full text-left px-4 py-2 rounded-lg text-sm transition-colors ${selectedCategory === opt ? 'bg-[#3457DC] text-white' : 'text-[#a5a5b2] hover:bg-white/5'}`}
+                                            >
+                                                {opt}
+                                            </button>
+                                        ))}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+
+                        {/* Request Button */}
+                        <button className="bg-[#1e1e24] flex items-center justify-center px-8 py-3 rounded-2xl w-full border border-white/5 hover:bg-[#25252d] transition-all whitespace-nowrap">
+                            <span className="text-[#a5a5b2] font-medium text-[14px]">Request a Reaserch?</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* List Section */}
+            <div className="container mx-auto px-6 mb-20">
+                <div className="max-w-[1240px] mx-auto grid grid-cols-1 gap-6">
+                    {isLoading && publications.length === 0 ? (
+                        <div className="text-center py-20 opacity-40">Loading research papers...</div>
+                    ) : filteredPublications.length === 0 ? (
+                        <div className="text-center py-20 opacity-40">No publications found.</div>
+                    ) : (
+                        filteredPublications.map((pub, idx) => (
+                            <ResearchPaperCard 
+                                key={pub._id || idx} 
+                                title={pub.title}
+                                authors={Array.isArray(pub.authors) ? pub.authors.join(', ') : pub.authors}
+                                year={pub.year}
+                                journal={pub.publisher}
+                                description={pub.contribution}
+                                tags={pub.tags}
+                                link={pub.documentUrl ? (pub.documentUrl.startsWith('http') ? pub.documentUrl : `http://localhost:5000${pub.documentUrl}`) : '#'}
+                            />
+                        ))
+                    )}
+                </div>
+            </div>
+
+            {/* Pagination Footer */}
+            <div className="container mx-auto px-6 pb-20">
+                <div className="max-w-[1240px] mx-auto flex items-center justify-between pt-8 border-t border-white/5">
+                    <button
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className={`w-12 h-12 flex items-center justify-center rounded-full transition-all ${currentPage === 1 ? 'bg-white/5 opacity-30 cursor-not-allowed' : 'bg-[#3457DC] hover:scale-110 active:scale-95'}`}
+                    >
+                        {isRTL ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+                    </button>
+
+                    <div className="flex items-center gap-4">
+                        <div className="bg-[#1e1e24] border border-white/5 rounded-xl px-4 py-2 font-bold min-w-[50px] text-center">
+                            {currentPage}
+                        </div>
+                        <span className="text-[#a5a5b2] text-sm">of {totalPages}</span>
+                    </div>
+
+                    <button
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        className={`w-12 h-12 flex items-center justify-center rounded-full transition-all ${currentPage === totalPages ? 'bg-white/5 opacity-30 cursor-not-allowed' : 'bg-[#3457DC] hover:scale-110 active:scale-95'}`}
+                    >
+                        {isRTL ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+                    </button>
+                </div>
+            </div>
+
+            {/* Research Teams Section - Full Width & Integrated with Footer */}
+            <div className="w-full bg-[#070710] py-32 relative overflow-hidden">
+
+                {/* Background Pattern for seamless transition */}
+                <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+                
+                <div className="container mx-auto px-6 relative z-10">
+                    <div className="text-center mb-16">
+                        <h2 className="text-white font-gilroy font-extrabold text-[48px] mb-4">Research Teams</h2>
+                        <p className="text-[#7b829d] text-[18px] max-w-2xl mx-auto">
+                            {isRTL 
+                                ? 'فرقنا البحثية المتخصصة في مختلف مجالات علوم الحاسوب والتكنولوجيا' 
+                                : 'Our specialized research teams in various fields of computer science and technology'}
+                        </p>
+                    </div>
+
+                    <div className="max-w-[1240px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <ResearchTeamCard 
+                            title="Artificial Intelligence & Deep Learning"
+                            leader="Prof. Ahmed Benali"
+                            members={["Dr. Sara Mansouri", "Amina Cherif", "Youcef Kaddour"]}
+                            membersCount="4"
+                            gradient="linear-gradient(135deg, rgb(57, 94, 213) 0%, rgb(60, 87, 221) 100%)"
+                            isRTL={isRTL}
+                        />
+                        <ResearchTeamCard 
+                            title="Cybersecurity & Network Defense"
+                            leader="Dr. Nour Hamdi"
+                            members={["Karim Belhadj", "Mehdi Slimani", "Ines Rahali"]}
+                            membersCount="4"
+                            gradient="linear-gradient(135deg, rgb(102, 51, 204) 0%, rgb(134, 57, 172) 100%)"
+                            isRTL={isRTL}
+                        />
+                        <ResearchTeamCard 
+                            title="Cloud Computing & Distributed Systems"
+                            leader="Prof. Mourad Djelloul"
+                            members={["Karim Belhadj", "Youcef Kaddour", "Amine Bouzid"]}
+                            membersCount="4"
+                            gradient="linear-gradient(135deg, rgb(34, 142, 195) 0%, rgb(51, 102, 204) 100%)"
+                            isRTL={isRTL}
+                        />
+                        <ResearchTeamCard 
+                            title="Natural Language Processing"
+                            leader="Dr. Sara Mansouri"
+                            members={["Amina Cherif", "Lina Toumi", "Rami Khelif"]}
+                            membersCount="4"
+                            gradient="linear-gradient(135deg, rgb(41, 163, 143) 0%, rgb(57, 153, 172) 100%)"
+                            isRTL={isRTL}
+                        />
+                        <ResearchTeamCard 
+                            title="Computer Vision & Image Processing"
+                            leader="Prof. Fatima Zahra Bensalem"
+                            members={["Youcef Kaddour", "Hiba Messaoudi", "Omar Ferhat"]}
+                            membersCount="4"
+                            gradient="linear-gradient(135deg, rgb(217, 128, 38) 0%, rgb(184, 80, 46) 100%)"
+                            isRTL={isRTL}
+                        />
+                        <ResearchTeamCard 
+                            title="Big Data & Analytics"
+                            leader="Dr. Khaled Mebarki"
+                            members={["Amina Cherif", "Karim Belhadj", "Nadia Boukerche"]}
+                            membersCount="4"
+                            gradient="linear-gradient(135deg, rgb(204, 51, 102) 0%, rgb(172, 57, 134) 100%)"
+                            isRTL={isRTL}
+                        />
+                    </div>
+                </div>
+                
+                {/* Visual spacer to accommodate footer slant */}
+                <div className="h-20 w-full" />
+            </div>
+        </div>
+    );
+}

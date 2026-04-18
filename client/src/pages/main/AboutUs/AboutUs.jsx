@@ -1,162 +1,199 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { FiMail, FiArrowUpRight } from "react-icons/fi";
-import AOS from "aos";
-import "aos/dist/aos.css";
+import { Users, BookOpen, Cpu, Trophy, Mail, MapPin, ChevronRight, ArrowUpRight, Rocket, Eye, Globe } from 'lucide-react';
 
-// Contexts & Hooks
-import { useLanguage } from "@/contexts/LanguageContext";
-import { useTranslation } from "@/hooks/useTranslation";
+const FadeIn = ({ children, delay = 0, direction = 'up' }) => (
+  <motion.div
+    initial={{ opacity: 0, y: direction === 'up' ? 30 : 0, x: direction === 'left' ? 30 : direction === 'right' ? -30 : 0 }}
+    whileInView={{ opacity: 1, y: 0, x: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.8, delay, ease: "easeOut" }}
+  >
+    {children}
+  </motion.div>
+);
 
-// --- 1. Hero Section (About Us) ---
-const HerAboutUs = () => {
-    const { t, language } = useTranslation("aboutus");
-    const isRTL = language === "ar";
+const GlassCard = ({ children, className = "" }) => (
+  <div className={`bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-[24px] p-8 hover:bg-white/[0.05] hover:border-blue-500/30 transition-all duration-500 group ${className}`}>
+    {children}
+  </div>
+);
 
-    return (
-        <section className="relative w-full h-[396px] flex flex-col items-center justify-center text-center px-6 overflow-hidden bg-[#020203]">
-            {/* Blue Radial Glow from Figma */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#1d4ed815_0%,transparent_70%)] pointer-events-none"></div>
-            
-            <motion.h2 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`text-4xl md:text-5xl font-black mb-4 text-blue-600 uppercase tracking-tighter ${isRTL ? "font-arabic" : "font-gilroy"}`}
-            >
-                {isRTL ? "من نحن" : "About Us"}
-            </motion.h2>
-            <motion.p 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="max-w-2xl text-zinc-500 text-sm leading-relaxed font-medium"
-            >
-                {isRTL 
-                    ? "مختبر بحثي أكاديمي متخصص في علوم الحاسوب والذكاء الاصطناعي، يضم نخبة من الباحثين والمهندسين." 
-                    : "An academic research lab specializing in CS and AI, bringing together elite researchers and engineers."}
-            </motion.p>
-        </section>
-    );
-};
+export default function AboutUs() {
+  const stats = [
+    { icon: Users, value: "30+", label: "Researchers & Engineers", color: "text-blue-500" },
+    { icon: BookOpen, value: "50+", label: "Published Papers", color: "text-indigo-500" },
+    { icon: Cpu, value: "20+", label: "Research Projects", color: "text-cyan-500" },
+    { icon: Trophy, value: "15+", label: "Awards & Achievements", color: "text-blue-400" }
+  ];
 
-// --- 2. Stats Section ---
-const StatsSection = () => {
-    const { language } = useLanguage();
-    const isRTL = language === "ar";
-    
-    const stats = [
-        { label: isRTL ? "باحث ومهندس" : "Researchers", val: "+30" },
-        { label: isRTL ? "ورقة بحثية" : "Publications", val: "+50" },
-        { label: isRTL ? "مشروع بحثي" : "Projects", val: "+20" },
-        { label: isRTL ? "جائزة" : "Awards", val: "+15" }
-    ];
+  const values = [
+    { icon: Rocket, title: "Our Mission", text: "Developing innovative tech solutions for society.", desc: "We strive to provide the latest technologies and smart solutions that contribute to solving modern challenges." },
+    { icon: Eye, title: "Our Vision", text: "To be a leading global research laboratory.", desc: "We aim to reach global excellence in the fields of computer science and artificial intelligence." },
+    { icon: Globe, title: "Our Values", text: "Innovation, Collaboration, and Academic Excellence.", desc: "We believe that collaboration among elite minds is the only way to achieve sustainable innovation." }
+  ];
 
-    return (
-        <section className="max-w-[896px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 px-6 mb-32 relative z-10">
+  const timeline = [
+    { year: "2018", title: "Lab Foundation", desc: "Starting the journey with an ambitious academic vision." },
+    { year: "2019", title: "First Published Paper", desc: "Participating in the International IEEE Conference with distinction." },
+    { year: "2020", title: "Open Source Launch", desc: "Contributing to the global programming community with open-source projects." },
+    { year: "2021", title: "Research Funding", desc: "Securing government support to expand scientific research activities." },
+    { year: "2022", title: "Team Expansion", desc: "Reaching a capacity of 6 integrated research groups." },
+    { year: "2023", title: "Regional Excellence", desc: "Winning 1st place in the regional ICPC competition." },
+    { year: "2024", title: "Knowledge Accomplishment", desc: "Surpassing the milestone of 50 globally peer-reviewed papers." }
+  ];
+
+  return (
+    <div className="w-full bg-[#05030D] text-white selection:bg-blue-500/30 overflow-x-hidden pt-20">
+      
+      {/* 1. HERO SECTION */}
+      <section className="relative w-full py-32 md:py-48 px-6 flex flex-col items-center justify-center overflow-hidden border-b border-white/5">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-blue-600/20 blur-[120px] rounded-full mix-blend-screen opacity-30 pointer-events-none" />
+        
+        <div className="container mx-auto max-w-[1200px] text-center relative z-10">
+          <FadeIn>
+            <span className="inline-block px-4 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[#3457DC] text-[12px] font-bold tracking-[0.2em] mb-6 uppercase">
+              Academic Excellence
+            </span>
+            <h1 className="font-gilroy font-black text-[60px] md:text-[90px] leading-[1.1] mb-8 bg-clip-text text-transparent bg-gradient-to-br from-white via-white to-blue-500/50">
+              About Us
+            </h1>
+          </FadeIn>
+          
+          <FadeIn delay={0.2}>
+            <p className="font-poppins text-[#7b829d] text-[20px] md:text-[24px] leading-relaxed max-w-4xl mx-auto">
+              An academic research lab specializing in computer science and artificial intelligence, bringing together elite researchers and engineers committed to scientific excellence and technical innovation.
+            </p>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* 2. STATS SECTION */}
+      <section className="w-full py-32 relative z-20">
+        <div className="container mx-auto px-6 max-w-[1240px]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map((stat, i) => (
-                <div key={i} className="bg-[#050506] border border-white/5 p-6 rounded-xl text-center hover:border-blue-600/30 transition-all group">
-                    <div className="text-2xl font-black text-white mb-1 group-hover:scale-110 transition-transform">{stat.val}</div>
-                    <div className="text-[10px] text-zinc-600 uppercase tracking-[0.2em] font-bold">{stat.label}</div>
-                </div>
+              <FadeIn key={i} delay={i * 0.1}>
+                <GlassCard className="text-center group">
+                  <div className={`mb-6 flex justify-center`}>
+                    <stat.icon size={32} className={`${stat.color} group-hover:scale-110 transition-transform duration-500`} />
+                  </div>
+                  <div className="text-4xl md:text-5xl font-black text-white mb-2 font-gilroy tracking-tight">
+                    {stat.value}
+                  </div>
+                  <div className="text-[#7b829d] text-sm uppercase tracking-widest font-bold">
+                    {stat.label}
+                  </div>
+                </GlassCard>
+              </FadeIn>
             ))}
-        </section>
-    );
-};
+          </div>
+        </div>
+      </section>
 
-// --- 3. Mission & Vision (The 325px Cards) ---
-const MissionSection = () => {
-    const { language } = useLanguage();
-    const isRTL = language === "ar";
+      {/* 3. MISSION & VISION GRID */}
+      <section className="w-full py-32 bg-[#070710]/50 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+        
+        <div className="container mx-auto px-6 max-w-[1240px] relative z-10">
+          <div className="text-center mb-24">
+             <h2 className="text-5xl font-gilroy font-black mb-4">Strategic Goals</h2>
+             <p className="text-[#7b829d] text-lg">The vision that drives us towards the future</p>
+          </div>
 
-    const cards = [
-        { title: isRTL ? "قيمنا" : "Our Values", text: isRTL ? "الابتكار، التعاون، والتميز الأكاديمي." : "Innovation, collaboration, and academic excellence." },
-        { title: isRTL ? "رؤيتنا" : "Our Vision", text: isRTL ? "أن نكون مختبراً بحثياً رائداً عالمياً." : "To be a leading global research laboratory." },
-        { title: isRTL ? "مهمتنا" : "Our Mission", text: isRTL ? "تطوير حلول تقنية مبتكرة للمجتمع." : "Developing innovative tech solutions for society." }
-    ];
-
-    return (
-        <section className="max-w-6xl mx-auto flex flex-wrap justify-center gap-6 px-6 mb-40">
-            {cards.map((card, i) => (
-                <div key={i} className="w-full md:w-[325px] h-[246px] p-8 rounded-[12px] border border-[#2E2E38] bg-[#050506] flex flex-col justify-center text-center hover:bg-[#08080a] transition-all relative overflow-hidden group">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
-                    <h4 className="text-lg font-bold mb-4 text-blue-500 uppercase italic">{card.title}</h4>
-                    <p className="text-zinc-500 text-xs leading-relaxed font-medium">{card.text}</p>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {values.map((item, i) => (
+              <FadeIn key={i} delay={i * 0.2}>
+                <GlassCard className="h-full flex flex-col items-center text-center">
+                   <div className="bg-blue-600/10 p-5 rounded-2xl mb-8 group-hover:bg-blue-600 transition-colors duration-500">
+                      <item.icon className="text-[#395ED5] group-hover:text-white" size={30} />
+                   </div>
+                   <h3 className="text-2xl font-bold text-white mb-4">{item.title}</h3>
+                   <p className="text-blue-500 font-semibold mb-4 italic text-sm">{item.text}</p>
+                   <p className="text-[#a5a5b2] text-[15px] leading-relaxed">{item.desc}</p>
+                </GlassCard>
+              </FadeIn>
             ))}
-        </section>
-    );
-};
+          </div>
+        </div>
+      </section>
 
-// --- 4. Timeline Section (Timeline Vertical) ---
-const TimelineSection = () => {
-    const { language } = useLanguage();
-    const isRTL = language === "ar";
+      {/* 4. OUR JOURNEY */}
+      <section className="w-full py-40 border-t border-white/5">
+        <div className="container mx-auto px-6 max-w-[1000px]">
+          <div className="text-center mb-32">
+            <h2 className="text-5xl font-gilroy font-black mb-4 tracking-tight">Our Journey</h2>
+            <div className="h-1.5 w-24 bg-blue-600 mx-auto rounded-full" />
+            <p className="text-[#7b829d] mt-8 text-xl">Key milestones in the laboratory's history</p>
+          </div>
 
-    const events = [
-        { year: "2018", text: isRTL ? "تأسيس المختبر" : "Lab Foundation" },
-        { year: "2021", text: isRTL ? "تمويل البحث العلمي" : "Research Funding" },
-        { year: "2024", text: isRTL ? "50+ ورقة منشورة" : "50+ Published Papers" }
-    ];
-
-    return (
-        <section className="max-w-4xl mx-auto px-6 mb-40" dir={isRTL ? "rtl" : "ltr"}>
-            <h3 className="text-2xl font-black mb-16 text-center text-white uppercase tracking-tighter italic">
-                {isRTL ? "مسيرتنا" : "Our Journey"}
-            </h3>
-            <div className={`relative border-zinc-800 ${isRTL ? "border-r-2 pr-8 text-right" : "border-l-2 pl-8 text-left"}`}>
-                {events.map((event, i) => (
-                    <div key={i} className="mb-12 relative group" data-aos="fade-up">
-                        <div className={`absolute top-1 w-4 h-4 rounded-full bg-blue-600 shadow-[0_0_15px_rgba(37,99,235,0.6)] ${isRTL ? "-right-[41px]" : "-left-[41px]"}`}></div>
-                        <span className="text-blue-500 font-mono font-black text-lg block mb-1">{event.year}</span>
-                        <p className="text-zinc-400 text-sm font-medium">{event.text}</p>
+          <div className="relative">
+            <div className="absolute left-[20px] md:left-1/2 top-0 bottom-0 w-[1px] bg-gradient-to-b from-blue-600 via-blue-500/20 to-transparent -translate-x-1/2" />
+            
+            <div className="space-y-24">
+              {timeline.map((item, i) => (
+                <FadeIn key={i} direction={i % 2 === 0 ? "right" : "left"}>
+                  <div className={`relative flex flex-col md:flex-row items-center ${i % 2 === 0 ? 'md:flex-row-reverse' : ''}`}>
+                    <div className="absolute left-[20px] md:left-1/2 -translate-x-1/2 size-[12px] bg-blue-600 rounded-full shadow-[0_0_20px_#395ED5] z-10" />
+                    <div className={`w-full md:w-1/2 flex ${i % 2 === 0 ? 'md:justify-start md:pl-20' : 'md:justify-end md:pr-20'}`}>
+                      <div className="text-3xl font-black font-gilroy text-[#395ED5]/80">{item.year}</div>
                     </div>
-                ))}
+                    <div className={`w-full md:w-1/2 mt-4 md:mt-0 ${i % 2 === 0 ? 'md:pr-20' : 'md:pl-20'}`}>
+                      <GlassCard className="!p-6 group-hover:scale-[1.02]">
+                         <h4 className="text-xl font-bold text-white mb-2">{item.title}</h4>
+                         <p className="text-[#7b829d] text-sm leading-relaxed">{item.desc}</p>
+                      </GlassCard>
+                    </div>
+                  </div>
+                </FadeIn>
+              ))}
             </div>
-        </section>
-    );
-};
+          </div>
+        </div>
+      </section>
 
-// --- 5. Contact CTA Section ---
-const ContactCTA = () => {
-    const { language } = useLanguage();
-    const isRTL = language === "ar";
+      {/* 5. CONTACT CTA */}
+      <section className="w-full py-40 bg-[#070710] relative overflow-hidden border-t border-white/5">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-blue-600/5 blur-[150px] pointer-events-none" />
+        
+        <div className="container mx-auto px-6 max-w-[1200px] text-center relative z-10">
+          <FadeIn>
+            <h2 className="text-5xl md:text-6xl font-gilroy font-black text-white mb-8">Contact Us</h2>
+            <p className="text-[#7b829d] text-xl mb-16 max-w-2xl mx-auto">We welcome academic and professional collaboration and seek to expand the horizons of innovation with our partners worldwide.</p>
+          </FadeIn>
 
-    return (
-        <section className="w-full h-[374px] bg-[#050506] border-y border-white/5 flex flex-col items-center justify-center text-center px-6 mb-20 relative overflow-hidden">
-             <div className="absolute inset-0 opacity-[0.02] bg-[grid-white_1px] [mask-image:linear-gradient(to_bottom,black,transparent)]"></div>
-             <h2 className="text-2xl md:text-3xl font-black mb-8 text-white relative z-10">
-                {isRTL ? "تواصل معنا" : "STAY CONNECTED"}
-             </h2>
-             <div className="flex gap-4 relative z-10 font-bold">
-                <button className="px-8 py-3 bg-blue-600 rounded-lg text-sm hover:bg-blue-700 transition-all flex items-center gap-2">
-                    {isRTL ? "فريقنا" : "Our Team"} <FiArrowUpRight />
-                </button>
-                <button className="px-8 py-3 bg-white/5 border border-white/10 rounded-lg text-sm hover:bg-white/10 transition-all">
-                    {isRTL ? "المنشورات" : "Publications"}
-                </button>
+          <div className="flex flex-col md:flex-row justify-center gap-12 mb-20">
+             <div className="flex items-center gap-4 bg-white/[0.03] px-8 py-4 rounded-2xl border border-white/[0.05]">
+                <Mail className="text-blue-500" />
+                <span className="text-white font-medium uppercase tracking-widest text-sm">lab@university.dz</span>
              </div>
-             <div className="mt-8 flex items-center gap-2 text-zinc-600 text-[11px] font-mono">
-                <FiMail className="text-blue-500" /> LAB@UNIVERSITY.DZ
+             <div className="flex items-center gap-4 bg-white/[0.03] px-8 py-4 rounded-2xl border border-white/[0.05]">
+                <MapPin className="text-blue-500" />
+                <span className="text-white font-medium text-sm">University of Algiers - Faculty of Engineering</span>
              </div>
-        </section>
-    );
-};
+          </div>
 
-// --- Main AboutUs Component ---
-function AboutUs() {
-    useEffect(() => {
-        AOS.init({ duration: 1000, once: true });
-    }, []);
-
-    return (
-        <main className="bg-[#020203] min-h-screen">
-            <HerAboutUs />
-            <StatsSection />
-            <MissionSection />
-            <TimelineSection />
-            <ContactCTA />
-        </main>
-    );
+          <div className="flex flex-wrap justify-center gap-6">
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="bg-[#3457DC] text-white px-10 py-5 rounded-[18px] font-bold text-lg flex items-center gap-3 shadow-2xl shadow-blue-500/20 group"
+            >
+              <span>Join our research team</span>
+              <ArrowUpRight size={20} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+            </motion.button>
+            
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="bg-white/5 border border-white/10 text-white px-10 py-5 rounded-[18px] font-bold text-lg flex items-center gap-3 hover:bg-white/10 transition-all"
+            >
+              <span>Contact Us</span>
+              <ChevronRight size={20} />
+            </motion.button>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
 }
-
-export default AboutUs;

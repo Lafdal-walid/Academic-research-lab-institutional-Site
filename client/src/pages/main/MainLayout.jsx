@@ -5,7 +5,11 @@ import Footer from '../../components/Footer';
 
 const MainLayout = ({ children }) => {
   const location = useLocation();
-  const isFullWidthVariant = location.pathname.includes('/projects') || location.pathname.includes('/support');
+  const isFullWidthVariant = location.pathname.includes('/projects') || 
+                             location.pathname.includes('/support') || 
+                             location.pathname.includes('/publications') ||
+                             location.pathname.includes('/teams-researches') ||
+                             location.pathname.includes('/about-us');
 
   return (
     <div className="min-h-screen bg-background-main text-white selection:bg-accent selection:text-white">
