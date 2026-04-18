@@ -34,7 +34,10 @@ exports.createPublication = async (req, res) => {
 
 exports.getPublications = async (req, res) => {
     try {
-        const publications = await Publication.find()
+        const query = {};
+        if (req.query.team) query.team = req.query.team;
+        
+        const publications = await Publication.find(query)
             .populate('team')
             .populate('project');
         res.json(publications);

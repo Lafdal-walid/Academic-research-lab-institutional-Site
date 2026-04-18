@@ -53,14 +53,43 @@ const ProjectCatalog = () => {
 
     const itemsPerPage = 21;
 
-    const categories = ["All Categories", "AI & NLP", "Quantum Physics", "Data Science", "Bioinformatics", "Neuroscience", "Cybersecurity"];
+    const [categories, setCategories] = useState(["All Categories"]);
     const sortOptions = ["sort by recent", "A-Z", "Z-A"];
 
-    // Load static projects
+    // Load projects from API
     useEffect(() => {
-        setProjectsData(staticProjectsData);
-        setIsLoadingProjects(false);
-    }, [language, user]); // Depend on language so the titles translate automatically when it changes
+        const fetchProjects = async () => {
+            setIsLoadingProjects(true);
+            try {
+                const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : '';
+                const res = await fetch(`${baseUrl}/api/projects`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.length > 0) {
+                        // Map backend data to frontend structure
+                        const mappedData = data.map(project => ({
+                            title: project.title,
+                            image: project.imageUrl 
+                                ? (project.imageUrl.startsWith('http') ? project.imageUrl : `${baseUrl}${project.imageUrl}`)
+                                : imagePool[Math.floor(Math.random() * imagePool.length)], // fallback to pool if no image
+                            category: project.team?.name || "General Research",
+                            status: project.status
+                        }));
+                        setProjectsData(mappedData);
+                        
+                        // Dynamically update categories
+                        const uniqueTeams = ["All Categories", ...new Set(mappedData.map(p => p.category))];
+                        setCategories(uniqueTeams);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch projects", err);
+            } finally {
+                setIsLoadingProjects(false);
+            }
+        };
+        fetchProjects();
+    }, [language, user]); 
 
     // Filter and Sort Logic
     const filteredProjects = React.useMemo(() => {

@@ -142,31 +142,44 @@ export default function Publications() {
     const [selectedSort, setSelectedSort] = useState(isRTL ? 'الأحدث' : 'sort by recent');
     const [selectedCategory, setSelectedCategory] = useState(isRTL ? 'الفئة' : 'Categorie');
     const [publications, setPublications] = useState(STATIC_PUBLICATIONS);
+    const [teams, setTeams] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
-    const totalPages = 12;
+    const totalPages = 1; // Updated dynamically or kept as fits
 
     const dropdownRef = useRef(null);
 
     useEffect(() => {
         AOS.init({ duration: 1000, once: true });
         
-        const fetchPublications = async () => {
+        const fetchData = async () => {
+            setIsLoading(true);
             try {
-                const res = await fetch('http://localhost:5000/api/publications');
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data && data.length > 0) {
-                        setPublications(data);
+                const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : '';
+                
+                // Fetch Publications
+                const pubRes = await fetch(`${baseUrl}/api/publications`);
+                if (pubRes.ok) {
+                    const pubData = await pubRes.json();
+                    if (pubData && pubData.length > 0) {
+                        setPublications(pubData);
                     }
                 }
+
+                // Fetch Teams
+                const teamRes = await fetch(`${baseUrl}/api/teams`);
+                if (teamRes.ok) {
+                    const teamData = await teamRes.json();
+                    setTeams(teamData);
+                }
             } catch (err) {
-                console.error("Failed to fetch publications", err);
+                console.error("Failed to fetch data from backend", err);
             } finally {
                 setIsLoading(false);
             }
         };
-        fetchPublications();
+
+        fetchData();
 
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -177,11 +190,26 @@ export default function Publications() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const filteredPublications = publications.filter(pub =>
-        pub.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        pub.authors.some(auth => auth.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (pub.tags && pub.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
-    );
+    const filteredPublications = publications
+        .filter(pub => {
+            const matchesSearch = pub.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                pub.authors.some(auth => auth.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                (pub.tags && pub.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
+            
+            const categoryMatch = selectedCategory === 'Categorie' || selectedCategory === 'All' || selectedCategory === 'الفئة' ||
+                (pub.field && pub.field.toLowerCase() === selectedCategory.toLowerCase()) ||
+                (pub.tags && pub.tags.some(tag => tag.toLowerCase() === selectedCategory.toLowerCase()));
+            
+            return matchesSearch && categoryMatch;
+        })
+        .sort((a, b) => {
+            if (selectedSort === 'sort by recent' || selectedSort === 'الأحدث') {
+                return b.year - a.year;
+            } else if (selectedSort === 'sort by oldest' || selectedSort === 'الأقدم') {
+                return a.year - b.year;
+            }
+            return 0;
+        });
 
     return (
         <div className="w-full min-h-screen bg-[#05030D] text-white font-poppins relative overflow-x-hidden" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -362,54 +390,46 @@ export default function Publications() {
                     </div>
 
                     <div className="max-w-[1240px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <ResearchTeamCard 
-                            title="Artificial Intelligence & Deep Learning"
-                            leader="Prof. Ahmed Benali"
-                            members={["Dr. Sara Mansouri", "Amina Cherif", "Youcef Kaddour"]}
-                            membersCount="4"
-                            gradient="linear-gradient(135deg, rgb(57, 94, 213) 0%, rgb(60, 87, 221) 100%)"
-                            isRTL={isRTL}
-                        />
-                        <ResearchTeamCard 
-                            title="Cybersecurity & Network Defense"
-                            leader="Dr. Nour Hamdi"
-                            members={["Karim Belhadj", "Mehdi Slimani", "Ines Rahali"]}
-                            membersCount="4"
-                            gradient="linear-gradient(135deg, rgb(102, 51, 204) 0%, rgb(134, 57, 172) 100%)"
-                            isRTL={isRTL}
-                        />
-                        <ResearchTeamCard 
-                            title="Cloud Computing & Distributed Systems"
-                            leader="Prof. Mourad Djelloul"
-                            members={["Karim Belhadj", "Youcef Kaddour", "Amine Bouzid"]}
-                            membersCount="4"
-                            gradient="linear-gradient(135deg, rgb(34, 142, 195) 0%, rgb(51, 102, 204) 100%)"
-                            isRTL={isRTL}
-                        />
-                        <ResearchTeamCard 
-                            title="Natural Language Processing"
-                            leader="Dr. Sara Mansouri"
-                            members={["Amina Cherif", "Lina Toumi", "Rami Khelif"]}
-                            membersCount="4"
-                            gradient="linear-gradient(135deg, rgb(41, 163, 143) 0%, rgb(57, 153, 172) 100%)"
-                            isRTL={isRTL}
-                        />
-                        <ResearchTeamCard 
-                            title="Computer Vision & Image Processing"
-                            leader="Prof. Fatima Zahra Bensalem"
-                            members={["Youcef Kaddour", "Hiba Messaoudi", "Omar Ferhat"]}
-                            membersCount="4"
-                            gradient="linear-gradient(135deg, rgb(217, 128, 38) 0%, rgb(184, 80, 46) 100%)"
-                            isRTL={isRTL}
-                        />
-                        <ResearchTeamCard 
-                            title="Big Data & Analytics"
-                            leader="Dr. Khaled Mebarki"
-                            members={["Amina Cherif", "Karim Belhadj", "Nadia Boukerche"]}
-                            membersCount="4"
-                            gradient="linear-gradient(135deg, rgb(204, 51, 102) 0%, rgb(172, 57, 134) 100%)"
-                            isRTL={isRTL}
-                        />
+                        {teams.length > 0 ? (
+                            teams.map((team, idx) => (
+                                <ResearchTeamCard 
+                                    key={team._id || idx}
+                                    title={team.name}
+                                    leader={team.leader?.username || team.leader || 'N/A'}
+                                    members={team.members?.map(m => m.username || m) || []}
+                                    membersCount={team.members?.length || 0}
+                                    gradient={idx % 3 === 0 ? "linear-gradient(135deg, rgb(57, 94, 213) 0%, rgb(60, 87, 221) 100%)" : idx % 3 === 1 ? "linear-gradient(135deg, rgb(102, 51, 204) 0%, rgb(134, 57, 172) 100%)" : "linear-gradient(135deg, rgb(34, 142, 195) 0%, rgb(51, 102, 204) 100%)"}
+                                    isRTL={isRTL}
+                                />
+                            ))
+                        ) : (
+                            <>
+                                <ResearchTeamCard 
+                                    title="Artificial Intelligence & Deep Learning"
+                                    leader="Prof. Ahmed Benali"
+                                    members={["Dr. Sara Mansouri", "Amina Cherif", "Youcef Kaddour"]}
+                                    membersCount="4"
+                                    gradient="linear-gradient(135deg, rgb(57, 94, 213) 0%, rgb(60, 87, 221) 100%)"
+                                    isRTL={isRTL}
+                                />
+                                <ResearchTeamCard 
+                                    title="Cybersecurity & Network Defense"
+                                    leader="Dr. Nour Hamdi"
+                                    members={["Karim Belhadj", "Mehdi Slimani", "Ines Rahali"]}
+                                    membersCount="4"
+                                    gradient="linear-gradient(135deg, rgb(102, 51, 204) 0%, rgb(134, 57, 172) 100%)"
+                                    isRTL={isRTL}
+                                />
+                                <ResearchTeamCard 
+                                    title="Cloud Computing & Distributed Systems"
+                                    leader="Prof. Mourad Djelloul"
+                                    members={["Karim Belhadj", "Youcef Kaddour", "Amine Bouzid"]}
+                                    membersCount="4"
+                                    gradient="linear-gradient(135deg, rgb(34, 142, 195) 0%, rgb(51, 102, 204) 100%)"
+                                    isRTL={isRTL}
+                                />
+                            </>
+                        )}
                     </div>
                 </div>
                 

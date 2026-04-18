@@ -28,7 +28,7 @@ const upload = multer({
     }
 });
 
-router.get('/', protect, getProjects);
+router.get('/', getProjects);
 router.post('/', protect, upload.single('image'), createProject);
 router.put('/:id', protect, upload.single('image'), updateProject);
 router.post('/:id/milestones', protect, addMilestone);

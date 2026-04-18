@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ExternalLink, Users as UsersIcon, Calendar as CalendarIcon, Trophy, Award, BookOpen, Cpu, Shield, BarChart3, Cloud, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -222,9 +222,72 @@ function AchievementCard({ icon, title }) {
 
 export default function TeamsResearches() {
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = 12;
+  const [teams, setTeams] = useState([]);
+  const [activeTeam, setActiveTeam] = useState(null);
+  const [teamPublications, setTeamPublications] = useState([]);
+  const [teamProjects, setTeamProjects] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const teamMembers = [
+  useEffect(() => {
+    const fetchTeams = async () => {
+      setIsLoading(true);
+      try {
+        const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : '';
+        const res = await fetch(`${baseUrl}/api/teams`);
+        if (res.ok) {
+          const data = await res.json();
+          setTeams(data);
+          if (data.length > 0) {
+            setActiveTeam(data[currentPage - 1] || data[0]);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch teams", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchTeams();
+  }, []);
+
+  useEffect(() => {
+    if (teams.length > 0) {
+      const team = teams[currentPage - 1] || teams[0];
+      setActiveTeam(team);
+    }
+  }, [currentPage, teams]);
+
+  useEffect(() => {
+    if (activeTeam) {
+      const fetchTeamContent = async () => {
+        try {
+          const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : '';
+          
+          // Fetch Team Publications
+          const pubRes = await fetch(`${baseUrl}/api/publications?team=${activeTeam._id}`);
+          if (pubRes.ok) {
+            const pubData = await pubRes.json();
+            setTeamPublications(pubData);
+          }
+
+          // Fetch Team Projects
+          const projRes = await fetch(`${baseUrl}/api/projects?team=${activeTeam._id}`);
+          if (projRes.ok) {
+            const projData = await projRes.json();
+            setTeamProjects(projData);
+          }
+        } catch (err) {
+          console.error("Failed to fetch team content", err);
+        }
+      };
+      fetchTeamContent();
+    }
+  }, [activeTeam]);
+
+  const totalPages = teams.length || 1;
+
+  // Fallback if no real teams exist yet
+  const dummyTeamMembers = [
     {
       name: "Prof. Ahmed Benali",
       title: "Professor - Lab Director",
@@ -238,80 +301,42 @@ export default function TeamsResearches() {
       role: "AI Research Scientist",
       image: `https://ui-avatars.com/api/?background=3457DC&color=fff&name=Sara+Mansouri`,
       showTwitter: true,
-    },
-    {
-      name: "Youcef Kaddour",
-      title: "Master's Student",
-      role: "Data Analyst",
-      image: `https://ui-avatars.com/api/?background=3457DC&color=fff&name=Youcef+Kaddour`,
-      showTwitter: false,
-    },
-    {
-      name: "Karim Belhadj",
-      title: "Master's Student",
-      role: "Backend Developer",
-      image: `https://ui-avatars.com/api/?background=3457DC&color=fff&name=Karim+Belhadj`,
-      showTwitter: false,
-    },
-    {
-      name: "Nour Hamdi",
-      title: "PhD Researcher",
-      role: "Cybersecurity Researcher",
-      image: `https://ui-avatars.com/api/?background=3457DC&color=fff&name=Nour+Hamdi`,
-      showTwitter: true,
-    },
-  ];
-
-  const researchInterests = [
-    "Machine Learning", "Network Security", "Cloud Computing", "Optimization Algorithms",
-    "Deep Learning", "Natural Language Processing", "Computer Vision", "Cybersecurity",
-    "Data Mining", "Big Data Analytics"
-  ];
-
-  const publications = [
-    {
-      title: "Deep Reinforcement Learning for Network Intrusion Detection",
-      authors: "A. Benali, S. Mansouri, N. Hamdi",
-      year: "2024",
-      publisher: "IEEE Transactions on Information Forensics and Security",
-      tags: ["Deep Learning", "Cybersecurity", "Networking"],
-      contribution: "Explored DRL architectures for early detection of complex network attacks."
-    },
-    {
-      title: "Optimizing Cloud Resource Allocation Using Genetic Algorithms",
-      authors: "A. Benali, K. Belhadj, Y. Kaddour",
-      year: "2023",
-      publisher: "ACM Computing Surveys",
-      tags: ["Cloud Computing", "Optimization", "Genetic Algorithms"],
-      contribution: "Proposed a metaheuristic approach for dynamic load balancing in cloud nodes."
-    },
-    {
-      title: "A Novel Approach to Arabic NLP Using Transformer Models",
-      authors: "S. Mansouri, A. Cherif",
-      year: "2023",
-      publisher: "EMNLP 2023",
-      tags: ["NLP", "Transformers", "Arabic Language"],
-      contribution: "State-of-the-art results on Arabic sentiment analysis and entity recognition."
     }
   ];
 
-  const projects = [
-    {
-      title: "SecureNet AI",
-      description: "Intelligent intrusion detection system using deep learning for real-time network security monitoring.",
-      hasDemo: true
-    },
-    {
-      title: "CloudOptimizer",
-      description: "A comprehensive tool for optimizing resource distribution in multi-cloud environments.",
-      hasDemo: false
-    },
-    {
-      title: "ArabicNLP Toolkit",
-      description: "Advanced open-source library for processing and analyzing Arabic natural language structures.",
-      hasDemo: true
+  const getActiveTeamMembers = () => {
+    if (!activeTeam) return dummyTeamMembers;
+    
+    const members = [];
+    if (activeTeam.leader) {
+      members.push({
+        name: activeTeam.leader.username || activeTeam.leader,
+        title: activeTeam.leader.role || "Team Leader",
+        role: "Leader",
+        image: `https://ui-avatars.com/api/?background=3457DC&color=fff&name=${encodeURIComponent(activeTeam.leader.username || activeTeam.leader)}`,
+        showTwitter: true
+      });
     }
-  ];
+    
+    if (activeTeam.members) {
+      activeTeam.members.forEach(m => {
+        members.push({
+          name: m.username || m,
+          title: m.role || "Researcher",
+          role: "Member",
+          image: `https://ui-avatars.com/api/?background=3457DC&color=fff&name=${encodeURIComponent(m.username || m)}`,
+          showTwitter: false
+        });
+      });
+    }
+    
+    return members.length > 0 ? members : dummyTeamMembers;
+  };
+
+  const getActiveInterests = () => {
+    if (!activeTeam || !activeTeam.focus) return ["Machine Learning", "Network Security", "Cloud Computing"];
+    return activeTeam.focus.split(',').map(i => i.trim());
+  };
 
   const achievements = [
     { icon: "trophy", title: "1st Place - ICPC Regional 2024" },
@@ -332,19 +357,19 @@ export default function TeamsResearches() {
           <div className="absolute bg-[rgba(57,94,213,0.2)] blur-[60px] w-[400px] h-[400px] opacity-20 rounded-full top-[-100px] left-1/2 -translate-x-1/2" />
           
           <div className="container mx-auto relative z-10 text-center mb-20">
-             <div className="flex flex-col items-center mb-8">
+              <div className="flex flex-col items-center mb-8">
                 <span className="text-[#3457DC] text-[13px] uppercase font-bold tracking-[0.2em] mb-2">TEAMS</span>
                 <h1 className="font-gilroy font-extrabold text-[60px] md:text-[80px] leading-tight mb-4 bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(156.197deg, rgb(60, 97, 221) 0%, rgb(117, 146, 240) 100%)" }}>
-                  Data Science <span className="text-[#f5f5f5]">Research Team</span>
+                  {activeTeam?.name || "Data Science Research Team"}
                 </h1>
              </div>
             <p className="font-normal text-[#7b829d] text-[20px] leading-[28px] max-w-2xl mx-auto">
-              We are a research team specializing in Artificial Intelligence, Cybersecurity, and Data Analytics. 
+              {activeTeam?.focus ? `Advancing research in ${activeTeam.focus}` : "We are a research team specializing in Artificial Intelligence, Cybersecurity, and Data Analytics."} 
             </p>
           </div>
 
           <div className="container mx-auto relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-32">
-            {teamMembers.map((member, index) => (
+            {getActiveTeamMembers().map((member, index) => (
               <TeamMemberCard key={index} {...member} />
             ))}
           </div>
@@ -359,7 +384,7 @@ export default function TeamsResearches() {
                 Research Interests
               </h2>
               <div className="flex flex-wrap gap-3 justify-center">
-                {researchInterests.map((interest, index) => <TagBadge key={index} label={interest} />)}
+                {getActiveInterests().map((interest, index) => <TagBadge key={index} label={interest} />)}
               </div>
             </div>
           </section>
@@ -370,9 +395,22 @@ export default function TeamsResearches() {
               Selected Publications
             </h2>
             <div className="space-y-6 max-w-[1100px] mx-auto">
-              {publications.map((pub, index) => (
-                <ResearchPaperCard key={index} {...pub} link="#" />
-              ))}
+              {teamPublications.length > 0 ? (
+                teamPublications.map((pub, index) => (
+                  <ResearchPaperCard 
+                    key={pub._id || index} 
+                    title={pub.title}
+                    authors={Array.isArray(pub.authors) ? pub.authors.join(', ') : pub.authors}
+                    year={pub.year}
+                    journal={pub.publisher}
+                    description={pub.contribution}
+                    tags={pub.tags}
+                    link={pub.documentUrl ? (pub.documentUrl.startsWith('http') ? pub.documentUrl : `http://localhost:5000${pub.documentUrl}`) : '#'}
+                  />
+                ))
+              ) : (
+                <div className="text-center py-20 opacity-40">No team publications found.</div>
+              )}
             </div>
           </section>
 
@@ -383,7 +421,18 @@ export default function TeamsResearches() {
                 Featured Projects
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {projects.map((project, index) => <ProjectCard key={index} {...project} />)}
+                {teamProjects.length > 0 ? (
+                  teamProjects.map((project, index) => (
+                    <ProjectCard 
+                        key={project._id || index} 
+                        title={project.title}
+                        description={project.description}
+                        hasDemo={!!project.imageUrl}
+                    />
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-10 opacity-40">No team projects found.</div>
+                )}
               </div>
             </div>
           </section>

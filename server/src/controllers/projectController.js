@@ -17,16 +17,24 @@ exports.addMilestone = async (req, res) => {
 
 exports.getProjects = async (req, res) => {
     try {
-        // If admin, show all projects; else show user-specific projects
         let query = {};
-        if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
-            query = {
-                $or: [
-                    { members: req.user._id },
-                    { team: req.user.team }
-                ]
-            };
+        
+        // If team ID is provided in query, filter by team (Public access allowed for this)
+        if (req.query.team) {
+            query.team = req.query.team;
+        } 
+        // Otherwise, if user is authenticated, handle dashboard filtering
+        else if (req.user) {
+            if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
+                query = {
+                    $or: [
+                        { members: req.user._id },
+                        { team: req.user.team }
+                    ]
+                };
+            }
         }
+        
         const projects = await Project.find(query).populate('team');
         res.json(projects);
     } catch (error) {
