@@ -20,7 +20,9 @@ import EngagementIcon from "@/assets/svg/userDashboard/Overview/dashboard (4) 1.
 
 const StatCard = ({ icon, title, value }) => {
     return (
-        <div style={{
+        <div 
+            className="stat-card"
+            style={{
             width: '100%',
             backgroundColor: '#151519',
             border: '1px solid rgba(255, 255, 255, 0.05)',
@@ -44,14 +46,20 @@ const StatCard = ({ icon, title, value }) => {
 
             {/* Top Part: Icon & Title */}
             <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', gap: '1.2vh' }}>
-                <div style={{
+                <div 
+                    className="stat-card-icon-container"
+                    style={{
                     width: '2.5vw', height: '2.5vw', minWidth: '35px', minHeight: '35px',
                     backgroundColor: 'rgba(52, 87, 220, 0.12)', borderRadius: '0.7vw',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white'
                 }}>
-                    {icon}
+                    <span className="stat-card-icon-wrapper">
+                        {icon}
+                    </span>
                 </div>
-                <span style={{
+                <span 
+                    className="stat-card-title-text"
+                    style={{
                     fontSize: '0.9vw', fontWeight: 600, color: '#A5A5B2',
                     textTransform: 'capitalize', letterSpacing: '0.01vw', fontFamily: "'Poppins', sans-serif"
                 }}>
@@ -61,7 +69,9 @@ const StatCard = ({ icon, title, value }) => {
 
             {/* Bottom Part: Value */}
             <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'end', justifyContent: 'space-between', marginTop: '0.3vh' }}>
-                <h3 style={{ fontSize: '1.8vw', fontWeight: 500, color: 'white', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5vw' }}>
+                <h3 
+                    className="stat-card-value-text"
+                    style={{ fontSize: '1.8vw', fontWeight: 500, color: 'white', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5vw' }}>
                     {value}
                 </h3>
             </div>
@@ -196,9 +206,11 @@ const ReportsHistoryTable = ({ direction = 'ltr', reportsList, setReportsList })
     return (
         <div dir={direction} style={commonContainerStyle}>
             {/* Header Section (Filters & Search) */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', marginBottom: '3vh' }} ref={dropdownRef}>
+            <div className="tracker-filters-row" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', marginBottom: '3vh' }} ref={dropdownRef}>
                 {/* Search Bar */}
-                <div style={{ ...filterItemStyle, flex: 1, minWidth: '15vw', backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #1e1d22', padding: '1.1vh 1.2vw' }}>
+                <div 
+                    className="tracker-search-container"
+                    style={{ ...filterItemStyle, flex: 1, minWidth: '15vw', backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #1e1d22', padding: '1.1vh 1.2vw' }}>
                     <input
                         type="text"
                         placeholder="/ Search"
@@ -211,7 +223,11 @@ const ReportsHistoryTable = ({ direction = 'ltr', reportsList, setReportsList })
                 </div>
 
                 {/* Sort Dropdown */}
-                <div style={{ ...filterItemStyle, position: 'relative', backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #1e1d22', padding: '1.1vh 1.2vw' }} onClick={() => setActiveDropdown(activeDropdown === 'sort' ? null : 'sort')}>
+                <div 
+                    className="tracker-filter-item"
+                    style={{ ...filterItemStyle, position: 'relative', backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #1e1d22', padding: '1.1vh 1.2vw' }} 
+                    onClick={() => setActiveDropdown(activeDropdown === 'sort' ? null : 'sort')}
+                >
                     <span style={{ fontSize: '14px', color: '#f0f0f2', flex: 1 }}>{selectedSort}</span>
                     <img src={DropdownIcon} alt="arrow" style={{ width: '0.8vw', transform: activeDropdown === 'sort' ? 'rotate(180deg)' : 'none', transition: '0.3s' }} />
                     {activeDropdown === 'sort' && (
@@ -226,7 +242,11 @@ const ReportsHistoryTable = ({ direction = 'ltr', reportsList, setReportsList })
                 </div>
 
                 {/* Status Dropdown */}
-                <div style={{ ...filterItemStyle, position: 'relative', backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #1e1d22', padding: '1.1vh 1.2vw' }} onClick={() => setActiveDropdown(activeDropdown === 'status' ? null : 'status')}>
+                <div 
+                    className="tracker-filter-item"
+                    style={{ ...filterItemStyle, position: 'relative', backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #1e1d22', padding: '1.1vh 1.2vw' }} 
+                    onClick={() => setActiveDropdown(activeDropdown === 'status' ? null : 'status')}
+                >
                     <span style={{ fontSize: '14px', color: '#f0f0f2', flex: 1 }}>{selectedStatus === 'All' ? 'Status' : selectedStatus}</span>
                     <img src={DropdownIcon} alt="arrow" style={{ width: '0.8vw', transform: activeDropdown === 'status' ? 'rotate(180deg)' : 'none', transition: '0.3s' }} />
                     {activeDropdown === 'status' && (
@@ -249,16 +269,16 @@ const ReportsHistoryTable = ({ direction = 'ltr', reportsList, setReportsList })
             </div>
 
             {/* Table Content */}
-            <div style={{ overflowX: 'auto' }}>
+            <div className="tracker-table-container" style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                     <thead>
                         <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                             <th style={{ padding: '1.5vh 0.5vw', width: '3vw' }}></th>
-                            <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, width: '14vw' }}>Date & Time</th>
-                            <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, width: '15vw' }}>Document</th>
-                            <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, textAlign: 'left' }}>University</th>
-                            <th style={{ padding: '1.5vh 3vw 1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, width: '9vw', textAlign: 'right' }}>Status</th>
-                            <th style={{ padding: '1.5vh 4vw 1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, textAlign: 'right' }}>Action</th>
+                            <th className="table-header-cell" style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, width: '14vw' }}>Date & Time</th>
+                            <th className="table-header-cell" style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, width: '15vw' }}>Document</th>
+                            <th className="table-header-cell" style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, textAlign: 'left' }}>University</th>
+                            <th className="table-header-cell" style={{ padding: '1.5vh 3vw 1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, width: '9vw', textAlign: 'right' }}>Status</th>
+                            <th className="table-header-cell" style={{ padding: '1.5vh 4vw 1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, textAlign: 'right' }}>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -270,11 +290,15 @@ const ReportsHistoryTable = ({ direction = 'ltr', reportsList, setReportsList })
                                         {row.checked && <RiCheckLine color="white" size="0.8vw" />}
                                     </div>
                                 </td>
-                                <td style={{ padding: '2.8vh 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{row.dateTime}</td>
-                                <td style={{ padding: '2.8vh 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{row.document}</td>
-                                <td style={{ padding: '2.8vh 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)', textAlign: 'left' }}>{row.university}</td>
-                                <td style={{ padding: '2.8vh 0 2.8vh 6vw', textAlign: 'right' }}>
-                                    <span style={{
+                                <td className="table-cell-text" style={{ padding: '2.8vh 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{row.dateTime}</td>
+                                <td className="table-cell-text" style={{ padding: '2.8vh 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{row.document}</td>
+                                <td className="table-cell-text" style={{ padding: '2.8vh 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)', textAlign: 'left' }}>{row.university}</td>
+                                <td 
+                                    className="table-status-cell"
+                                    style={{ padding: '2.8vh 0 2.8vh 6vw', textAlign: 'right' }}>
+                                    <span 
+                                        className="status-badge"
+                                        style={{
                                         display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                                         padding: '1.2vh 0', borderRadius: '100px', width: '7.5vw',
                                         fontSize: '0.8vw', backgroundColor: getStatusStyle(row.status).bg, color: getStatusStyle(row.status).color,
@@ -283,16 +307,19 @@ const ReportsHistoryTable = ({ direction = 'ltr', reportsList, setReportsList })
                                         {row.status}
                                     </span>
                                 </td>
-                                <td style={{ padding: '2.8vh 1.5vw 2.8vh 0.5vw', textAlign: 'right' }}>
+                                <td 
+                                    className="table-action-cell"
+                                    style={{ padding: '2.8vh 1.5vw 2.8vh 0.5vw', textAlign: 'right' }}>
                                     <a
+                                        className="download-link"
                                         href={row.fileUrl ? `http://localhost:5000${row.fileUrl}` : '#'}
                                         download
                                         target="_blank"
                                         rel="noreferrer"
                                         style={{ backgroundColor: 'transparent', border: 'none', cursor: row.fileUrl ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', gap: '0.55vw', justifyContent: 'flex-end', marginLeft: 'auto', textDecoration: 'none', opacity: row.fileUrl ? 1 : 0.4 }}
                                     >
-                                        <img src={DownloadIcon} alt="download" style={{ width: '1.1vw' }} />
-                                        <span style={{ color: '#3457DC', fontSize: '0.85vw', fontWeight: 600, marginTop: '0.3vh' }}>Download</span>
+                                        <img className="download-icon" src={DownloadIcon} alt="download" style={{ width: '1.1vw' }} />
+                                        <span className="download-text" style={{ color: '#3457DC', fontSize: '0.85vw', fontWeight: 600, marginTop: '0.3vh' }}>Download</span>
                                     </a>
                                 </td>
                             </tr>
@@ -302,9 +329,9 @@ const ReportsHistoryTable = ({ direction = 'ltr', reportsList, setReportsList })
             </div>
 
             {/* Footer Section (Pagination) */}
-            <div className="report-pagination" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginTop: '4vh', flexDirection: isAr ? 'row-reverse' : 'row' }}>
+            <div className="report-pagination tracker-pagination" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginTop: '4vh', flexDirection: isAr ? 'row-reverse' : 'row' }}>
                 <button
-                    className="report-pagination-btn"
+                    className="report-pagination-btn pagination-arrow"
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
                     style={{
@@ -315,20 +342,20 @@ const ReportsHistoryTable = ({ direction = 'ltr', reportsList, setReportsList })
                         opacity: currentPage === 1 ? 0.5 : 1
                     }}
                 >
-                    <svg width="0.45vw" height="0.95vw" viewBox="0 0 7 13" fill="none" style={{ transform: isAr ? 'rotate(180deg)' : 'none' }}>
+                    <svg className="pagination-svg" width="0.45vw" height="0.95vw" viewBox="0 0 7 13" fill="none" style={{ transform: isAr ? 'rotate(180deg)' : 'none' }}>
                         <path d="M6.5 12L1.5 6.5L6.5 1" stroke={currentPage === 1 ? '#717177' : '#F7F7F7'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                 </button>
 
                 <div className="pagination-counts-box" style={{ display: 'flex', alignItems: 'center', gap: '0.7vw', flexDirection: 'row' }}>
                     <div className="pagination-current-page-box" style={{ border: '1px solid #2a2a30', borderRadius: '0.6vw', padding: '1vh 0.6vw', backgroundColor: 'rgba(255,255,255,0.01)', minWidth: '2.5vw', textAlign: 'center' }}>
-                        <span style={{ fontSize: '0.9vw', color: '#ffffff' }}>{currentPage}</span>
+                        <span className="pagination-current-text" style={{ fontSize: '0.9vw', color: '#ffffff' }}>{currentPage}</span>
                     </div>
-                    <span style={{ fontSize: '0.95vw', color: '#80808a' }}>of {totalPages}</span>
+                    <span className="pagination-total-text" style={{ fontSize: '0.95vw', color: '#80808a' }}>of {totalPages}</span>
                 </div>
 
                 <button
-                    className="report-pagination-btn"
+                    className="report-pagination-btn pagination-arrow"
                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
                     style={{
@@ -339,7 +366,7 @@ const ReportsHistoryTable = ({ direction = 'ltr', reportsList, setReportsList })
                         opacity: currentPage === totalPages ? 0.5 : 1
                     }}
                 >
-                    <svg width="0.45vw" height="0.95vw" viewBox="0 0 7 13" fill="none" style={{ transform: isAr ? 'rotate(180deg)' : 'none' }}>
+                    <svg className="pagination-svg" width="0.45vw" height="0.95vw" viewBox="0 0 7 13" fill="none" style={{ transform: isAr ? 'rotate(180deg)' : 'none' }}>
                         <path d="M1 12L6 6.5L1 1" stroke={currentPage === totalPages ? '#717177' : '#F7F7F7'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                 </button>
@@ -362,24 +389,30 @@ const ReportsHistoryTable = ({ direction = 'ltr', reportsList, setReportsList })
 
 const AcademicPhasesSection = ({ phases }) => {
     return (
-        <div style={{
+        <div 
+            className="tracker-phase-card"
+            style={{
             backgroundColor: '#151519', border: '1px solid #1e1d22',
             borderRadius: '16px', padding: '24px', display: 'flex',
             flexDirection: 'column', gap: '24px', width: '100%'
         }}>
             {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'flex-end', position: 'relative', width: '100%' }}>
+            <div 
+                className="tracker-phase-header"
+                style={{ display: 'flex', alignItems: 'flex-end', position: 'relative', width: '100%' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'white', fontFamily: 'Gilroy, sans-serif' }}>Academic Phases</h3>
+                    <h3 className="tracker-phase-main-title" style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'white', fontFamily: 'Gilroy, sans-serif' }}>Academic Phases</h3>
                     <p style={{ margin: 0, fontSize: '14px', color: '#a5a5b2' }}>Key Objectives & Milestones.</p>
                 </div>
 
                 {/* Absolutely Centered Status */}
-                <div style={{
+                <div 
+                    className="tracker-phase-status-badge"
+                    style={{
                     position: 'absolute', left: '50%', transform: 'translateX(-50%)',
                     display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center'
                 }}>
-                    <span style={{ fontSize: '14px', color: '#3457DC', fontWeight: 500 }}>You're Doctorat</span>
+                    <span className="tracker-phase-status-text" style={{ fontSize: '14px', color: '#3457DC', fontWeight: 500 }}>You're Doctorat</span>
                     <div style={{ width: '60px', height: '4px', backgroundColor: '#1e1e24', borderRadius: '400px', overflow: 'hidden' }}>
                         <div style={{ width: '24px', height: '100%', backgroundColor: '#3457DC' }} />
                     </div>
@@ -391,10 +424,16 @@ const AcademicPhasesSection = ({ phases }) => {
             {/* Timeline Area with custom scrollbar */}
             <div className="academic-timeline-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '32px', maxHeight: '300px', overflowY: 'auto', paddingRight: '12px' }}>
                 {phases.map((phase, index) => (
-                    <div key={index} style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
+                    <div 
+                        className="tracker-phase-item"
+                        key={index} style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
                         {/* Dot & Line Indicator */}
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '46px', position: 'relative' }}>
-                            <div style={{
+                        <div 
+                            className="tracker-phase-indicator"
+                            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '46px', position: 'relative' }}>
+                            <div 
+                                className="tracker-phase-dot"
+                                style={{
                                 backgroundColor: phase.completed ? '#3457DC' : '#1e1e24',
                                 padding: '14px', borderRadius: '50%', display: 'flex',
                                 alignItems: 'center', justifyContent: 'center', zIndex: 2,
@@ -403,20 +442,25 @@ const AcademicPhasesSection = ({ phases }) => {
                                 <img src={ComputerIcon} alt="phase" style={{ width: '16px', height: '16px' }} />
                             </div>
                             {index !== phases.length - 1 && (
-                                <div style={{
+                                <div 
+                                    className="tracker-phase-line"
+                                    style={{
                                     width: '2px', height: '100px', backgroundColor: '#3457DC',
                                     position: 'absolute', top: '22px', zIndex: 1
                                 }} />
                             )}
                         </div>
 
-                        {/* Content */}
-                        <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div 
+                            className="tracker-phase-content"
+                            style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                <span style={{ fontSize: '14px', color: '#a5a5b2', fontWeight: 500 }}>{phase.date}</span>
-                                <span style={{ fontSize: '14px', color: 'white', fontWeight: 400 }}>{phase.title}</span>
+                                <span className="tracker-phase-date" style={{ fontSize: '14px', color: '#a5a5b2', fontWeight: 500 }}>{phase.date}</span>
+                                <span className="tracker-phase-title" style={{ fontSize: '14px', color: 'white', fontWeight: 400 }}>{phase.title}</span>
                             </div>
-                            <div style={{
+                            <div 
+                                className="tracker-phase-btn"
+                                style={{
                                 backgroundColor: '#1e1e24', padding: '10px 24px', borderRadius: '16px',
                                 color: 'white', fontSize: '14px', fontWeight: 500, cursor: 'pointer'
                             }}>
@@ -847,7 +891,7 @@ const EditProgressForm = ({ onSave }) => {
                 </div>
 
                 {/* University & Wilaya Group */}
-                <div style={{ display: 'flex', gap: '40px' }}>
+                <div className="tracker-form-row" style={{ display: 'flex', gap: '40px' }}>
                     {/* University - Custom Premium Dropdown */}
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative' }} ref={uniDropdownRef}>
                         <p style={{ color: '#80808a', fontSize: '14px', margin: 0 }}>University</p>
@@ -1018,7 +1062,7 @@ const EditProgressForm = ({ onSave }) => {
                         <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: 'white' }} />
                         <span>Date & Time</span>
                     </div>
-                    <div style={{ display: 'flex', gap: '60px' }}>
+                    <div className="tracker-form-row" style={{ display: 'flex', gap: '60px' }}>
                         {/* Month */}
                         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             <p style={{ color: '#80808a', fontSize: '14px', margin: 0 }}>Month</p>
@@ -1303,7 +1347,7 @@ const PhdTracker = () => {
                             transition={{ duration: 0.3 }}
                             className="flex flex-col gap-[2vh]"
                         >
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[1vw]">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[1vw] tracker-stats-grid">
                                 {overviewStats.map((stat, index) => (
                                     <StatCard
                                         key={index}
@@ -1346,5 +1390,148 @@ const PhdTracker = () => {
         </div>
     );
 };
+
+/* --- Mobile Responsive Style --- */
+const trackerStyles = `
+@media (max-width: 1024px) {
+    .tracker-stats-grid { 
+        grid-template-columns: repeat(2, 1fr) !important; 
+        gap: 12px !important;
+    }
+    .stat-card { 
+        height: 160px !important; 
+        border-radius: 12px !important; 
+        padding: 16px !important;
+    }
+    .stat-card-title-text { font-size: 14px !important; }
+    .stat-card-value-text { font-size: 24px !important; }
+    .stat-card-icon-container { 
+        width: 48px !important; 
+        height: 48px !important; 
+        border-radius: 10px !important; 
+    }
+    .stat-card-icon-wrapper img, .stat-card-icon-wrapper svg {
+        width: 24px !important;
+        height: 24px !important;
+        object-fit: contain !important;
+    }
+
+    /* Form Responsiveness */
+    .tracker-form-row {
+        flex-direction: column !important;
+        gap: 24px !important;
+    }
+    .tracker-form-row > div {
+        width: 100% !important;
+    }
+
+    /* Table & Filters Responsiveness */
+    .tracker-filters-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+    }
+    .tracker-search-container, .tracker-filter-item {
+        width: 100% !important;
+        min-width: unset !important;
+        padding: 14px 18px !important;
+    }
+    .tracker-table-container {
+        margin-top: 24px !important;
+        border: 1px solid #1e1d22 !important;
+        border-radius: 12px !important;
+        overflow-x: auto !important;
+    }
+    .table-header-cell { 
+        font-size: 14px !important; 
+        padding: 15px 10px !important; 
+        min-width: 120px !important;
+    }
+    .table-data-row { padding: 20px 10px !important; }
+    .table-cell-text { 
+        font-size: 15px !important; 
+        min-width: 120px !important;
+    }
+    
+    /* Scaling Table Icons and Badges */
+    .status-badge { 
+        width: 110px !important; 
+        height: 36px !important; 
+        font-size: 14px !important; 
+        border-radius: 50px !important;
+    }
+    .download-icon { width: 22px !important; }
+    .download-text { font-size: 16px !important; }
+    .table-status-cell { padding: 15px 0 15px 15px !important; min-width: 130px !important; }
+    .table-action-cell { padding: 15px 15px !important; min-width: 140px !important; }
+
+    /* Academic Phases Responsiveness */
+    .tracker-phase-card {
+        padding: 16px !important;
+        gap: 20px !important;
+    }
+    .tracker-phase-main-title { font-size: 16px !important; }
+    .tracker-phase-status-badge {
+        position: static !important;
+        transform: none !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        background: rgba(52, 87, 220, 0.05) !important;
+        padding: 10px 14px !important;
+        border-radius: 10px !important;
+    }
+    .tracker-phase-status-text { font-size: 13px !important; }
+    .tracker-phase-header { flex-direction: column !important; align-items: flex-start !important; gap: 15px !important; }
+    
+    .tracker-phase-item { gap: 15px !important; }
+    .tracker-phase-indicator { min-width: 40px !important; }
+    .tracker-phase-dot { padding: 10px !important; }
+    .tracker-phase-dot img { width: 14px !important; height: 14px !important; }
+    .tracker-phase-line { height: 80px !important; top: 18px !important; }
+    
+    .tracker-phase-date { font-size: 12px !important; }
+    .tracker-phase-title { font-size: 13px !important; }
+    .tracker-phase-btn { padding: 8px 16px !important; font-size: 12px !important; border-radius: 10px !important; }
+
+    /* Pagination Scaling */
+    .report-pagination-btn.pagination-arrow {
+        width: 44px !important;
+        height: 44px !important;
+    }
+    .pagination-svg {
+        width: 10px !important;
+        height: 18px !important;
+    }
+    .pagination-current-page-box {
+        min-width: 45px !important;
+        padding: 8px !important;
+        border-radius: 8px !important;
+    }
+    .pagination-current-text { font-size: 16px !important; }
+    .pagination-total-text { font-size: 16px !important; }
+    .pagination-counts-box { gap: 12px !important; }
+}
+
+@media (max-width: 480px) {
+    /* Ensure cards stay 2 in line as requested, unless extremely narrow */
+    .tracker-stats-grid { 
+        grid-template-columns: repeat(2, 1fr) !important; 
+        gap: 8px !important;
+    }
+    .stat-card {
+        height: 140px !important;
+        padding: 12px !important;
+    }
+    .stat-card-title-text { font-size: 12px !important; }
+    .stat-card-value-text { font-size: 20px !important; }
+}
+`;
+
+if (typeof document !== 'undefined') {
+    const styleSheet = document.createElement("style");
+    styleSheet.innerText = trackerStyles;
+    document.head.appendChild(styleSheet);
+}
 
 export default PhdTracker;

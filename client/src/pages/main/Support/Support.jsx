@@ -41,16 +41,15 @@ const CarreIcon = ({ className }) => (
 );
 
 const HerFAQ = () => {
-    const { t, language } = useTranslation("faq");
+    const { language } = useLanguage();
     const isRTL = language === "ar";
 
     return (
         <section
-            className={`relative overflow-hidden bg-[#05030D] text-white pt-[50px] lg:pt-20 ${isRTL ? "font-arabic" : ""}`}
+            className={`relative overflow-hidden bg-[#05030D] text-white pt-[50px] lg:pt-20 ${isRTL ? "font-tajawal" : "font-poppins"}`}
             dir={isRTL ? "rtl" : "ltr"}
         >
             <div className="pointer-events-none absolute inset-0 z-[1]">
-                {/* Left Side Shapes */}
                 <div className="absolute top-0 left-0 lg:top-[40px] w-[234px] h-[326px] scale-[0.6] sm:scale-[0.8] lg:scale-100 origin-top-left">
                     <motion.div initial={{ opacity: 0, x: -100 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1.2, delay: 0.1 }} className="absolute top-0 left-0">
                         <svg width="234" height="235" viewBox="0 0 234 235" fill="none"><path d="M-181 0L17.2118 110.118L233.212 234.635L79.0471 206.682L-181 0Z" fill="#3457DC" /></svg>
@@ -59,7 +58,6 @@ const HerFAQ = () => {
                         <svg width="130" height="224" viewBox="0 0 130 224" fill="none"><path d="M-47.1582 56.3737L129.877 223.624L47.7124 146L-88.6641 0L-47.1582 56.3737Z" fill="#3457DC" /></svg>
                     </motion.div>
                 </div>
-                {/* Right Side Shapes */}
                 <div className="absolute right-0 bottom-[20px] lg:bottom-auto lg:top-[190px] w-[190px] h-[179px] scale-[0.55] sm:scale-[0.8] lg:scale-100 origin-bottom-right lg:origin-top-right">
                     <motion.div initial={{ opacity: 0, x: 100 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1.2, delay: 0.1 }} className="absolute top-[120px] right-10">
                         <svg width="150" height="52" viewBox="0 0 150 52" fill="none"><path d="M38 42.5L150 0L91.5022 23L0 52L38 42.5Z" fill="#3457DC" /></svg>
@@ -73,7 +71,6 @@ const HerFAQ = () => {
             <div className="relative z-10 mx-auto max-w-[1380px] px-6 lg:px-8 pb-10">
                 <div className="relative flex min-h-[360px] sm:min-h-[400px] lg:min-h-[300px] items-start lg:items-center pt-[30px] sm:pt-[60px] lg:pt-[100px] lg:left-20">
                     <div className="relative w-full">
-                        {/* Desktop Section */}
                         <div className="relative hidden lg:block h-[260px]">
                             <CarreIcon className={`absolute w-[46px] h-[46px] z-20 ${isRTL ? "left-[130px] xl:left-[269px] 2xl:left-[200px] top-[14px] scale-x-[-1]" : "right-[160px] xl:right-[269px] 2xl:right-[300px] top-[30px]"}`} />
                             <CarreIcon className={`absolute w-[46px] h-[46px] z-20 ${isRTL ? "right-[130px] xl:right-[269px] 2xl:right-[300px] bottom-[14px] scale-y-[-1]" : "left-[150px] bottom-[-8px] scale-x-[-1] scale-y-[-1]"}`} />
@@ -83,16 +80,16 @@ const HerFAQ = () => {
                             </motion.div>
                             <div className={`absolute top-[60px] w-full flex items-start justify-center ${isRTL ? "text-right left-[-30px] gap-[30px] xl:gap-[94px]" : "left-[-70px] text-left gap-[200px] xl:gap-[58px]"}`}>
                                 <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.85, delay: 0.08 }} className="flex flex-col">
-                                    <h1 className={`${isRTL ? "font-arabic" : "font-gilroy"} font-extrabold text-[84px] leading-[100%] uppercase`}>
-                                        {language === "en" ? <>{t('title', {defaultValue: 'FREQUENTLY'})}<br />{t('titleSpan', {defaultValue: 'QUESTION'})}</> : <>{t('title', {defaultValue: 'الأسئلة'})}<br />{t('titleSpan', {defaultValue: 'شيوعًا'})}</>}
+                                    <h1 className={`${isRTL ? "font-tajawal" : "font-gilroy"} font-extrabold text-[84px] leading-[100%] uppercase`}>
+                                        {isRTL ? <>الأسئلة<br />شيوعًا</> : <>FREQUENTLY<br />QUESTION</>}
                                     </h1>
                                 </motion.div>
                                 <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.85, delay: 0.12 }} className="flex flex-col pt-[4px] items-start">
-                                    <h1 className={`${isRTL ? "font-arabic" : "font-gilroy"} font-extrabold text-[80px] leading-[100%] uppercase`}>{language === "en" ? "ASKED" : "الأكثر"}</h1>
+                                    <h1 className={`${isRTL ? "font-tajawal" : "font-gilroy"} font-extrabold text-[80px] leading-[100%] uppercase`}>{isRTL ? "الأكثر" : "ASKED"}</h1>
                                     <motion.div initial={{ opacity: 0, x: isRTL ? -20 : 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.82, delay: 0.24 }} className={`mt-[20px] ${isRTL ? "w-[260px]" : "w-[229px]"}`}>
                                         <div className="relative p-0 pt-2">
                                             <div className="absolute -bottom-[24px] w-[290px] -left-[60px] -right-[40px] -top-[12px] bg-repeat pointer-events-none" style={{ backgroundImage: `url(${carreFAQ})` }} />
-                                            <p className="relative z-10 font-inter text-[14px] leading-none text-white">{t('description', {defaultValue: language === "en" ? "Find quick answers to the most common questions about the Saad Dahlab Research Institute." : "إجابات مفصّلة لأكثر ما يشغل المستخدمين حول معهد سعد دحلب للبحوث في مكان واحد."})}</p>
+                                            <p className="relative z-10 font-inter text-[14px] leading-none text-white">{isRTL ? "إجابات مفصّلة لأكثر ما يشغل المستخدمين حول معهد سعد دحلب للبحوث في مكان واحد." : "Find quick answers to the most common questions about the Saad Dahlab Research Institute."}</p>
                                         </div>
                                     </motion.div>
                                 </motion.div>
@@ -102,7 +99,6 @@ const HerFAQ = () => {
                             </motion.div>
                         </div>
 
-                        {/* Mobile Section */}
                         <div className="mx-auto flex w-full flex-col px-[20px] items-start text-left lg:hidden relative z-10">
                             <CarreIcon className={`absolute w-[26px] h-[26px] z-20 ${isRTL ? "left-[12px] top-[15px] scale-x-[-1]" : "right-[12px] top-[15px]"}`} />
                             <CarreIcon className={`absolute w-[26px] h-[26px] z-20 ${isRTL ? "right-[12px] bottom-[-25px] scale-y-[-1]" : "left-[12px] bottom-[-25px] rotate-90"}`} />
@@ -111,7 +107,7 @@ const HerFAQ = () => {
                                 <span className="font-poppins text-[12px] font-bold text-white/95">{isRTL ? "يُعرف بـ FAQ" : "Aka. FAQ"}</span>
                             </motion.div>
                             <div className="relative w-full z-10">
-                                <motion.h1 className={`${isRTL ? "font-arabic text-right" : "font-gilroy text-left"} text-[56px] font-extrabold uppercase leading-[1.2] text-white my-0 mt-[-10px] relative z-10`}>
+                                <motion.h1 className={`${isRTL ? "font-tajawal text-right" : "font-gilroy text-left"} text-[56px] font-extrabold uppercase leading-[1.2] text-white my-0 mt-[-10px] relative z-10`}>
                                     {isRTL ? <>الأسئلة<br />الأكثر<br />شيوعًا</> : <>FREQUENTLY<br />ASKED<br />QUESTION</>}
                                 </motion.h1>
                                 <motion.div className={`pointer-events-none absolute z-[5] ${isRTL ? "left-[20px] top-[-15px]" : "right-[-60px] top-[-35px]"}`}>
@@ -122,7 +118,7 @@ const HerFAQ = () => {
                                 <div className="relative p-0 pt-0 pb-1">
                                     <div className={`absolute -bottom-[20px] -top-[10px] opacity-[0.9] bg-repeat pointer-events-none z-[-1] ${isRTL ? "-right-[20px] -left-[40px]" : "-left-[20px] -right-[40px]"}`} style={{ backgroundImage: `url(${carreFAQ})` }} />
                                     <p className={`relative z-10 font-inter text-[14px] leading-[1.4] text-white/95 ${isRTL ? "text-right" : "text-left"}`}>
-                                        {language === "en" ? "Find quick answers to the most common questions about the Saad Dahlab Research Institute." : "إجابات مفصّلة لأكثر ما يشغل المستخدمين حول معهد سعد دحلب للبحوث في مكان واحد."}
+                                        {isRTL ? "إجابات مفصّلة لأكثر ما يشغل المستخدمين حول معهد سعد دحلب للبحوث في مكان واحد." : "Find quick answers to the most common questions about the Saad Dahlab Research Institute."}
                                     </p>
                                 </div>
                             </motion.div>
@@ -135,7 +131,6 @@ const HerFAQ = () => {
 };
 
 const FAQSection = () => {
-    const { t } = useTranslation('home');
     const { language } = useLanguage();
     const isRTL = language === 'ar';
     const [openIndex, setOpenIndex] = useState(0);
@@ -178,7 +173,7 @@ const FAQSection = () => {
     };
 
     return (
-        <section className="relative w-full text-white overflow-hidden pb-10" dir={isRTL ? 'rtl' : 'ltr'}>
+        <section className={`relative w-full text-white overflow-hidden pb-10 ${isRTL ? 'font-tajawal' : 'font-poppins'}`} dir={isRTL ? 'rtl' : 'ltr'}>
             <div className="relative w-full flex flex-col items-center mb-14 gap-5">
                 <div className="h-px w-full max-w-[1180px] mx-auto bg-[#1A1A21]" />
                 <svg width="14" height="8" viewBox="0 0 14 8" fill="none"><path d="M0.999787 0H12.1718C12.3695 0 12.5628 0.05 12.72 0.16C12.89 0.27 13.01 0.43 13.09 0.61C13.17 0.8 13.19 1.0 13.15 1.19C13.11 1.38 13.01 1.56 12.87 1.7L7.29 7.29C7.1 7.48 6.85 7.58 6.58 7.58C6.32 7.58 6.06 7.48 5.87 7.29L0.29 1.7C0.15 1.56 0.05 1.38 0.01 1.19C-0.01 1 0 0.8 0.07 0.61C0.15 0.43 0.27 0.27 0.44 0.16C0.6 0.05 0.8 0 0.99 0Z" fill="white" /></svg>
@@ -235,19 +230,19 @@ const CardFAQ = () => {
     const isRTL = language === "ar";
 
     return (
-        <section className="bg-[#05030D] px-4 pb-16">
+        <section className={`bg-[#05030D] px-4 pb-16 ${isRTL ? 'font-tajawal' : 'font-poppins'}`}>
             <div className="mx-auto max-w-[820px]">
                 <div dir={isRTL ? "rtl" : "ltr"} className="relative overflow-hidden rounded-[28px] border border-white/10 min-h-[320px] px-8 py-12 flex flex-col items-center justify-center text-center" style={{ backgroundImage: `url(${backgroundCard})`, backgroundSize: "cover", backgroundColor: "#08080819" }}>
                     <div className="relative z-10 w-full max-w-[560px]">
-                        <h2 className={`mb-10 text-white font-extrabold text-[30px] ${isRTL ? "font-arabic" : "font-gilroy"}`}>
-                            {language === "ar" ? "لم تجد الإجابة التي تبحث عنها؟" : "Didn’t find the answer you were looking for?"}
+                        <h2 className={`mb-10 text-white font-extrabold text-[30px] ${isRTL ? "font-tajawal" : "font-gilroy"}`}>
+                            {isRTL ? "لم تجد الإجابة التي تبحث عنها؟" : "Didn’t find the answer you were looking for?"}
                         </h2>
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                             <button className="w-full sm:w-auto min-w-[180px] bg-[#3457DC] hover:bg-[#2c4ecf] text-white rounded-[14px] px-6 py-5 flex items-center justify-center gap-2 font-semibold transition-all hover:scale-105 active:scale-95">
-                                <span>{language === "ar" ? "تواصل معنا" : "Contact us"}</span>
+                                <span>{isRTL ? "تواصل معنا" : "Contact us"}</span>
                             </button>
                             <button className="w-full sm:w-auto min-w-[180px] bg-[#1D1D26] hover:bg-[#2a2a35] text-white rounded-[14px] px-6 py-5 flex items-center justify-center gap-2 font-semibold transition-all hover:scale-105 active:scale-95">
-                                <span>{language === "ar" ? "انضم للمجتمع" : "Join Community"}</span>
+                                <span>{isRTL ? "انضم للمجتمع" : "Join Community"}</span>
                             </button>
                         </div>
                     </div>

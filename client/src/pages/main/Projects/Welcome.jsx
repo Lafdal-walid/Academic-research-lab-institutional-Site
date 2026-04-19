@@ -19,8 +19,8 @@ const Welcome = () => {
         row2_start: isRTL ? 'الأبـ' : 'RESE',
         row2_end: isRTL ? 'ـحاث المتقدمة.' : 'ARCH LIBRARY.',
         description: isRTL 
-            ? 'أرشيف متنامٍ باستمرار يضم أكثر من 1000 ورقة بحثية، جميعها مراجعة من قبل أقران لضمان التميز الأكاديمي.' 
-            : 'A constantly growing archive of 1,000+ research papers, all peer-reviewed for academic excellence.'
+            ? 'كتالوج متوسع باستمرار يضم أكثر من 10,000 قطعة ألعاب، جميعها محسنة لتجربة لعب أسلس وأسرع.' 
+            : 'A constantly expanding catalog of 10,000+ <br class="md:hidden" /> games, all optimized for smoother, <br class="md:hidden" /> faster play.'
     };
 
     const platformIcons = [
@@ -48,7 +48,7 @@ const Welcome = () => {
                 initial={{ opacity: 0, x: isRTL ? 80 : -80 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 1 }}
-                className={`absolute ${isRTL ? 'right-[5%]' : 'left-[5%]'} bottom-0 md:w-[20%] w-[50%] max-w-[400px]  md:max-w-[350px] pointer-events-none select-none`}
+                className={`absolute ${isRTL ? '-right-[8%] md:right-[5%]' : '-left-[8%] md:left-[5%]'} bottom-0 md:w-[20%] w-[50%] max-w-full md:max-w-[350px] pointer-events-none select-none`}
             >
                 <div className="relative">
                     <img
@@ -64,7 +64,7 @@ const Welcome = () => {
                 initial={{ opacity: 0, x: isRTL ? -80 : 80 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 1, delay: 0.2 }}
-                className={`absolute ${isRTL ? 'pl-6 left-0' : 'pr-6 right-0'} bottom-10 md:bottom-20 md:w-[40%] w-[60%] max-w-[500px] md:max-w-[450px] pointer-events-none select-none`}
+                className={`absolute ${isRTL ? 'pl-6 left-0' : 'pr-6 right-0'} bottom-10 md:bottom-20 md:w-[40%] w-[60%] max-w-full md:max-w-[450px] pointer-events-none select-none`}
             >
                 <div className="relative">
                     <img
@@ -77,7 +77,7 @@ const Welcome = () => {
 
 
             {/* Center Content */}
-            <div className={`relative z-20 w-full max-w-7xl mx-auto px-6 md:px-20 md:py-10 bottom-20 md:bottom-0 flex flex-col items-center md:items-start text-center md:text-start gap-8 md:gap-4 ${isRTL ? 'md:right-8 font-tajawal' : 'md:left-8'}`}>
+            <div className={`relative z-20 w-full max-w-7xl mx-auto px-6 md:px-20 md:py-10 flex flex-col items-center md:items-start text-center md:text-start gap-2 md:gap-4 -translate-y-8 md:translate-y-0 ${isRTL ? 'md:right-8 font-tajawal' : 'md:left-8'}`}>
 
                 {/* Localized Row 1 Glow */}
                 <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-[#3457DC]/10 blur-[80px] rounded-full pointer-events-none -z-10"></div>
@@ -109,13 +109,42 @@ const Welcome = () => {
 
                 {/* ROW 2: GA + PLATFORM PILL + MES LIBRARY. */}
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-2 md:gap-x-4 mt-2 w-full md:w-auto">
-                    <div className="flex mt-[20px] items-center justify-center md:justify-start gap-2 md:gap-3 w-full md:w-auto">
-                        <h1 className={`text-white tracking-wide ${isRTL ? 'text-[34px] sm:text-4xl md:text-[88px] lg:text-[95px]' : 'text-[30px] sm:text-4xl md:text-[78px] lg:text-[85px]'} font-black font-gilroy md:tracking-tighter leading-[1.1] md:leading-[0.9] uppercase`}>
-                            {text.row2_start}
-                        </h1>
+                    <div className="flex mt-2 items-center justify-center md:justify-start gap-2 md:gap-3 w-full md:w-auto flex-wrap">
+                        <div className="flex items-center gap-2">
+                            <h1 className={`text-white tracking-wide ${isRTL ? 'text-[34px] sm:text-4xl md:text-[88px] lg:text-[95px]' : 'text-[30px] sm:text-4xl md:text-[78px] lg:text-[85px]'} font-black font-gilroy md:tracking-tighter leading-[1.1] md:leading-[0.9] uppercase`}>
+                                {text.row2_start}
+                            </h1>
 
-                        {/* Platform Pill Carousel (Infinite Continuous) */}
-                        <div className="relative w-[100px] md:w-[150px] lg:w-[200px] h-9 md:h-[50px] lg:h-[70px] bg-[#0E0E12]/40 backdrop-blur-2xl border border-white/10 rounded-full overflow-hidden flex items-center">
+                            {/* Platform Pill Carousel (Inserted between on Mobile) */}
+                            <div className="md:hidden relative w-[80px] h-8 bg-[#0E0E12]/40 backdrop-blur-2xl border border-white/10 rounded-full overflow-hidden flex items-center">
+                                <motion.div
+                                    className="flex items-center gap-4"
+                                    animate={{ x: isRTL ? ["-50%", "0%"] : ["0%", "-50%"] }}
+                                    transition={{
+                                        duration: 8,
+                                        repeat: Infinity,
+                                        ease: "linear",
+                                        repeatType: "loop"
+                                    }}
+                                >
+                                    {[...platformIcons, ...platformIcons].map((icon, idx) => (
+                                        <img
+                                            key={idx}
+                                            src={icon}
+                                            alt=""
+                                            className="h-2.5 object-contain opacity-70 shrink-0"
+                                        />
+                                    ))}
+                                </motion.div>
+                            </div>
+
+                            <h1 className="md:hidden text-white text-[34px] font-black font-gilroy uppercase tracking-tighter leading-[1.1]">
+                                {text.row2_end.split(' ')[0]}
+                            </h1>
+                        </div>
+
+                        {/* Platform Pill Carousel (Desktop ONLY) */}
+                        <div className="hidden md:flex relative w-[100px] md:w-[150px] lg:w-[200px] h-9 md:h-[50px] lg:h-[70px] bg-[#0E0E12]/40 backdrop-blur-2xl border border-white/10 rounded-full overflow-hidden items-center">
                             <motion.div
                                 className="flex items-center gap-6"
                                 animate={{ x: isRTL ? ["-50%", "0%"] : ["0%", "-50%"] }}
@@ -130,26 +159,21 @@ const Welcome = () => {
                                     <img
                                         key={idx}
                                         src={icon}
-                                        alt="Platform"
+                                        alt=""
                                         className="h-3 md:h-4 lg:h-5 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.2)] shrink-0"
                                     />
                                 ))}
                             </motion.div>
                         </div>
-
-                        {/* MOBILE ONLY: Support for the second part of row 2 */}
-                        <h1 className="md:hidden text-white text-[28px] font-black font-gilroy uppercase tracking-tighter leading-[1.1] md:leading-[0.9]">
-                            {text.row2_end}
-                        </h1>
                     </div>
 
                     <div className="flex flex-col items-center justify-center md:items-start md:relative md:top-4 md:translate-y-2">
-                        <h1 className={`text-white ${isRTL ? 'text-[32px] sm:text-4xl md:text-[80px] lg:text-[95px]' : 'text-[24px] sm:text-4xl md:text-[78px] lg:text-[85px]'} font-black font-gilroy tracking-tighter leading-[1.1] md:leading-[0.9] uppercase whitespace-nowrap`}>
+                        <h1 className={`text-white ${isRTL ? 'text-[32px] sm:text-4xl md:text-[80px] lg:text-[95px]' : 'text-[24px] sm:text-4xl md:text-[78px] lg:text-[85px]'} font-black font-gilroy tracking-tighter leading-[1.1] md:leading-[0.9] uppercase`}>
                             <span className="hidden md:inline">{text.row2_end}</span>
                         </h1>
 
                         <p
-                            className={`text-gray-200 text-sm md:text-sm lg:text-base max-w-[300px] md:max-w-[500px] leading-relaxed md:mt-0 mt-6 md:leading-[1.1] !text-center md:!text-start ${isRTL ? 'font-tajawal' : ''}`}
+                            className={`text-gray-200 text-sm md:text-sm lg:text-base max-w-[300px] md:max-w-[500px] leading-relaxed md:mt-0 mt-1 md:leading-[1.1] !text-center md:!text-start ${isRTL ? 'font-tajawal' : ''}`}
                             dangerouslySetInnerHTML={{ __html: text.description }}
                         />
                     </div>
@@ -164,7 +188,7 @@ const Welcome = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1.2 }}
-                className="absolute flex items-center md:mt-110 mt-130 justify-center"
+                className="absolute flex items-center md:bottom-20 bottom-24 justify-center"
             >
                 <motion.div
                     animate={{ y: [0, 10, 0] }}

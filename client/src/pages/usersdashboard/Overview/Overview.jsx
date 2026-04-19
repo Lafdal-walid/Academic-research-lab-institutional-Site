@@ -181,13 +181,17 @@ const ActivePlans = ({ language = 'en', projectStats }) => {
                 gap: '1vw',
                 direction: language === 'ar' ? 'rtl' : 'ltr'
             }}>
-                <h4 style={{ fontSize: '1.1vw', fontWeight: 600, color: 'white', margin: 0, fontFamily: "'Poppins', sans-serif" }}>
+                <h4 
+                    className="project-hub-title"
+                    style={{ fontSize: '1.1vw', fontWeight: 600, color: 'white', margin: 0, fontFamily: "'Poppins', sans-serif" }}>
                     {t.projectHub}
                 </h4>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8vw' }}>
                     {/* Date Toggle Box */}
-                    <div style={{
+                    <div 
+                        className="date-toggle-box"
+                        style={{
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
@@ -204,7 +208,9 @@ const ActivePlans = ({ language = 'en', projectStats }) => {
                         >
                             <AngleSmallDown color="#3457DC" />
                         </button>
-                        <span style={{ color: 'white', fontSize: '0.75vw', fontWeight: 500, fontFamily: "'Poppins', sans-serif", minWidth: '6.3vw', textAlign: 'center' }}>
+                        <span 
+                            className="date-display-text"
+                            style={{ color: 'white', fontSize: '0.75vw', fontWeight: 500, fontFamily: "'Poppins', sans-serif", minWidth: '6.3vw', textAlign: 'center' }}>
                             {displayMonth}, {displayYear}
                         </span>
                         <button
@@ -218,16 +224,16 @@ const ActivePlans = ({ language = 'en', projectStats }) => {
                     </div>
 
                     {/* Y/M Toggle */}
-                    <div className="bg-[#1e1e24] flex h-[4.72vh] items-center relative rounded-[0.7vw] shrink-0 p-[0.3vh]">
+                    <div className="bg-[#1e1e24] flex h-[4.72vh] items-center relative rounded-[0.7vw] shrink-0 p-[0.3vh] stats-mode-container">
                         <button
                             onClick={() => setStatsMode("Y")}
-                            className={`flex h-full items-center justify-center px-[0.7vw] relative rounded-[0.5vw] transition-all ${statsMode === "Y" ? 'bg-white/5 text-[#3457dc]' : 'text-white/60'}`}
+                            className={`flex h-full items-center justify-center px-[0.7vw] relative rounded-[0.5vw] transition-all stats-mode-btn ${statsMode === "Y" ? 'bg-white/5 text-[#3457dc]' : 'text-white/60'}`}
                         >
                             <p className="font-poppins text-[0.85vw] font-bold">Y</p>
                         </button>
                         <button
                             onClick={() => setStatsMode("M")}
-                            className={`flex h-full items-center justify-center px-[0.7vw] relative rounded-[0.5vw] transition-all ${statsMode === "M" ? 'bg-white/5 text-[#3457dc]' : 'text-white/60'}`}
+                            className={`flex h-full items-center justify-center px-[0.7vw] relative rounded-[0.5vw] transition-all stats-mode-btn ${statsMode === "M" ? 'bg-white/5 text-[#3457dc]' : 'text-white/60'}`}
                         >
                             <p className="font-poppins text-[0.85vw] font-bold">M</p>
                         </button>
@@ -240,7 +246,9 @@ const ActivePlans = ({ language = 'en', projectStats }) => {
 
             {/* Donut Chart */}
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ position: 'relative', width: '100%', maxWidth: '18vw', aspectRatio: '1/1' }}>
+                <div 
+                    className="chart-container-donut"
+                    style={{ position: 'relative', width: '100%', maxWidth: '18vw', aspectRatio: '1/1' }}>
                     <svg viewBox={`0 0 ${size} ${size}`} style={{ width: '100%', height: '100%', transform: language === 'ar' ? 'scaleX(-1)' : 'none' }}>
                         {segments.map((segment, index) => (
                             <circle
@@ -262,9 +270,9 @@ const ActivePlans = ({ language = 'en', projectStats }) => {
                             />
                         ))}
                         <g style={{ transform: language === 'ar' ? 'scaleX(-1)' : 'none', transformOrigin: 'center' }}>
-                            <text x="50%" y="47%" textAnchor="middle" fill="#FFFFFF" fontSize="22" fontWeight="700" style={{ fontFamily: 'Poppins' }}>{t.totalValue}</text>
-                            <text x="50%" y="56%" textAnchor="middle" fill="#A5A5B2" fontSize="14" fontWeight="400" style={{ fontFamily: 'Poppins' }}>{t.totalLabel}</text>
-                            <text x="50%" y="63%" textAnchor="middle" fill="#A5A5B2" fontSize="14" fontWeight="400" style={{ fontFamily: 'Poppins' }}>{t.subLabel}</text>
+                            <text x="50%" y="47%" textAnchor="middle" fill="#FFFFFF" fontSize="22" fontWeight="700" className="chart-total-value" style={{ fontFamily: 'Poppins' }}>{t.totalValue}</text>
+                            <text x="50%" y="56%" textAnchor="middle" fill="#A5A5B2" fontSize="14" fontWeight="400" className="chart-label-text" style={{ fontFamily: 'Poppins' }}>{t.totalLabel}</text>
+                            <text x="50%" y="63%" textAnchor="middle" fill="#A5A5B2" fontSize="14" fontWeight="400" className="chart-label-text" style={{ fontFamily: 'Poppins' }}>{t.subLabel}</text>
                         </g>
                     </svg>
                 </div>
@@ -274,7 +282,9 @@ const ActivePlans = ({ language = 'en', projectStats }) => {
                     {data.plans.map(plan => (
                         <div key={plan.label} style={{ display: 'flex', alignItems: 'center', gap: '0.6vw' }}>
                             <div style={{ width: '0.6vw', height: '0.6vw', minWidth: '8px', minHeight: '8px', borderRadius: '50%', backgroundColor: plan.color }}></div>
-                            <span style={{ fontSize: '0.9vw', fontWeight: 500, fontFamily: "'Poppins', sans-serif" }}>{plan.label}</span>
+                            <span 
+                                className="legend-label-span"
+                                style={{ fontSize: '0.9vw', fontWeight: 500, fontFamily: "'Poppins', sans-serif" }}>{plan.label}</span>
                         </div>
                     ))}
                 </div>
@@ -290,16 +300,22 @@ const ActivePlans = ({ language = 'en', projectStats }) => {
                 gap: '1vw',
                 direction: language === 'ar' ? 'rtl' : 'ltr'
             }}>
-                <div style={{
+                <div 
+                    className="trend-icon-circle"
+                    style={{
                     width: '2.5vw', height: '2.5vw', minWidth: '32px', minHeight: '32px', borderRadius: '50%',
                     backgroundColor: 'rgba(52, 87, 220, 0.12)', display: 'flex',
                     alignItems: 'center', justifyContent: 'center'
                 }}>
                     <ArrowUpIcon width="1.8vw" height="1.8vw" fill="#3457DC" />
                 </div>
-                <p style={{ margin: 0, fontSize: '0.9vw', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5vw', fontFamily: "'Poppins', sans-serif" }}>
-                    <span style={{ fontSize: '1.2vw', fontWeight: 700, color: '#ffffff' }}>{data.trend}</span>
-                    <span style={{ fontWeight: 400, marginLeft: '0.95vw' }}>{t.trendText}</span>
+                 <p style={{ margin: 0, fontSize: '0.9vw', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5vw', fontFamily: "'Poppins', sans-serif" }}>
+                    <span 
+                        className="trend-percentage-span"
+                        style={{ fontSize: '1.2vw', fontWeight: 700, color: '#ffffff' }}>{data.trend}</span>
+                    <span 
+                        className="trend-text-span"
+                        style={{ fontWeight: 400, marginLeft: '0.95vw' }}>{t.trendText}</span>
                 </p>
             </div>
         </div>
@@ -349,7 +365,7 @@ const LastProjects = ({ language = 'en', style = {}, data = [] }) => {
         <div className="bg-[#151519] flex flex-col relative" style={{ padding: '2.22vh 1.25vw', borderRadius: '0.83vw', width: '100%', border: '1px solid #1E1D22', fontFamily: "'Poppins', sans-serif", ...style }}>
             {/* Header: Title + Search */}
             <div className="flex items-center justify-between w-full mb-[2.22vh]" style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}>
-                <p className="font-bold text-white whitespace-nowrap" style={{ fontSize: '0.91vw' }}>
+                <p className="font-bold text-white whitespace-nowrap last-project-header-title" style={{ fontSize: '0.91vw' }}>
                     {t.lastProjects}
                 </p>
                 <div className="flex flex-col items-start justify-center relative shrink-0" style={{ width: '10.73vw' }}>
@@ -376,13 +392,13 @@ const LastProjects = ({ language = 'en', style = {}, data = [] }) => {
             {/* Table Header */}
             <div className="flex items-center justify-between w-full mb-[1.48vh]" style={{ height: '1.94vh', direction: language === 'ar' ? 'rtl' : 'ltr' }}>
                 <div className="flex flex-col items-start justify-center relative shrink-0" style={{ width: '12.92vw' }}>
-                    <p className="text-[#80808a]" style={{ fontSize: '0.8vw' }}>{t.name}</p>
+                    <p className="text-[#80808a] last-project-header-text" style={{ fontSize: '0.8vw' }}>{t.name}</p>
                 </div>
                 <div className="flex flex-[1_0_0] flex-col items-center justify-center relative">
-                    <p className="text-[#80808a] text-center w-full" style={{ fontSize: '0.8vw' }}>{t.complet}</p>
+                    <p className="text-[#80808a] text-center w-full last-project-header-text" style={{ fontSize: '0.8vw' }}>{t.complet}</p>
                 </div>
                 <div className="flex flex-[1_0_0] flex-col items-start relative">
-                    <p className="text-[#80808a] text-center w-full" style={{ fontSize: '0.8vw' }}>{t.approval}</p>
+                    <p className="text-[#80808a] text-center w-full last-project-header-text" style={{ fontSize: '0.8vw' }}>{t.approval}</p>
                 </div>
             </div>
 
@@ -392,21 +408,21 @@ const LastProjects = ({ language = 'en', style = {}, data = [] }) => {
             <div className="flex flex-col items-start w-full" style={{ gap: '2.22vh', direction: language === 'ar' ? 'rtl' : 'ltr' }}>
                 {projects.map((project) => (
                     <div key={project.id} className="flex items-center w-full">
-                        <div className="relative shrink-0" style={{ width: '1.72vw', height: '4.72vh', borderRadius: '0.21vw', backgroundColor: '#2a2a30', overflow: 'hidden' }}>
+                        <div className="relative shrink-0 last-project-img-container" style={{ width: '1.72vw', height: '4.72vh', borderRadius: '0.21vw', backgroundColor: '#2a2a30', overflow: 'hidden' }}>
                             <img src={project.img} alt={project.name} className="w-full h-full object-cover" />
                         </div>
-                        <div className="flex items-center relative shrink-0 ml-[1vw]" style={{ width: '11.92vw' }}>
+                        <div className="flex items-center relative shrink-0 ml-[1vw] last-project-name-container" style={{ width: '11.92vw' }}>
                             <div className="flex flex-col items-start leading-[normal] relative shrink-0 whitespace-pre-wrap" style={{ gap: '0.56vh' }}>
-                                <p className="text-white font-bold" style={{ fontSize: '0.91vw' }}>{project.name}</p>
-                                <p className="text-[#a5a5b2]" style={{ fontSize: '0.69vw' }}>{project.date}</p>
+                                <p className="text-white font-bold last-project-name" style={{ fontSize: '0.91vw' }}>{project.name}</p>
+                                <p className="text-[#a5a5b2] last-project-date" style={{ fontSize: '0.69vw' }}>{project.date}</p>
                             </div>
                         </div>
                         <div className="flex flex-[1_0_0] items-center justify-between relative">
                             <div className="flex flex-[1_0_0] flex-col items-center justify-center relative">
-                                <p className="text-center text-white w-full" style={{ fontSize: '0.8vw' }}>{project.complet}</p>
+                                <p className="text-center text-white w-full last-project-status-text" style={{ fontSize: '0.8vw' }}>{project.complet}</p>
                             </div>
                             <div className="flex flex-[1_0_0] flex-col items-start relative">
-                                <p className="text-center text-white w-full" style={{ fontSize: '0.8vw' }}>{project.approval}</p>
+                                <p className="text-center text-white w-full last-project-status-text" style={{ fontSize: '0.8vw' }}>{project.approval}</p>
                             </div>
                         </div>
                     </div>
@@ -417,7 +433,7 @@ const LastProjects = ({ language = 'en', style = {}, data = [] }) => {
 
             {/* Pagination */}
             <div className="flex items-center justify-between w-full" style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}>
-                <div className="flex items-center justify-center relative shrink-0 cursor-pointer hover:brightness-150 transition-all">
+                <div className="flex items-center justify-center relative shrink-0 cursor-pointer hover:brightness-150 transition-all last-project-pagination-btn">
                     <div className={language === 'ar' ? "" : "-scale-y-100 rotate-180"}>
                         <div className="relative" style={{ width: '1.67vw', height: '1.67vw' }}>
                             <svg className="absolute block inset-0 size-full" fill="none" viewBox="0 0 32 32">
@@ -429,14 +445,14 @@ const LastProjects = ({ language = 'en', style = {}, data = [] }) => {
                     </div>
                 </div>
                 <div className="flex items-center" style={{ gap: '0.52vw' }}>
-                    <div className="bg-[rgba(255,255,255,0.01)] flex flex-col items-center justify-center relative" style={{ padding: '0.41vh 0.23vw', borderRadius: '0.46vw', width: '1.95vw', border: '1px solid #1e1d22' }}>
-                        <p className="text-center text-white w-full" style={{ fontSize: '0.88vw' }}>01</p>
+                    <div className="bg-[rgba(255,255,255,0.01)] flex flex-col items-center justify-center relative last-project-pagination-box" style={{ padding: '0.41vh 0.23vw', borderRadius: '0.46vw', width: '1.95vw', border: '1px solid #1e1d22' }}>
+                        <p className="text-center text-white w-full last-project-pagination-text" style={{ fontSize: '0.88vw' }}>01</p>
                     </div>
                     <p className="text-[#a5a5b2] whitespace-nowrap" style={{ fontSize: '0.76vw' }}>
                         {t.outOf}
                     </p>
                 </div>
-                <div className="flex items-center justify-center relative shrink-0 cursor-pointer hover:brightness-150 transition-all">
+                <div className="flex items-center justify-center relative shrink-0 cursor-pointer hover:brightness-150 transition-all last-project-pagination-btn">
                     <div className={language === 'ar' ? "-scale-y-100 rotate-180" : ""}>
                         <div className="relative" style={{ width: '1.67vw', height: '1.67vw' }}>
                             <svg className="absolute block inset-0 size-full" fill="none" viewBox="0 0 32 32">
@@ -470,18 +486,6 @@ const LastPublication = ({ language = 'en', data, avgViews = 0 }) => {
         }
     }[language];
 
-    const InfoIconSVG = () => (
-        <div className="relative shrink-0" style={{ width: '0.78vw', height: '0.78vw' }}>
-            <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 32 32">
-                <g opacity="1">
-                    <path d="M7.5 0C6.01664 0 4.5666 0.439867 3.33323 1.26398C2.09986 2.08809 1.13856 3.25943 0.570907 4.62987C0.00324965 6.00032 -0.145275 7.50832 0.144114 8.96318C0.433503 10.418 1.14781 11.7544 2.1967 12.8033C3.2456 13.8522 4.58197 14.5665 6.03683 14.8559C7.49168 15.1453 8.99968 14.9968 10.3701 14.4291C11.7406 13.8614 12.9119 12.9001 13.736 11.6668C14.5601 10.4334 15 8.98336 15 7.5C14.9979 5.51154 14.207 3.60513 12.8009 2.19907C11.3949 0.793018 9.48847 0.00215068 7.5 0ZM7.5 13.75C6.26387 13.75 5.0555 13.3834 4.02769 12.6967C2.99988 12.0099 2.1988 11.0338 1.72576 9.89177C1.25271 8.74973 1.12894 7.49307 1.3701 6.28069C1.61125 5.0683 2.20651 3.95466 3.08059 3.08058C3.95466 2.2065 5.06831 1.61125 6.28069 1.37009C7.49307 1.12893 8.74974 1.25271 9.89178 1.72575C11.0338 2.1988 12.0099 2.99988 12.6967 4.02769C13.3834 5.05549 13.75 6.26387 13.75 7.5C13.7482 9.15705 13.0891 10.7457 11.9174 11.9174C10.7457 13.0891 9.15705 13.7482 7.5 13.75Z" fill="#A5A5B2" />
-                    <path d="M7.5 6.25H6.875C6.70924 6.25 6.55027 6.31585 6.43306 6.43306C6.31585 6.55027 6.25 6.70924 6.25 6.875C6.25 7.04076 6.31585 7.19973 6.43306 7.31694C6.55027 7.43415 6.70924 7.5 6.875 7.5H7.5V11.25C7.5 11.4158 7.56585 11.5747 7.68306 11.6919C7.80027 11.8092 7.95924 11.875 8.125 11.875C8.29076 11.875 8.44973 11.8092 8.56694 11.6919C8.68415 11.5747 8.75 11.4158 8.75 11.25V7.5C8.75 7.16848 8.6183 6.85054 8.38388 6.61612C8.14946 6.3817 7.83152 6.25 7.5 6.25Z" fill="#A5A5B2" />
-                    <path d="M7.5 5C8.01777 5 8.4375 4.58027 8.4375 4.0625C8.4375 3.54473 8.01777 3.125 7.5 3.125C6.98223 3.125 6.5625 3.54473 6.5625 4.0625C6.5625 4.58027 6.98223 5 7.5 5Z" fill="#A5A5B2" />
-                </g>
-            </svg>
-        </div>
-    );
-
     return (
         <div style={{
             backgroundColor: '#151519',
@@ -497,7 +501,7 @@ const LastPublication = ({ language = 'en', data, avgViews = 0 }) => {
             fontFamily: "'Poppins', sans-serif"
         }}>
             <div className="flex items-center justify-between w-full">
-                <p className="text-white font-bold" style={{ fontSize: '0.91vw' }}>
+                <p className="text-white font-bold last-pub-header-title" style={{ fontSize: '0.91vw' }}>
                     {t.lastPublication}
                 </p>
             </div>
@@ -505,7 +509,7 @@ const LastPublication = ({ language = 'en', data, avgViews = 0 }) => {
             <div className="w-full" style={{ height: '1px', backgroundColor: '#1E1D22' }} />
 
             <div className="flex items-center w-full" style={{ gap: '1.375vw' }}>
-                <div className="flex items-center justify-center bg-[#1E1E24] rounded-[0.52vw]" style={{ width: '3.6vw', height: '10.58vh', overflow: 'hidden' }}>
+                <div className="flex items-center justify-center bg-[#1E1E24] rounded-[0.52vw] last-pub-img-container" style={{ width: '3.6vw', height: '10.58vh', overflow: 'hidden' }}>
                     <img
                         src={ScienceIcon}
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
@@ -514,24 +518,24 @@ const LastPublication = ({ language = 'en', data, avgViews = 0 }) => {
                 </div>
                 <div className="flex flex-col flex-1" style={{ gap: '0.91vw' }}>
                     <div className="flex items-start" style={{ gap: '0.91vw' }}>
-                        <p className="font-bold text-[#f5f5f5]" style={{ fontSize: '0.91vw', lineHeight: '1.375' }}>
+                        <p className="font-bold text-[#f5f5f5] last-pub-title" style={{ fontSize: '0.91vw', lineHeight: '1.375' }}>
                             {t.title}
                         </p>
-                        <p className="text-[#a5a5b2]" style={{ fontSize: '0.8vw' }}>
+                        <p className="text-[#a5a5b2] last-pub-date" style={{ fontSize: '0.8vw' }}>
                             {t.date}
                         </p>
                     </div>
                     <div className="flex items-center justify-between w-full">
                         <div className="flex items-center" style={{ gap: '2.75vw' }}>
-                            <p className="text-white font-medium" style={{ fontSize: '0.8vw' }}>{t.views}</p>
-                            <div className="bg-[#1e1e24] flex items-center justify-center rounded-full" style={{ padding: '0.51vh 0.57vw' }}>
-                                <p className="text-white" style={{ fontSize: '0.8vw' }}>{data?.views || 0}</p>
+                            <p className="text-white font-medium last-pub-stats-label" style={{ fontSize: '0.8vw' }}>{t.views}</p>
+                            <div className="bg-[#1e1e24] flex items-center justify-center rounded-full px-2" style={{ height: '2vw', minHeight: '20px' }}>
+                                <p className="text-white last-pub-stats-value" style={{ fontSize: '0.8vw' }}>{data?.views || 0}</p>
                             </div>
                         </div>
                         <div className="flex items-center" style={{ gap: '2.75vw' }}>
-                            <p className="text-white font-medium" style={{ fontSize: '0.8vw' }}>{t.avgViews}</p>
-                            <div className="bg-[#043d37] flex items-center justify-center rounded-full" style={{ padding: '0.51vh 0.57vw' }}>
-                                <p className="text-[#01cbb1]" style={{ fontSize: '0.69vw' }}>{avgViews}</p>
+                            <p className="text-white font-medium last-pub-stats-label" style={{ fontSize: '0.8vw' }}>{t.avgViews}</p>
+                            <div className="bg-[#043d37] flex items-center justify-center rounded-full px-2" style={{ height: '2vw', minHeight: '20px' }}>
+                                <p className="text-[#01cbb1] last-pub-stats-value" style={{ fontSize: '0.69vw' }}>{avgViews}</p>
                             </div>
                         </div>
                     </div>
@@ -539,7 +543,6 @@ const LastPublication = ({ language = 'en', data, avgViews = 0 }) => {
             </div>
         </div>
     );
-
 };
 
 
@@ -576,10 +579,10 @@ const PublicationsAnalysis = ({ language = 'en', data = [], avg = 0, currentPeri
             {/* Header */}
             <div className="flex items-center justify-between w-full mb-[3.13vh]" style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}>
                 <div className="flex flex-col items-start justify-center" style={{ gap: '0.93vh' }}>
-                    <p className="font-bold text-white" style={{ fontSize: '0.91vw' }}>
+                    <p className="font-bold text-white pub-analysis-title" style={{ fontSize: '0.91vw' }}>
                         {t.title}
                     </p>
-                    <p className="text-[#a5a5b2]" style={{ fontSize: '0.8vw' }}>
+                    <p className="text-[#a5a5b2] pub-analysis-subtitle" style={{ fontSize: '0.8vw' }}>
                         {t.subtitle}
                     </p>
                 </div>
@@ -661,7 +664,7 @@ const PublicationsAnalysis = ({ language = 'en', data = [], avg = 0, currentPeri
             <div className="w-full flex items-start" style={{ marginTop: '1.25vh' }}>
                 {t.months.map((m, i) => (
                     <div key={i} className="flex-1 text-center">
-                        <p className="text-[#80808a]" style={{ fontSize: '0.69vw' }}>{m}</p>
+                        <p className="text-[#80808a] pub-analysis-month-text" style={{ fontSize: '0.69vw' }}>{m}</p>
                     </div>
                 ))}
             </div>
@@ -746,13 +749,13 @@ const Overview = () => {
             {/* Info Line */}
             <div className="mt-[2.5vh] flex items-center gap-[0.5vw] px-[0.2vw]">
                 <img src={InfoIcon} alt="Info" className="w-[0.9vw] h-[0.9vw] brightness-0 invert" />
-                <span className="text-[0.9vw] font-[400] text-white">
+                <span className="info-text-span text-[0.9vw] font-[400] text-white">
                     This data is based on your team.
                 </span>
             </div>
 
             {/* Main Content Sections Section */}
-            <div className="mt-[6vh] w-full grid grid-cols-1 md:grid-cols-12 gap-[1vw] items-start">
+            <div className="mt-[6vh] w-full grid grid-cols-1 md:grid-cols-12 gap-[1vw] items-start main-sections-grid">
                 {/* Left Column: Project Hub + Last Projects - Spans 5 columns */}
                 <div className="md:col-span-12 lg:col-span-5 flex flex-col gap-[1vw]">
                     <ActivePlans language={language} projectStats={stats.projectStats} />
@@ -777,7 +780,56 @@ const Overview = () => {
                     h3[style*="font-size: 1.8vw"] { font-size: 24px !important; }
                     div[style*="width: 2.5vw"] { width: 40px !important; height: 40px !important; }
                     div[style*="height: 20vh"] { height: 160px !important; border-radius: 12px !important; }
-                    div[style*="width: 2.5vw"] img { width: 20px !important; height: 20px !important; }
+                     div[style*="width: 2.5vw"] img { width: 20px !important; height: 20px !important; }
+
+                    /* New mobile refinements */
+                    .info-text-span { font-size: 16px !important; }
+                    .project-hub-title { font-size: 18px !important; }
+                    .chart-container-donut { max-width: 85% !important; margin-top: 20px !important; }
+                    .chart-total-value { font-size: 42px !important; }
+                    .chart-label-text { font-size: 22px !important; }
+                    .legend-label-span { font-size: 10px !important; }
+                    .trend-percentage-span { font-size: 22px !important; }
+                    .trend-text-span { font-size: 17px !important; }
+
+                    /* Date and Toggle refinements */
+                    .date-toggle-box { min-width: 150px !important; height: 40px !important; border-radius: 8px !important; }
+                    .date-display-text { font-size: 14px !important; min-width: 90px !important; }
+                    .stats-mode-btn p { font-size: 16px !important; }
+                    .stats-mode-btn { padding: 0 12px !important; }
+                    .stats-mode-container { height: 35px !important; width: fit-content !important; min-width: 90px !important; }
+
+                    /* Trend icon enlargement */
+                    .trend-icon-circle { width: 44px !important; height: 44px !important; }
+                    .trend-icon-circle svg { width: 24px !important; height: 24px !important; }
+
+                    /* Last Projects refinements */
+                    .last-project-header-title { font-size: 18px !important; }
+                    .last-project-header-text { font-size: 13px !important; }
+                    .last-project-img-container { width: 50px !important; height: 50px !important; border-radius: 6px !important; }
+                    .last-project-name-container { width: 45% !important; margin-left: 15px !important; }
+                    .last-project-name { font-size: 15px !important; }
+                    .last-project-date { font-size: 12px !important; }
+                    .last-project-status-text { font-size: 13px !important; }
+
+                    /* Last Publication refinements */
+                    .last-pub-header-title { font-size: 18px !important; }
+                    .last-pub-img-container { width: 85px !important; height: 85px !important; border-radius: 10px !important; }
+                    .last-pub-title { font-size: 16px !important; }
+                    .last-pub-date { font-size: 13px !important; }
+                    .last-pub-stats-label { font-size: 14px !important; }
+                    .last-pub-stats-value { font-size: 14px !important; }
+
+                    /* Publication Analysis refinements */
+                    .pub-analysis-title { font-size: 18px !important; }
+                    .pub-analysis-subtitle { font-size: 14px !important; }
+                    .pub-analysis-month-text { font-size: 12px !important; }
+
+                    /* Pagination and Layout refinements */
+                    .last-project-pagination-box { width: 45px !important; height: 36px !important; border-radius: 8px !important; }
+                    .last-project-pagination-text { font-size: 16px !important; }
+                    .last-project-pagination-btn div[style*="width: 1.67vw"] { width: 36px !important; height: 36px !important; }
+                    .main-sections-grid { gap: 32px !important; }
                 }
             `}</style>
         </div>

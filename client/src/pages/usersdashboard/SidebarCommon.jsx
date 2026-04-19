@@ -5,7 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import Leavereviewlink from '@/ui/user/Leavereviewlink';
 import { RiArrowRightSLine } from "react-icons/ri";
 
-const SidebarCommon = ({ items, isSidebarOpen = true, className = "" }) => {
+const SidebarCommon = ({ items, isSidebarOpen = true, closeSidebar, className = "" }) => {
     const { t } = useTranslation('sidebar');
     const { direction } = useLanguage();
     const location = useLocation();
@@ -14,7 +14,7 @@ const SidebarCommon = ({ items, isSidebarOpen = true, className = "" }) => {
 
     return (
         <aside
-            className={`sidebar border-r-[0.05vw] border-solid border-[#2a2a30]/70 w-[15.8vw] shrink-0 min-h-screen flex flex-col pr-[3.2vw] transition-all duration-300 ${!isSidebarOpen ? '-translate-x-full absolute' : 'translate-x-0'} ${className}`}
+            className={`sidebar fixed lg:static top-0 bottom-0 z-[50] border-r border-[#2a2a30]/70 w-[280px] lg:w-[15.8vw] shrink-0 min-h-screen flex flex-col transition-all duration-300 ${isSidebarOpen ? 'translate-x-0 opacity-100' : '-translate-x-full lg:translate-x-0 opacity-0 lg:opacity-100 lg:hidden'} ${className}`}
             style={{ backgroundColor: '#0A070E' }}
             dir={direction}
         >
@@ -37,14 +37,15 @@ const SidebarCommon = ({ items, isSidebarOpen = true, className = "" }) => {
                         <React.Fragment key={item.id}>
                             <Link
                                 to={item.path}
-                                className={`nav-link flex items-center gap-[0.8vw] pl-[0.85vw] py-[1.3vh] ml-[0.8vw] rounded-[0.7vw] group pr-[2vw] mr-[-1.3vw] ${isActive ? 'active-nav bg-[#3457DC] text-white' : 'text-white hover:bg-white/9'
+                                onClick={closeSidebar}
+                                className={`nav-link flex items-center gap-3 lg:gap-[0.8vw] pl-4 lg:pl-[0.85vw] py-3 lg:py-[1.3vh] ml-3 lg:ml-[0.8vw] rounded-xl lg:rounded-[0.7vw] group pr-6 lg:pr-[2vw] ${isActive ? 'active-nav bg-[#3457DC] text-white' : 'text-white hover:bg-white/5'
                                     }`}
                             >
-                                <div className="nav-link-content flex items-center gap-[0.8vw]">
+                                <div className="nav-link-content flex items-center gap-3 lg:gap-[0.8vw]">
                                     <div className={`nav-icon flex shrink-0 ${direction === 'rtl' ? 'rotate-180' : ''}`}>
-                                        {React.isValidElement(item.icon) ? React.cloneElement(item.icon, { width: '0.9vw', height: '0.9vw' }) : item.icon}
+                                        {React.isValidElement(item.icon) ? React.cloneElement(item.icon, { className: 'w-5 h-5 lg:w-[0.9vw] lg:h-[0.9vw]' }) : item.icon}
                                     </div>
-                                    <span className="nav-text whitespace-nowrap text-[1.1vw] font-[500]">
+                                    <span className="nav-text whitespace-nowrap text-[16px] lg:text-[1.1vw] font-[500]">
                                         {item.label || t(item.id)}
                                     </span>
                                 </div>

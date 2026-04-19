@@ -90,10 +90,11 @@ const PublicationEditor = ({ langTab, setLangTab, lastUpdated, isDraft, lastDraf
     };
 
     return (
-        <div className="bg-[#151519] relative rounded-[16px] shrink-0 w-full" style={{ border: '1px solid #1e1d22' }}>
+        <div className="editor-publication-main bg-[#151519] relative rounded-[16px] shrink-0 w-full" style={{ border: '1px solid #1e1d22' }}>
+            <style dangerouslySetInnerHTML={{ __html: editorStyles }} />
             <div className="content-stretch flex flex-col gap-[32px] items-start p-[24px] relative size-full">
                 {/* Header (Tabs + Info) */}
-                <div className="content-stretch flex flex-col gap-[32px] items-start relative shrink-0 w-full">
+                <div className="editor-header-tabs content-stretch flex flex-col gap-[32px] items-start relative shrink-0 w-full">
                     <div className="content-stretch flex gap-[24px] items-start relative shrink-0">
                         <div onClick={() => setLangTab('en')} className="content-stretch flex flex-col gap-[4px] items-center justify-center relative shrink-0 cursor-pointer">
                             <p className={`font-['Poppins',sans-serif] font-medium leading-[normal] not-italic relative shrink-0 text-[16px] whitespace-nowrap ${langTab === 'en' ? 'text-[#3457dc]' : 'text-[#a5a5b2]'}`}>English Content</p>
@@ -105,7 +106,7 @@ const PublicationEditor = ({ langTab, setLangTab, lastUpdated, isDraft, lastDraf
                         </div>
                     </div>
                     {/* Last Updated info */}
-                    <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
+                    <div className="editor-info-bar content-stretch flex flex-col items-start relative shrink-0 w-full">
                         <div className="content-stretch flex gap-[16px] items-center relative shrink-0 w-full">
                             <div className="content-stretch flex gap-[12px] items-center relative shrink-0">
                                 <RiRefreshLine size={16} color="#A5A5B2" />
@@ -130,11 +131,11 @@ const PublicationEditor = ({ langTab, setLangTab, lastUpdated, isDraft, lastDraf
                 </div>
 
                 {/* Editor Surface */}
-                <div className="relative shrink-0 w-full">
+                <div className="editor-canvas-wrapper relative shrink-0 w-full">
                     <div className="bg-[#151519] flex flex-col items-start relative shrink-0 w-full min-h-[400px]">
                         {/* Editor Toolbar */}
-                        <div className="bg-[#1e1e24] border-b border-[#2a2a30] shrink-0 w-full rounded-t-[12px] z-[10]">
-                            <div className="flex items-center justify-between px-[12px] h-[52px]">
+                        <div className="editor-toolbar-scroll-container bg-[#1e1e24] border-b border-[#2a2a30] shrink-0 w-full rounded-t-[12px] z-[10]">
+                            <div className="editor-toolbar-wrapper flex items-center justify-between px-[12px] h-[52px]">
                                 <div className="flex items-center gap-[4px]">
                                     {/* Text Type Selection */}
                                     <div className="content-stretch flex flex-col items-start relative shrink-0 border-r border-[#2a2a30] pr-[8px]">
@@ -208,7 +209,7 @@ const PublicationEditor = ({ langTab, setLangTab, lastUpdated, isDraft, lastDraf
                                 </div>
 
                                 {/* Import Button */}
-                                <div onClick={onImport} className="bg-[#2a2a30] content-stretch flex gap-[10px] items-center justify-center px-[16px] h-[36px] relative rounded-[8px] shrink-0 cursor-pointer hover:bg-white/10 transition-colors">
+                                <div onClick={onImport} className="editor-import-btn-container bg-[#2a2a30] content-stretch flex gap-[10px] items-center justify-center px-[16px] h-[36px] relative rounded-[8px] shrink-0 cursor-pointer hover:bg-white/10 transition-colors">
                                     <p className="font-['Poppins',sans-serif] font-medium leading-[normal] text-[13px] text-white whitespace-nowrap">Import from Word</p>
                                     <img src={wordIcon} alt="word" style={{ width: '16px' }} />
                                 </div>
@@ -253,5 +254,42 @@ const PublicationEditor = ({ langTab, setLangTab, lastUpdated, isDraft, lastDraf
         </div>
     );
 };
+
+const editorStyles = `
+@media screen and (max-width: 1024px) {
+    .editor-publication-main > div {
+        padding: 20px !important;
+        gap: 24px !important;
+    }
+    .editor-header-tabs {
+        gap: 20px !important;
+    }
+    .editor-info-bar > div {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 12px !important;
+    }
+    .editor-info-bar .bg-[#1e1e24] {
+        display: none !important;
+    }
+    
+    .editor-toolbar-scroll-container {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+    .editor-toolbar-wrapper {
+        min-width: 600px !important;
+        padding: 0 12px !important;
+    }
+    
+    .editor-canvas-wrapper .bg-[#151519] {
+        min-h: 300px !important;
+    }
+    .editor-canvas {
+        padding: 12px !important;
+        font-size: 14px !important;
+    }
+}
+`;
 
 export default PublicationEditor;

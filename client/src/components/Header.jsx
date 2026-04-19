@@ -20,25 +20,25 @@ const svgPaths = {
 };
 
 const AccountIcon = () => (
-    <img src={iconSettings} alt="" className="w-[1.2vw] h-[1.2vw] brightness-0 invert opacity-70" />
+  <img src={iconSettings} alt="" className="w-[1.2vw] h-[1.2vw] brightness-0 invert opacity-70" />
 );
 
 const NotiIcon = () => (
-    <img src={iconNotification} alt="" className="w-[1.2vw] h-[1.2vw] brightness-0 invert opacity-70" />
+  <img src={iconNotification} alt="" className="w-[1.2vw] h-[1.2vw] brightness-0 invert opacity-70" />
 );
 
 const OverviewIcon = () => (
-    <img src={iconOverview} alt="" className="w-[1.2vw] h-[1.2vw] brightness-0 invert opacity-70" />
+  <img src={iconOverview} alt="" className="w-[1.2vw] h-[1.2vw] brightness-0 invert opacity-70" />
 );
 
 const SupportIcon = () => (
-    <img src={iconContact} alt="" className="w-[1.2vw] h-[1.2vw] brightness-0 invert opacity-70" />
+  <img src={iconContact} alt="" className="w-[1.2vw] h-[1.2vw] brightness-0 invert opacity-70" />
 );
 
 const SignoutIcon = () => (
-    <svg width="1.2vw" height="1.2vw" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-70">
-        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
-    </svg>
+  <svg width="1.2vw" height="1.2vw" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-70">
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
+  </svg>
 );
 
 const Header = () => {
@@ -46,7 +46,7 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
-  
+
   const { language, setLanguage } = useLanguage();
   const { user, logout } = useAuth();
   const location = useLocation();
@@ -56,157 +56,143 @@ const Header = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-        if (accountRef.current && !accountRef.current.contains(event.target)) {
-            setIsAccountOpen(false);
-        }
+      if (accountRef.current && !accountRef.current.contains(event.target)) {
+        setIsAccountOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const userRole = user?.role === 'superadmin' ? 'Super Admin' : 
-                   user?.role === 'admin' ? 'Admin' : 
-                   user?.role === 'guest' ? 'Guest' : 'User';
-  
+  const userRole = user?.role === 'superadmin' ? 'Super Admin' :
+    user?.role === 'admin' ? 'Admin' :
+      user?.role === 'guest' ? 'Guest' : 'User';
+
   const avatarUrl = user?.avatar || `https://ui-avatars.com/api/?name=${user?.name || 'User'}&background=3457DC&color=fff`;
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#0A070E] border-b border-solid border-[#2a2a30] transition-all duration-300">
-      <div 
-        className="flex items-center justify-between relative"
-        style={{
-          paddingLeft: '4.86vw', 
-          paddingRight: '4.86vw',
-          paddingTop: '2.4vh', 
-          paddingBottom: '2.4vh'
-        }}
+      <div
+        className="flex items-center justify-between relative pl-0 pr-4 md:px-[4.86vw] py-2.5 md:py-[2.4vh] max-w-full"
+        dir="ltr"
       >
         {/* Left Section - Logo and Navigation */}
-        <div 
-          className="flex items-center relative shrink-0"
+        <div
+          className="flex items-center relative shrink-0 order-first"
           style={{
-            gap: '1.88vw', 
-            height: '7.6vh', 
+            gap: '1.88vw',
+            height: 'fit-content',
           }}
         >
           {/* Logo */}
-          <Link 
+          <Link
             to="/"
-            className="relative shrink-0"
-            style={{
-              height: '7.8vh', 
-              width: '10.5vw' 
-            }}
+            className="relative shrink-0 h-[52px] w-[150px] md:h-[7.8vh] md:w-[10.5vw] -ml-4 md:ml-0"
           >
-            <img 
-              alt="Saad Dahlab University Logo" 
-              className="absolute inset-0 max-w-none object-contain size-full" 
-              src="/Saad Dahlab white.png" 
+            <img
+              alt={language === 'ar' ? "شعار جامعة سعد دحلب" : "Saad Dahlab University Logo"}
+              className="absolute inset-0 max-w-none object-contain size-full"
+              src="/Saad Dahlab white.png"
             />
           </Link>
 
           {/* Navigation Items */}
           <nav className="hidden lg:flex items-center" style={{ gap: '1.88vw' }}>
-            <Link 
+            <Link
               to="/projects"
               className="font-poppins font-medium leading-[normal] not-italic relative shrink-0 text-white whitespace-nowrap hover:text-accent transition-colors"
-              style={{ fontSize: '0.97vw' }} 
+              style={{ fontSize: '0.97vw' }}
             >
-              Projects
+              {language === 'ar' ? 'المشاريع' : 'Projects'}
             </Link>
-            <Link 
+            <Link
               to="/publications"
               className="font-poppins font-medium leading-[normal] not-italic relative shrink-0 text-white whitespace-nowrap hover:text-accent transition-colors"
               style={{ fontSize: '0.97vw' }}
             >
-              Publications
+              {language === 'ar' ? 'المنشورات' : 'Publications'}
             </Link>
-            <Link 
+            <Link
               to="/teams-researches"
               className="font-poppins font-medium leading-[normal] not-italic relative shrink-0 text-white whitespace-nowrap hover:text-accent transition-colors"
               style={{ fontSize: '0.97vw' }}
             >
-              Teams Researches
+              {language === 'ar' ? 'الأبحاث والفرق' : 'Teams Researches'}
             </Link>
-            <Link 
+            <Link
               to="/about-us"
               className="font-poppins font-medium leading-[normal] not-italic relative shrink-0 text-white whitespace-nowrap hover:text-accent transition-colors"
               style={{ fontSize: '0.97vw' }}
             >
-              About Us
+              {language === 'ar' ? 'عنا' : 'About Us'}
             </Link>
 
             {/* Support with Dropdown */}
             <div className="group relative flex items-center shrink-0" style={{ gap: '0.56vw' }}>
-              <Link 
+              <Link
                 to="/support"
                 className="font-poppins font-medium leading-[normal] not-italic relative shrink-0 text-white whitespace-nowrap group-hover:text-accent transition-colors"
                 style={{ fontSize: '0.97vw' }}
               >
-                Support
+                {language === 'ar' ? 'الدعم' : 'Support'}
               </Link>
               {/* Angle Down Icon */}
-              <div 
+              <div
                 className="relative shrink-0"
                 style={{
-                  width: '1.39vw', 
-                  height: '2vh' 
+                  width: '1.39vw',
+                  height: '2vh'
                 }}
               >
                 <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 20 20">
                   <path d={svgPaths.p2d73fe00} fill="currentColor" className="text-white group-hover:text-accent transition-colors" />
                 </svg>
               </div>
-              
+
               {/* Dropdown Menu */}
-              <div className="absolute top-full left-0 mt-2 w-48 bg-dashboard-card border border-card-border rounded-xl p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all shadow-2xl z-[60]">
-                <Link to="/support" className="block px-4 py-2 text-[13px] text-neutral-grey hover:bg-white/5 hover:text-white rounded-lg transition-colors">FAQ</Link>
-                <a href="#" className="block px-4 py-2 text-[13px] text-neutral-grey hover:bg-white/5 hover:text-white rounded-lg transition-colors">Discord</a>
-                <a href="#" className="block px-4 py-2 text-[13px] text-neutral-grey hover:bg-white/5 hover:text-white rounded-lg transition-colors">Contact</a>
+              <div className={`absolute top-full left-0 mt-2 w-48 bg-dashboard-card border border-card-border rounded-xl p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all shadow-2xl z-[60] ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                <Link to="/support" className="block px-4 py-2 text-[13px] text-neutral-grey hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+                  {language === 'ar' ? 'الأسئلة الشائعة' : 'FAQ'}
+                </Link>
+                <a href="#" className="block px-4 py-2 text-[13px] text-neutral-grey hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+                  {language === 'ar' ? 'ديسكورد' : 'Discord'}
+                </a>
+                <a href="#" className="block px-4 py-2 text-[13px] text-neutral-grey hover:bg-white/5 hover:text-white rounded-lg transition-colors">
+                  {language === 'ar' ? 'اتصل بنا' : 'Contact'}
+                </a>
               </div>
             </div>
           </nav>
         </div>
 
         {/* Right Section - Language Selector and Login */}
-        <div 
-          className="flex items-center relative shrink-0"
-          style={{ gap: '1.67vw' }} 
+        <div
+          className="flex items-center relative shrink-0 ml-auto md:ml-0"
+          style={{ gap: '1.67vw' }}
         >
           {/* Language Selector */}
           <div className="relative">
-            <button 
+            <button
               onClick={() => setIsLangOpen(!isLangOpen)}
-              className="bg-[#1e1e24] flex items-center relative rounded-[400px] shrink-0 hover:bg-[#2a2a30] transition-all"
-              style={{
-                gap: '0.56vw', 
-                padding: '0.8vh 0.56vw' 
-              }}
+              className="bg-[#1e1e24] flex items-center relative rounded-[400px] shrink-0 hover:bg-[#2a2a30] transition-all gap-0 md:gap-[0.56vw] px-2 py-1 md:px-[0.56vw] md:py-[0.8vh]"
             >
               {/* Flag Icon */}
-              <div 
-                className="relative shrink-0 flex items-center justify-center"
-                style={{
-                  height: '1.2vh', 
-                  width: '1.11vw' 
-                }}
+              <div
+                className="relative shrink-0 flex items-center justify-center h-[31px] w-[38px] md:h-[1.2vh] md:w-[1.11vw]"
               >
                 {lang === 'En' ? <EnglishIcon /> : <ArabicIcon />}
               </div>
 
-              <p 
-                className="font-poppins font-medium leading-[normal] not-italic relative shrink-0 text-white whitespace-nowrap capitalize"
-                style={{ fontSize: '0.97vw' }}
+              <p
+                className="font-poppins font-medium leading-[normal] not-italic relative shrink-0 text-white whitespace-nowrap capitalize text-lg md:text-[0.97vw] hidden md:block"
               >
                 {lang}
               </p>
 
               {/* Angle Down Icon */}
-              <div 
-                className="relative shrink-0 transition-transform duration-300"
+              <div
+                className="relative shrink-0 transition-transform duration-300 w-5 h-5 md:w-[1.39vw] md:h-[2vh]"
                 style={{
-                  width: '1.39vw', 
-                  height: '2vh',
                   transform: isLangOpen ? 'rotate(180deg)' : 'none'
                 }}
               >
@@ -215,32 +201,33 @@ const Header = () => {
                 </svg>
               </div>
             </button>
-            
+
             {isLangOpen && (
-              <div className="absolute top-full right-0 mt-2 w-32 bg-dashboard-card border border-card-border rounded-xl p-1 shadow-2xl z-[70] overflow-hidden">
-                <button 
-                  onClick={() => { setLanguage('en'); setIsLangOpen(false); }} 
+              <div className="absolute top-full right-0 mt-2 w-32 bg-dashboard-card border border-card-border rounded-xl p-1 shadow-2xl z-[100] overflow-hidden">
+                <button
+                  onClick={() => { setLanguage('en'); setIsLangOpen(false); }}
                   className="w-full text-left px-4 py-2 text-[13px] text-neutral-grey hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2"
                 >
                   <EnglishIcon />
                   English
                 </button>
-                <button 
-                  onClick={() => { setLanguage('ar'); setIsLangOpen(false); }} 
-                  className="w-full text-left px-4 py-2 text-[13px] text-neutral-grey hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2 border-t border-card-border/50"
+                <button
+                  onClick={() => { setLanguage('ar'); setIsLangOpen(false); }}
+                  className="w-full text-right px-4 py-2 text-[13px] text-neutral-grey hover:bg-white/5 hover:text-white transition-colors flex items-center justify-end gap-2 border-t border-card-border/50"
+                  dir="rtl"
                 >
-                  <ArabicIcon />
                   العربية
+                  <ArabicIcon />
                 </button>
               </div>
             )}
           </div>
 
           {/* Divider */}
-          <div 
+          <div
             className="flex items-center justify-center relative shrink-0"
             style={{
-              height: '2.4vh', 
+              height: '2.4vh',
               width: '1px',
               backgroundColor: '#2A2A30'
             }}
@@ -249,86 +236,86 @@ const Header = () => {
           {/* Login / Profile Button */}
           {user ? (
             <div className="hidden md:flex items-center gap-[1.11vw]">
-               {/* Role Badge */}
-               <div
-                  className="bg-white/10 flex items-center justify-center relative rounded-full shrink-0"
-                  style={{ padding: '0.8vh 1vw', gap: '0.5vw', height: '4.5vh' }}
+              {/* Role Badge */}
+              <div
+                className="bg-white/10 flex items-center justify-center relative rounded-full shrink-0"
+                style={{ padding: '0.8vh 1vw', gap: '0.5vw', height: '4.5vh' }}
+              >
+                <span className="font-poppins font-medium leading-none text-white/80 whitespace-nowrap tracking-wide" style={{ fontSize: '0.85vw' }}>
+                  {userRole}
+                </span>
+                <div className="w-[0.4vw] h-[0.4vw] rounded-full bg-white/80 shrink-0" />
+              </div>
+
+              {/* Avatar with Dropdown */}
+              <div className="relative" ref={accountRef}>
+                <button
+                  onClick={() => setIsAccountOpen(!isAccountOpen)}
+                  className="relative shrink-0 flex items-center justify-center rounded-full overflow-hidden border border-[#3457dc]/30 transition-transform active:scale-95"
+                  style={{ width: '2.8vw', height: '2.8vw' }}
                 >
-                  <span className="font-poppins font-medium leading-none text-white/80 whitespace-nowrap tracking-wide" style={{ fontSize: '0.85vw' }}>
-                    {userRole}
-                  </span>
-                  <div className="w-[0.4vw] h-[0.4vw] rounded-full bg-white/80 shrink-0" />
-                </div>
+                  <img src={avatarUrl} alt="profile" className="size-full object-cover" />
+                </button>
 
-                {/* Avatar with Dropdown */}
-                <div className="relative" ref={accountRef}>
-                    <button 
-                         onClick={() => setIsAccountOpen(!isAccountOpen)}
-                         className="relative shrink-0 flex items-center justify-center rounded-full overflow-hidden border border-[#3457dc]/30 transition-transform active:scale-95"
-                         style={{ width: '2.8vw', height: '2.8vw' }}
-                    >
-                        <img src={avatarUrl} alt="profile" className="size-full object-cover" />
-                    </button>
-
-                    {/* Dropdown Menu */}
-                    <div className={`absolute right-0 top-full mt-[2vh] w-[16vw] bg-[#121217] border border-[#2a2a30] rounded-xl overflow-hidden transition-all duration-200 z-[100] p-[0.6vw] shadow-2xl ${isAccountOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'}`}>
-                        <ul className="flex flex-col gap-[0.4vh]">
-                            <li className="flex items-center gap-[0.8vw] px-[0.8vw] py-[1.2vh] rounded-[0.5vw] hover:bg-white/5 cursor-pointer text-[0.9vw] text-white/80 hover:text-white transition-colors" 
-                                onClick={() => { 
-                                    const path = (user?.role === 'admin' || user?.role === 'superadmin') ? '/leaderdashboard' : '/usersdashboard/overview';
-                                    navigate(path); 
-                                    setIsAccountOpen(false); 
-                                }}>
-                                <OverviewIcon /> <span>Go to Dashboard</span>
-                            </li>
-                            <li className="flex items-center gap-[0.8vw] px-[0.8vw] py-[1.2vh] rounded-[0.5vw] hover:bg-white/5 cursor-pointer text-[0.9vw] text-white/80 hover:text-white transition-colors" 
-                                onClick={() => { 
-                                    const path = (user?.role === 'admin' || user?.role === 'superadmin') ? '/leaderdashboard/notifications' : '/usersdashboard/notifications';
-                                    navigate(path); 
-                                    setIsAccountOpen(false); 
-                                }}>
-                                <NotiIcon /> <span>Notifications</span>
-                            </li>
-                            <li className="flex items-center gap-[0.8vw] px-[0.8vw] py-[1.2vh] rounded-[0.5vw] hover:bg-white/5 cursor-pointer text-[0.9vw] text-white/80 hover:text-white transition-colors" 
-                                onClick={() => { 
-                                    const path = (user?.role === 'admin' || user?.role === 'superadmin') ? '/leaderdashboard' : '/usersdashboard/account';
-                                    navigate(path); 
-                                    setIsAccountOpen(false); 
-                                }}>
-                                <AccountIcon /> <span>{ (user?.role === 'admin' || user?.role === 'superadmin') ? 'Admin Panel' : 'My Account'}</span>
-                            </li>
-                            <div className="h-px bg-[#2a2a30] my-[0.5vh] w-full" />
-                            <li className="flex items-center gap-[0.8vw] px-[0.8vw] py-[1.2vh] rounded-[0.5vw] hover:bg-[#C5432D]/10 cursor-pointer text-[0.9vw] text-[#C5432D] transition-colors" 
-                                onClick={() => { logout(); setIsAccountOpen(false); navigate('/'); }}>
-                                <SignoutIcon /> <span>Sign Out</span>
-                            </li>
-                        </ul>
-                    </div>
+                {/* Dropdown Menu */}
+                <div className={`absolute right-0 top-full mt-[2vh] w-[16vw] bg-[#121217] border border-[#2a2a30] rounded-xl overflow-hidden transition-all duration-200 z-[100] p-[0.6vw] shadow-2xl ${isAccountOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'}`}>
+                  <ul className="flex flex-col gap-[0.4vh]">
+                    <li className="flex items-center gap-[0.8vw] px-[0.8vw] py-[1.2vh] rounded-[0.5vw] hover:bg-white/5 cursor-pointer text-[0.9vw] text-white/80 hover:text-white transition-colors"
+                      onClick={() => {
+                        const path = (user?.role === 'admin' || user?.role === 'superadmin') ? '/leaderdashboard' : '/usersdashboard/overview';
+                        navigate(path);
+                        setIsAccountOpen(false);
+                      }}>
+                      <OverviewIcon /> <span>{language === 'ar' ? 'الذهاب إلى لوحة التحكم' : 'Go to Dashboard'}</span>
+                    </li>
+                    <li className="flex items-center gap-[0.8vw] px-[0.8vw] py-[1.2vh] rounded-[0.5vw] hover:bg-white/5 cursor-pointer text-[0.9vw] text-white/80 hover:text-white transition-colors"
+                      onClick={() => {
+                        const path = (user?.role === 'admin' || user?.role === 'superadmin') ? '/leaderdashboard/notifications' : '/usersdashboard/notifications';
+                        navigate(path);
+                        setIsAccountOpen(false);
+                      }}>
+                      <NotiIcon /> <span>{language === 'ar' ? 'الإشعارات' : 'Notifications'}</span>
+                    </li>
+                    <li className="flex items-center gap-[0.8vw] px-[0.8vw] py-[1.2vh] rounded-[0.5vw] hover:bg-white/5 cursor-pointer text-[0.9vw] text-white/80 hover:text-white transition-colors"
+                      onClick={() => {
+                        const path = (user?.role === 'admin' || user?.role === 'superadmin') ? '/leaderdashboard' : '/usersdashboard/account';
+                        navigate(path);
+                        setIsAccountOpen(false);
+                      }}>
+                      <AccountIcon /> <span>{(user?.role === 'admin' || user?.role === 'superadmin') ? (language === 'ar' ? 'لوحة المسؤول' : 'Admin Panel') : (language === 'ar' ? 'حسابي' : 'My Account')}</span>
+                    </li>
+                    <div className="h-px bg-[#2a2a30] my-[0.5vh] w-full" />
+                    <li className="flex items-center gap-[0.8vw] px-[0.8vw] py-[1.2vh] rounded-[0.5vw] hover:bg-[#C5432D]/10 cursor-pointer text-[0.9vw] text-[#C5432D] transition-colors"
+                      onClick={() => { logout(); setIsAccountOpen(false); navigate('/'); }}>
+                      <SignoutIcon /> <span>{language === 'ar' ? 'تسجيل الخروج' : 'Sign Out'}</span>
+                    </li>
+                  </ul>
                 </div>
+              </div>
             </div>
           ) : (
-            <Link 
+            <Link
               to="/login"
               className="hidden sm:flex content-stretch items-center justify-center relative shrink-0 border border-[#3457dc] border-solid rounded-[16px] bg-white/[0.01] hover:bg-accent/10 transition-all"
               style={{
-                paddingLeft: '1.39vw', 
+                paddingLeft: '1.39vw',
                 paddingRight: '1.39vw',
-                paddingTop: '1.6vh', 
+                paddingTop: '1.6vh',
                 paddingBottom: '1.6vh',
-                width: '11.11vw' 
+                width: '11.11vw'
               }}
             >
-              <p 
+              <p
                 className="font-poppins font-medium leading-none not-italic relative shrink-0 text-[#3457dc] whitespace-nowrap"
                 style={{ fontSize: '0.97vw' }}
               >
-                Log in / Sign up
+                {language === 'ar' ? 'تسجيل الدخول / الاشتراك' : 'Log in / Sign up'}
               </p>
             </Link>
           )}
 
           {/* Mobile Menu Button */}
-          <button 
+          <button
             onClick={() => setIsMobileMenuOpen(true)}
             className="lg:hidden p-2 rounded-xl bg-white/5 border border-white/10 text-white"
           >
@@ -343,20 +330,38 @@ const Header = () => {
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
           <aside className="absolute right-0 top-0 bottom-0 w-[300px] bg-background-main border-l border-card-border shadow-2xl p-6">
             <div className="flex items-center justify-between mb-12">
-              <img src="/Saad Dahlab white.png" alt="Logo" className="h-10 w-auto" />
+              <img src="/Saad Dahlab white.png" alt="Logo" className="h-16 w-auto" />
               <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-neutral-grey hover:text-white">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
             </div>
             <nav className="flex flex-col gap-6">
-              <Link to="/projects" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-medium text-white">Projects</Link>
-              <Link to="/publications" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-medium text-white">Publications</Link>
-              <Link to="/teams-researches" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-medium text-white">Teams Researches</Link>
-              <Link to="/about-us" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-medium text-white">About Us</Link>
-              <Link to="/support" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-medium text-white">Support</Link>
+              <Link to="/projects" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-medium text-white">{language === 'ar' ? 'المشاريع' : 'Projects'}</Link>
+              <Link to="/publications" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-medium text-white">{language === 'ar' ? 'المنشورات' : 'Publications'}</Link>
+              <Link to="/teams-researches" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-medium text-white">{language === 'ar' ? 'الأبحاث والفرق' : 'Teams Researches'}</Link>
+              <Link to="/about-us" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-medium text-white">{language === 'ar' ? 'عنا' : 'About Us'}</Link>
+              <Link to="/support" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-medium text-white">{language === 'ar' ? 'الدعم' : 'Support'}</Link>
             </nav>
             <div className="mt-auto pt-6 border-t border-card-border">
-              <Link to="/login" className="block w-full py-4 text-center bg-accent text-white rounded-xl font-bold">Log in / Sign up</Link>
+  {user ? (
+  <div className="flex items-center gap-2 mt-4">
+    <img src={avatarUrl} alt="profile" className="w-10 h-10 rounded-full object-cover" />
+    <button
+      onClick={() => {
+        const path = (user?.role === 'admin' || user?.role === 'superadmin') ? '/leaderdashboard' : '/usersdashboard/overview';
+        navigate(path);
+        setIsMobileMenuOpen(false);
+      }}
+      className="text-white"
+    >
+      {language === 'ar' ? 'الذهاب إلى لوحة التحكم' : 'Go to Dashboard'}
+    </button>
+  </div>
+) : (
+  <Link to="/login" className="block w-full py-4 text-center bg-accent text-white rounded-xl font-bold">
+    {language === 'ar' ? 'تسجيل الدخول / الاشتراك' : 'Log in / Sign up'}
+  </Link>
+)}
             </div>
           </aside>
         </div>

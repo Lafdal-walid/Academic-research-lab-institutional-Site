@@ -132,7 +132,8 @@ const AddPublicationContent = () => {
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2.4vh', marginTop: '4vh', width: '100%' }}>
+        <div className="add-pub-container" style={{ display: 'flex', flexDirection: 'column', gap: '2.4vh', marginTop: '4vh', width: '100%' }}>
+            <style dangerouslySetInnerHTML={{ __html: addPubStyles }} />
             <PublicationEditor
                 langTab={langTab}
                 setLangTab={setLangTab}
@@ -149,7 +150,7 @@ const AddPublicationContent = () => {
                 accept=".doc,.docx,.pdf"
             />
 
-            <div style={{
+            <div className="add-pub-form-card" style={{
                 backgroundColor: '#151519',
                 borderRadius: '1.2vw',
                 width: '100%',
@@ -160,16 +161,17 @@ const AddPublicationContent = () => {
                 gap: '2.5vh',
                 marginTop: '1vh'
             }}>
-                <h2 style={{ fontSize: '1.1vw', fontWeight: 800, color: '#ffffff', fontFamily: 'Gilroy, Poppins, sans-serif', margin: 0 }}>
+                <h2 className="add-pub-form-title" style={{ fontSize: '1.1vw', fontWeight: 800, color: '#ffffff', fontFamily: 'Gilroy, Poppins, sans-serif', margin: 0 }}>
                     Add Professional Publication details
                 </h2>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: '2vh' }}>
+                <div className="add-pub-grid-layout" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: '2vh' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2vh' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8vh' }}>
-                            <label style={{ color: '#80808a', fontSize: '0.85vw', fontWeight: 500 }}>Publication Title</label>
+                        <div className="add-pub-form-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.8vh' }}>
+                            <label className="add-pub-label" style={{ color: '#80808a', fontSize: '0.85vw', fontWeight: 500 }}>Publication Title</label>
                             <input
                                 placeholder="e.g., Attention Mechanisms in Hierarchical Cognitive Architectures..."
+                                className="add-pub-input"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 style={{
@@ -178,7 +180,7 @@ const AddPublicationContent = () => {
                             />
                         </div>
 
-                        <div style={{ display: 'flex', gap: '1vw' }}>
+                        <div className="add-pub-form-row" style={{ display: 'flex', gap: '1vw' }}>
                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.8vh', position: 'relative' }}>
                                 <label style={{ color: '#80808a', fontSize: '0.85vw', fontWeight: 500 }}>Authors (Team Members & External)</label>
                                 <div style={{ display: 'flex', gap: '8px' }}>
@@ -356,5 +358,61 @@ const AddPublicationContent = () => {
         </div>
     );
 };
+
+const addPubStyles = `
+@media screen and (max-width: 1024px) {
+    .add-pub-grid-layout {
+        grid-template-columns: 100% !important;
+        gap: 24px !important;
+    }
+    .add-pub-form-row {
+        flex-direction: column !important;
+        gap: 24px !important;
+    }
+    .add-pub-form-row > div {
+        width: 100% !important;
+        flex: none !important;
+    }
+    .add-pub-form-card {
+        padding: 24px 20px !important;
+        border-radius: 12px !important;
+    }
+    .add-pub-form-title {
+        font-size: 16px !important;
+    }
+    .add-pub-label {
+        font-size: 14px !important;
+    }
+    .add-pub-input, select, textarea, .add-pub-container input[readonly] {
+        padding: 12px 14px !important;
+        font-size: 14px !important;
+        border-radius: 8px !important;
+    }
+    .add-pub-container button {
+        height: auto !important;
+        padding: 12px 20px !important;
+        font-size: 14px !important;
+        border-radius: 8px !important;
+    }
+    .add-pub-container textarea {
+        min-height: 120px !important;
+    }
+    
+    /* Author selection members dropdown */
+    div[style*="position: absolute"][style*="right: 0"] {
+        width: 200px !important;
+        max-height: 200px !important;
+    }
+    div[style*="padding: 1vh 1vw"] {
+        padding: 10px 14px !important;
+        font-size: 13px !important;
+    }
+    
+    .add-pub-container div[style*="gap: 16px"][style*="alignItems: center"] svg {
+        width: 18px !important;
+        height: 18px !important;
+    }
+}
+`;
 
 export default AddPublicationContent;

@@ -39,15 +39,15 @@ const ResearchTeamCard = ({ title, leader, members, membersCount, gradient, isRT
     </div>
 );
 
-const ResearchPaperCard = ({ title, authors, year, journal, description, tags, link }) => {
+const ResearchPaperCard = ({ title, authors, year, journal, description, tags, link, isRTL }) => {
     return (
         <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="bg-[#151519] border border-white/5 rounded-2xl p-6 flex flex-col gap-4 group hover:border-[#3457DC]/30 transition-all duration-300"
+            className={`bg-[#151519] border border-white/5 rounded-2xl p-6 flex flex-col gap-4 group hover:border-[#3457DC]/30 transition-all duration-300 ${isRTL ? 'text-right' : 'text-left'}`}
         >
-            <div className="flex justify-between items-start gap-4">
+            <div className={`flex justify-between items-start gap-4 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                 <h3 className="text-xl font-bold text-white font-gilroy leading-tight group-hover:text-[#3457DC] transition-colors">
                     {title}
                 </h3>
@@ -56,7 +56,7 @@ const ResearchPaperCard = ({ title, authors, year, journal, description, tags, l
                 </a>
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <div className={`flex flex-wrap items-center gap-x-6 gap-y-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                 <div className="flex items-center gap-2 text-white/40 text-sm">
                     <UsersIcon size={16} />
                     <span>{authors}</span>
@@ -79,7 +79,7 @@ const ResearchPaperCard = ({ title, authors, year, journal, description, tags, l
                 </p>
             )}
 
-            <div className="flex flex-wrap gap-2 mt-2">
+            <div className={`flex flex-wrap gap-2 mt-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                 {tags && tags.map((tag, idx) => (
                     <span key={idx} className="bg-[#3457DC]/10 px-3 py-1 rounded-full text-[#3457DC] text-[11px] font-semibold uppercase tracking-wider">
                         {tag}
@@ -122,14 +122,6 @@ const STATIC_PUBLICATIONS = [
         publisher: "Robotics and Autonomous Systems",
         tags: ["Robotics", "Autonomous Systems", "Transformers"],
         contribution: "Developed a transformer-based spatial encoder that predicts obstacle trajectories with sub-centimeter precision."
-    },
-    {
-        title: "test lorem test",
-        authors: ["oualidlafdal50@gmail.com", "walidbusiness50@gmail.com", "walidbusiness10@gmail.com", "wwalidlaf@gmail.com"],
-        year: "2026",
-        publisher: "Institutional Lab",
-        tags: ["deep learning", "machine learning", "ai test"],
-        contribution: "Collaborative research on experimental AI architectures."
     }
 ];
 
@@ -137,15 +129,33 @@ export default function Publications() {
     const { language } = useLanguage();
     const isRTL = language === "ar";
     
+    const text = {
+        badge: isRTL ? 'منشورات' : 'posts',
+        title: isRTL ? 'المنشورات' : 'Publications',
+        subtitle: isRTL ? 'استكشف منشورات فرقنا البحثية' : 'Explore our Teams Publications',
+        searchPlaceholder: isRTL ? "ابحث هنا..." : "Search e.g Lab",
+        sortByRecent: isRTL ? 'الأحدث' : 'sort by recent',
+        sortByOldest: isRTL ? 'الأقدم' : 'sort by oldest',
+        categoryLabel: isRTL ? 'الفئة' : 'Categorie',
+        all: isRTL ? 'الكل' : 'All',
+        requestResearch: isRTL ? 'طلب إضافة بحث؟' : 'Request a Research?',
+        loading: isRTL ? 'جاري تحميل الأوراق البحثية...' : 'Loading research papers...',
+        noPublications: isRTL ? 'لم يتم العثور على منشورات.' : 'No publications found.',
+        of: isRTL ? 'من' : 'of',
+        researchTeams: isRTL ? 'الفرق البحثية' : 'Research Teams',
+        researchTeamsSubtitle: isRTL ? 'فرقنا البحثية المتخصصة في مختلف مجالات علوم الحاسوب والتكنولوجيا' : 'Our specialized research teams in various fields of computer science and technology',
+        teamsLoading: isRTL ? 'جاري تحميل الفرق...' : 'Loading teams...'
+    };
+
     const [searchTerm, setSearchTerm] = useState('');
     const [activeDropdown, setActiveDropdown] = useState(null);
-    const [selectedSort, setSelectedSort] = useState(isRTL ? 'الأحدث' : 'sort by recent');
-    const [selectedCategory, setSelectedCategory] = useState(isRTL ? 'الفئة' : 'Categorie');
+    const [selectedSort, setSelectedSort] = useState(text.sortByRecent);
+    const [selectedCategory, setSelectedCategory] = useState(text.categoryLabel);
     const [publications, setPublications] = useState(STATIC_PUBLICATIONS);
     const [teams, setTeams] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
-    const totalPages = 1; // Updated dynamically or kept as fits
+    const totalPages = 1;
 
     const dropdownRef = useRef(null);
 
@@ -157,7 +167,6 @@ export default function Publications() {
             try {
                 const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : '';
                 
-                // Fetch Publications
                 const pubRes = await fetch(`${baseUrl}/api/publications`);
                 if (pubRes.ok) {
                     const pubData = await pubRes.json();
@@ -166,7 +175,6 @@ export default function Publications() {
                     }
                 }
 
-                // Fetch Teams
                 const teamRes = await fetch(`${baseUrl}/api/teams`);
                 if (teamRes.ok) {
                     const teamData = await teamRes.json();
@@ -190,13 +198,19 @@ export default function Publications() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    // Update internal state when language changes
+    useEffect(() => {
+        setSelectedSort(isRTL ? 'الأحدث' : 'sort by recent');
+        setSelectedCategory(isRTL ? 'الفئة' : 'Categorie');
+    }, [language, isRTL]);
+
     const filteredPublications = publications
         .filter(pub => {
             const matchesSearch = pub.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                pub.authors.some(auth => auth.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                (Array.isArray(pub.authors) ? pub.authors.some(auth => auth.toLowerCase().includes(searchTerm.toLowerCase())) : pub.authors.toLowerCase().includes(searchTerm.toLowerCase())) ||
                 (pub.tags && pub.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
             
-            const categoryMatch = selectedCategory === 'Categorie' || selectedCategory === 'All' || selectedCategory === 'الفئة' ||
+            const categoryMatch = selectedCategory === 'Categorie' || selectedCategory === 'All' || selectedCategory === 'الفئة' || selectedCategory === 'الكل' ||
                 (pub.field && pub.field.toLowerCase() === selectedCategory.toLowerCase()) ||
                 (pub.tags && pub.tags.some(tag => tag.toLowerCase() === selectedCategory.toLowerCase()));
             
@@ -212,36 +226,31 @@ export default function Publications() {
         });
 
     return (
-        <div className="w-full min-h-screen bg-[#05030D] text-white font-poppins relative overflow-x-hidden" dir={isRTL ? 'rtl' : 'ltr'}>
-            {/* Header Padding to avoid overlapping with fixed header */}
+        <div className={`w-full min-h-screen bg-[#05030D] text-white relative overflow-x-hidden ${isRTL ? 'font-tajawal' : 'font-poppins'}`} dir={isRTL ? 'rtl' : 'ltr'}>
             <div className="h-20 w-full" />
 
-            {/* Header Section */}
             <div className="container mx-auto px-6 pt-16 pb-24 text-center relative z-10">
                 <motion.div 
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="flex flex-col items-center"
                 >
-                    <span className="text-[#3457DC] text-[13px] uppercase font-bold tracking-[0.2em] mb-0">posts</span>
-                    <h1 className="font-gilroy font-extrabold text-[64px] md:text-[96px] leading-tight mb-4">Publications</h1>
-                    <p className="text-white/60 text-lg max-w-2xl mx-auto">Explore our Teams Publications</p>
+                    <span className="text-[#3457DC] text-[13px] uppercase font-bold tracking-[0.2em] mb-0">{text.badge}</span>
+                    <h1 className="font-gilroy font-extrabold text-[64px] md:text-[96px] leading-tight mb-4">{text.title}</h1>
+                    <p className="text-white/60 text-lg max-w-2xl mx-auto">{text.subtitle}</p>
                 </motion.div>
             </div>
 
-            {/* Separator Line */}
             <div className="w-full h-px bg-[#373735]/30 relative mb-16">
                 <div className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-[#3457DC]/50 to-transparent" />
             </div>
 
-            {/* Toolbar Section */}
             <div className="container mx-auto px-6 mb-12">
                 <div className="flex flex-col lg:flex-row items-center gap-5 w-full max-w-[1240px] mx-auto" ref={dropdownRef}>
-                    {/* Search Bar */}
-                    <div className="bg-[#1e1e24] flex items-center gap-4 px-6 py-3 rounded-2xl w-full lg:flex-[2] border border-white/5 focus-within:border-[#3457DC]/50 transition-all">
+                    <div className={`bg-[#1e1e24] flex items-center gap-4 px-6 py-3 rounded-2xl w-full lg:flex-[2] border border-white/5 focus-within:border-[#3457DC]/50 transition-all ${isRTL ? 'flex-row-reverse text-right' : 'flex-row text-left'}`}>
                         <input
                             type="text"
-                            placeholder={isRTL ? "ابحث هنا..." : "Search e.g Lab"}
+                            placeholder={text.searchPlaceholder}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="bg-transparent border-none outline-none text-white text-[15px] w-full placeholder:text-[#a5a5b2]"
@@ -249,9 +258,7 @@ export default function Publications() {
                         <Search className="text-[#3457DC] shrink-0" size={20} />
                     </div>
 
-                    {/* Filters Row */}
                     <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:flex-[3]">
-                        {/* Sort Dropdown */}
                         <div className="relative w-full">
                             <button
                                 onClick={() => setActiveDropdown(activeDropdown === 'sort' ? null : 'sort')}
@@ -268,7 +275,7 @@ export default function Publications() {
                                         exit={{ opacity: 0, y: 10 }}
                                         className="absolute top-full left-0 right-0 mt-2 bg-[#1e1e24] border border-white/10 rounded-xl p-2 z-50 shadow-2xl"
                                     >
-                                        {['sort by recent', 'sort by oldest'].map(opt => (
+                                        {[text.sortByRecent, text.sortByOldest].map(opt => (
                                             <button
                                                 key={opt}
                                                 onClick={() => { setSelectedSort(opt); setActiveDropdown(null); }}
@@ -282,7 +289,6 @@ export default function Publications() {
                             </AnimatePresence>
                         </div>
 
-                        {/* Category Dropdown */}
                         <div className="relative w-full">
                             <button
                                 onClick={() => setActiveDropdown(activeDropdown === 'category' ? null : 'category')}
@@ -299,7 +305,7 @@ export default function Publications() {
                                         exit={{ opacity: 0, y: 10 }}
                                         className="absolute top-full left-0 right-0 mt-2 bg-[#1e1e24] border border-white/10 rounded-xl p-2 z-50 shadow-2xl"
                                     >
-                                        {['All', 'AI & Vision', 'Networks', 'Embedded Systems'].map(opt => (
+                                        {[text.all, 'AI & Vision', 'Networks', 'Embedded Systems'].map(opt => (
                                             <button
                                                 key={opt}
                                                 onClick={() => { setSelectedCategory(opt); setActiveDropdown(null); }}
@@ -313,21 +319,19 @@ export default function Publications() {
                             </AnimatePresence>
                         </div>
 
-                        {/* Request Button */}
                         <button className="bg-[#1e1e24] flex items-center justify-center px-8 py-3 rounded-2xl w-full border border-white/5 hover:bg-[#25252d] transition-all whitespace-nowrap">
-                            <span className="text-[#a5a5b2] font-medium text-[14px]">Request a Reaserch?</span>
+                            <span className="text-[#a5a5b2] font-medium text-[14px]">{text.requestResearch}</span>
                         </button>
                     </div>
                 </div>
             </div>
 
-            {/* List Section */}
             <div className="container mx-auto px-6 mb-20">
                 <div className="max-w-[1240px] mx-auto grid grid-cols-1 gap-6">
                     {isLoading && publications.length === 0 ? (
-                        <div className="text-center py-20 opacity-40">Loading research papers...</div>
+                        <div className="text-center py-20 opacity-40">{text.loading}</div>
                     ) : filteredPublications.length === 0 ? (
-                        <div className="text-center py-20 opacity-40">No publications found.</div>
+                        <div className="text-center py-20 opacity-40">{text.noPublications}</div>
                     ) : (
                         filteredPublications.map((pub, idx) => (
                             <ResearchPaperCard 
@@ -339,13 +343,13 @@ export default function Publications() {
                                 description={pub.contribution}
                                 tags={pub.tags}
                                 link={pub.documentUrl ? (pub.documentUrl.startsWith('http') ? pub.documentUrl : `http://localhost:5000${pub.documentUrl}`) : '#'}
+                                isRTL={isRTL}
                             />
                         ))
                     )}
                 </div>
             </div>
 
-            {/* Pagination Footer */}
             <div className="container mx-auto px-6 pb-20">
                 <div className="max-w-[1240px] mx-auto flex items-center justify-between pt-8 border-t border-white/5">
                     <button
@@ -360,7 +364,7 @@ export default function Publications() {
                         <div className="bg-[#1e1e24] border border-white/5 rounded-xl px-4 py-2 font-bold min-w-[50px] text-center">
                             {currentPage}
                         </div>
-                        <span className="text-[#a5a5b2] text-sm">of {totalPages}</span>
+                        <span className="text-[#a5a5b2] text-sm">{text.of} {totalPages}</span>
                     </div>
 
                     <button
@@ -373,23 +377,16 @@ export default function Publications() {
                 </div>
             </div>
 
-            {/* Research Teams Section - Full Width & Integrated with Footer */}
             <div className="w-full bg-[#070710] py-32 relative overflow-hidden">
-
-                {/* Background Pattern for seamless transition */}
                 <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
                 
                 <div className="container mx-auto px-6 relative z-10">
                     <div className="text-center mb-16">
-                        <h2 className="text-white font-gilroy font-extrabold text-[48px] mb-4">Research Teams</h2>
-                        <p className="text-[#7b829d] text-[18px] max-w-2xl mx-auto">
-                            {isRTL 
-                                ? 'فرقنا البحثية المتخصصة في مختلف مجالات علوم الحاسوب والتكنولوجيا' 
-                                : 'Our specialized research teams in various fields of computer science and technology'}
-                        </p>
+                        <h2 className="text-white font-gilroy font-extrabold text-[48px] mb-4">{text.researchTeams}</h2>
+                        <p className="text-[#7b829d] text-[18px] max-w-2xl mx-auto">{text.researchTeamsSubtitle}</p>
                     </div>
 
-                    <div className="max-w-[1240px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="max-w-[1240px] mx-auto grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                         {teams.length > 0 ? (
                             teams.map((team, idx) => (
                                 <ResearchTeamCard 
@@ -403,37 +400,11 @@ export default function Publications() {
                                 />
                             ))
                         ) : (
-                            <>
-                                <ResearchTeamCard 
-                                    title="Artificial Intelligence & Deep Learning"
-                                    leader="Prof. Ahmed Benali"
-                                    members={["Dr. Sara Mansouri", "Amina Cherif", "Youcef Kaddour"]}
-                                    membersCount="4"
-                                    gradient="linear-gradient(135deg, rgb(57, 94, 213) 0%, rgb(60, 87, 221) 100%)"
-                                    isRTL={isRTL}
-                                />
-                                <ResearchTeamCard 
-                                    title="Cybersecurity & Network Defense"
-                                    leader="Dr. Nour Hamdi"
-                                    members={["Karim Belhadj", "Mehdi Slimani", "Ines Rahali"]}
-                                    membersCount="4"
-                                    gradient="linear-gradient(135deg, rgb(102, 51, 204) 0%, rgb(134, 57, 172) 100%)"
-                                    isRTL={isRTL}
-                                />
-                                <ResearchTeamCard 
-                                    title="Cloud Computing & Distributed Systems"
-                                    leader="Prof. Mourad Djelloul"
-                                    members={["Karim Belhadj", "Youcef Kaddour", "Amine Bouzid"]}
-                                    membersCount="4"
-                                    gradient="linear-gradient(135deg, rgb(34, 142, 195) 0%, rgb(51, 102, 204) 100%)"
-                                    isRTL={isRTL}
-                                />
-                            </>
+                            <div className="col-span-3 text-center py-10 opacity-40">{text.teamsLoading}</div>
                         )}
                     </div>
                 </div>
                 
-                {/* Visual spacer to accommodate footer slant */}
                 <div className="h-20 w-full" />
             </div>
         </div>

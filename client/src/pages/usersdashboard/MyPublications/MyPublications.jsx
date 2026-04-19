@@ -82,7 +82,7 @@ const Tab = ({ label, isActive, onClick }) => {
 
 const ResearchPaperCard = ({ title, authors, year, journal, description, tags, link }) => {
     return (
-        <div style={{
+        <div className="publication-paper-card" style={{
             backgroundColor: '#151519',
             border: '1px solid rgba(255, 255, 255, 0.05)',
             borderRadius: '1.2vw',
@@ -96,8 +96,8 @@ const ResearchPaperCard = ({ title, authors, year, journal, description, tags, l
             cursor: 'default'
         }}>
             {/* Header: Title and Link Icon */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
-                <h3 style={{
+            <div className="pub-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
+                <h3 className="pub-card-title" style={{
                     margin: 0,
                     fontSize: '1.1vw',
                     fontWeight: 700,
@@ -108,20 +108,20 @@ const ResearchPaperCard = ({ title, authors, year, journal, description, tags, l
                 }}>
                     {title}
                 </h3>
-                <a href={link} target="_blank" rel="noopener noreferrer" style={{ transition: 'opacity 0.2s' }} onMouseOver={e => e.currentTarget.style.opacity = 0.7} onMouseOut={e => e.currentTarget.style.opacity = 1}>
+                <a href={link} target="_blank" rel="noopener noreferrer" className="pub-card-link-icon" style={{ transition: 'opacity 0.2s' }} onMouseOver={e => e.currentTarget.style.opacity = 0.7} onMouseOut={e => e.currentTarget.style.opacity = 1}>
                     <img src={LinkIcon} alt="link" style={{ width: '1.2vw' }} />
                 </a>
             </div>
 
             {/* Sub-header: Authors and Year */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2vw' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6vw' }}>
+            <div className="pub-card-meta" style={{ display: 'flex', alignItems: 'center', gap: '2vw' }}>
+                <div className="pub-card-meta-item" style={{ display: 'flex', alignItems: 'center', gap: '0.6vw' }}>
                     <img src={UsersIcon} alt="authors" style={{ width: '0.9vw' }} />
                     <span style={{ fontSize: '0.85vw', color: '#7b829d', fontFamily: 'Inter, sans-serif' }}>
                         {authors}
                     </span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6vw' }}>
+                <div className="pub-card-meta-item" style={{ display: 'flex', alignItems: 'center', gap: '0.6vw' }}>
                     <img src={CalendarSquareIcon} alt="year" style={{ width: '0.8vw' }} />
                     <span style={{ fontSize: '0.85vw', color: '#7b829d', fontFamily: 'Inter, sans-serif' }}>
                         {year}
@@ -130,7 +130,7 @@ const ResearchPaperCard = ({ title, authors, year, journal, description, tags, l
             </div>
 
             {/* Journal Info */}
-            <div style={{ fontSize: '0.95vw', color: '#7b829d', fontFamily: 'Inter, sans-serif' }}>
+            <div className="pub-card-journal" style={{ fontSize: '0.95vw', color: '#7b829d', fontFamily: 'Inter, sans-serif' }}>
                 {journal}
             </div>
 
@@ -233,9 +233,9 @@ const TeamPublicationContent = () => {
     });
 
     return (
-        <div style={{ marginTop: '30px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div className="publication-team-content" style={{ marginTop: '30px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {/* Header / Filter Bar - No Background */}
-            <div style={{
+            <div className="publication-filter-bar" style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '20px',
@@ -243,7 +243,7 @@ const TeamPublicationContent = () => {
                 padding: '0 0 10px 0'
             }}>
                 {/* Full Width Search Bar */}
-                <div style={{
+                <div className="publication-search-container" style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '12px',
@@ -271,7 +271,7 @@ const TeamPublicationContent = () => {
                 </div>
 
                 {/* Flexible Filters Row */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 3 }} ref={dropdownRef}>
+                <div className="publication-dropdown-group" style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 3 }} ref={dropdownRef}>
                     {/* Sort Dropdown */}
                     <div
                         onClick={() => setActiveDropdown(activeDropdown === 'sort' ? null : 'sort')}
@@ -438,9 +438,10 @@ const MyPublications = () => {
     const [isPublishPopupOpen, setIsPublishPopupOpen] = useState(false);
 
     return (
-        <div className="w-full text-white font-poppins pb-10 animate-in fade-in duration-500">
+        <div className="publication-main-container w-full text-white font-poppins pb-10 animate-in fade-in duration-500">
+            <style dangerouslySetInnerHTML={{ __html: publicationStyles }} />
             {/* Tab Navigation - Exact replica of PhdTracker layout but with refined gap */}
-            <div className="flex justify-between items-center pb-[12px] pt-[0px] px-[0px] w-full">
+            <div className="publication-tab-nav flex justify-between items-center pb-[12px] pt-[0px] px-[0px] w-full">
                 <div className="flex gap-[24px] items-center">
                     <Tab
                         label="Team Publication"
@@ -497,5 +498,92 @@ const MyPublications = () => {
         </div>
     );
 };
+
+const publicationStyles = `
+@media screen and (max-width: 1024px) {
+    .publication-tab-nav {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 16px !important;
+        padding-bottom: 24px !important;
+    }
+    .publication-tab-nav > button {
+        width: 100% !important;
+        padding: 12px !important;
+    }
+
+    .publication-filter-bar {
+        flex-direction: column !important;
+        gap: 16px !important;
+    }
+    .publication-search-container, .publication-dropdown-group {
+        width: 100% !important;
+        flex: none !important;
+    }
+    .publication-dropdown-group {
+        flex-direction: column !important;
+    }
+    .publication-dropdown-group > div {
+        width: 100% !important;
+    }
+
+    .publication-paper-card {
+        border-radius: 12px !important;
+        padding: 24px 20px !important;
+        gap: 20px !important;
+    }
+    .pub-card-title {
+        font-size: 16px !important;
+    }
+    .pub-card-link-icon img {
+        width: 20px !important;
+    }
+    .pub-card-meta {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 12px !important;
+    }
+    .pub-card-meta-item img {
+        width: 16px !important;
+    }
+    .pub-card-meta-item span {
+        font-size: 14px !important;
+    }
+    .pub-card-journal {
+        font-size: 14px !important;
+    }
+    .publication-paper-card p {
+        font-size: 14px !important;
+        max-width: 100% !important;
+    }
+    .publication-paper-card div[style*="backgroundColor: rgba(57, 94, 213, 0.1)"] {
+        padding: 6px 12px !important;
+        font-size: 12px !important;
+    }
+
+    .report-pagination {
+        margin-top: 32px !important;
+    }
+    .report-pagination-btn {
+        width: 44px !important;
+        height: 44px !important;
+    }
+    .report-pagination-btn svg {
+        width: 10px !important;
+        height: 18px !important;
+    }
+    .pagination-counts-box {
+        gap: 12px !important;
+    }
+    .pagination-current-page-box {
+        min-width: 44px !important;
+        padding: 10px !important;
+        border-radius: 8px !important;
+    }
+    .pagination-current-page-box span, .pagination-counts-box > span {
+        font-size: 14px !important;
+    }
+}
+`;
 
 export default MyPublications;

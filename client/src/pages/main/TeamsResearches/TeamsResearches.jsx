@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ExternalLink, Users as UsersIcon, Calendar as CalendarIcon, Trophy, Award, BookOpen, Cpu, Shield, BarChart3, Cloud, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const svgPaths = {
   p11263c80: "M10.5 7.58333V11.0833C10.5 11.3928 10.3771 11.6895 10.1583 11.9083C9.9395 12.1271 9.64275 12.25 9.33333 12.25H2.91667C2.60725 12.25 2.3105 12.1271 2.09171 11.9083C1.87292 11.6895 1.75 11.3928 1.75 11.0833V4.66667C1.75 4.35725 1.87292 4.0605 2.09171 3.84171C2.3105 3.62292 2.60725 3.5 2.91667 3.5H6.41667",
@@ -31,13 +32,13 @@ function TagBadge({ label }) {
   );
 }
 
-function TeamMemberCard({ name, title, role, image, showTwitter = true }) {
+function TeamMemberCard({ name, title, role, image, showTwitter = true, isRTL }) {
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="bg-[rgba(255,255,255,0.05)] border border-[#2e2e38] border-solid rounded-[22px] p-6 flex flex-col items-center hover:border-blue-500/40 transition-all group"
+      className={`bg-[rgba(255,255,255,0.05)] border border-[#2e2e38] border-solid rounded-[22px] p-6 flex flex-col items-center hover:border-blue-500/40 transition-all group ${isRTL ? 'text-right' : 'text-left'}`}
     >
       <div className="rounded-[9999px] shadow-[0px_0px_0px_2px_rgba(57,94,213,0.3)] size-[112px] overflow-hidden mb-6 group-hover:shadow-[0px_0px_0px_4px_rgba(57,94,213,0.5)] transition-all">
         <img alt={name} className="size-full object-cover" src={image || placeholderImage} />
@@ -58,49 +59,27 @@ function TeamMemberCard({ name, title, role, image, showTwitter = true }) {
       </div>
 
       <div className="flex gap-[30px] items-center">
+        {/* Social Icons Placeholder */}
         <div className="h-[18px] w-[18px] opacity-40 hover:opacity-100 transition-opacity cursor-pointer">
-          <svg className="block size-full" fill="none" viewBox="0 0 18 18">
-            <g>
-              <path d="M5.25 0.75C6.44347 0.75 7.58807 1.22411 8.43198 2.06802C9.27589 2.91193 9.75 4.05653 9.75 5.25V10.5H6.75V5.25C6.75 4.85218 6.59196 4.47064 6.31066 4.18934C6.02936 3.90804 5.64782 3.75 5.25 3.75C4.85218 3.75 4.47064 3.90804 4.18934 4.18934C3.90804 4.47064 3.75 4.85218 3.75 5.25V10.5H0.75V5.25C0.75 4.05653 1.22411 2.91193 2.06802 2.06802C2.91193 1.22411 4.05653 0.75 5.25 0.75Z" stroke="#7B829D" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-              <path d="M3.75 0.75H0.75V9.75H3.75V0.75Z" stroke="#7B829D" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-              <path d="M2.25 3.75C3.07843 3.75 3.75 3.07843 3.75 2.25C3.75 1.42157 3.07843 0.75 2.25 0.75C1.42157 0.75 0.75 1.42157 0.75 2.25C0.75 3.07843 1.42157 3.75 2.25 3.75Z" stroke="#7B829D" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-            </g>
-          </svg>
+           <ExternalLink size={18} className="text-[#7B829D]" />
         </div>
-
         <div className="h-[18px] w-[18px] opacity-40 hover:opacity-100 transition-opacity cursor-pointer">
-          <svg className="block size-full" fill="none" viewBox="0 0 18 18">
-            <g>
-              <path d="M9.00863 15.75V12.75C9.11297 11.8105 8.84358 10.8676 8.25863 10.125C10.5086 10.125 12.7586 8.625 12.7586 6C12.8186 5.0625 12.5561 4.14 12.0086 3.375C12.2186 2.5125 12.2186 1.6125 12.0086 0.75C12.0086 0.75 11.2586 0.75 9.75863 1.875C7.77863 1.5 5.73863 1.5 3.75863 1.875C2.25863 0.75 1.50863 0.75 1.50863 0.75C1.28363 1.6125 1.28363 2.5125 1.50863 3.375C0.96254 4.13691 0.697489 5.06459 0.758635 6C0.758635 8.625 3.00863 10.125 5.25863 10.125C4.96613 10.4925 4.74863 10.9125 4.62113 11.3625C4.49363 11.8125 4.45613 12.285 4.50863 12.75V15.75" stroke="#7B829D" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-              <path d="M6 2.25C2.6175 3.75 2.25 0.75 0.75 0.75" stroke="#7B829D" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-            </g>
-          </svg>
+           <UsersIcon size={18} className="text-[#7B829D]" />
         </div>
-
-        {showTwitter && (
-          <div className="h-[18px] w-[18px] opacity-40 hover:opacity-100 transition-opacity cursor-pointer">
-            <svg className="block size-full" fill="none" viewBox="0 0 18 18">
-              <g>
-                <path d="M0.75 0.75V11.25" stroke="#7B829D" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-                <path d="M1.5 12C1.30109 12 1.11032 11.921 0.96967 11.7803C0.829018 11.6397 0.75 11.4489 0.75 11.25V1.5C0.75 1.30109 0.829018 1.11032 0.96967 0.96967C1.11032 0.829018 1.30109 0.75 1.5 0.75H5.25C6.04565 0.75 6.80871 1.06607 7.37132 1.62868C7.93393 2.19129 8.25 2.95435 8.25 3.75C8.25 2.95435 8.56607 2.19129 9.12868 1.62868C9.69129 1.06607 10.4544 0.75 11.25 0.75H15C15.1989 0.75 15.3897 0.829018 15.5303 0.96967C15.671 1.11032 15.75 1.30109 15.75 1.5V11.25C15.75 11.4489 15.671 11.6397 15.5303 11.7803C15.3897 11.921 15.1989 12 15 12H10.5C9.90326 12 9.33097 12.2371 8.90901 12.659C8.48705 13.081 8.25 13.6533 8.25 14.25C8.25 13.6533 8.01295 13.081 7.59099 12.659C7.16903 12.2371 6.59674 12 6 12H1.5Z" stroke="#7B829D" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-              </g>
-            </svg>
-          </div>
-        )}
       </div>
     </motion.div>
   );
 }
 
-const ResearchPaperCard = ({ title, authors, year, journal, description, tags, link }) => {
+const ResearchPaperCard = ({ title, authors, year, journal, description, tags, link, isRTL }) => {
     return (
         <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="bg-[#151519] border border-white/5 rounded-2xl p-6 flex flex-col gap-4 group hover:border-[#3457DC]/30 transition-all duration-300"
+            className={`bg-[#151519] border border-white/5 rounded-2xl p-6 flex flex-col gap-4 group hover:border-[#3457DC]/30 transition-all duration-300 ${isRTL ? 'text-right' : 'text-left'}`}
         >
-            <div className="flex justify-between items-start gap-4">
+            <div className={`flex justify-between items-start gap-4 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                 <h3 className="text-xl font-bold text-white font-gilroy leading-tight group-hover:text-[#3457DC] transition-colors">
                     {title}
                 </h3>
@@ -109,7 +88,7 @@ const ResearchPaperCard = ({ title, authors, year, journal, description, tags, l
                 </a>
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <div className={`flex flex-wrap items-center gap-x-6 gap-y-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                 <div className="flex items-center gap-2 text-white/40 text-sm">
                     <UsersIcon size={16} />
                     <span>{authors}</span>
@@ -132,7 +111,7 @@ const ResearchPaperCard = ({ title, authors, year, journal, description, tags, l
                 </p>
             )}
 
-            <div className="flex flex-wrap gap-2 mt-2">
+            <div className={`flex flex-wrap gap-2 mt-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                 {tags && tags.map((tag, idx) => (
                     <span key={idx} className="bg-[#3457DC]/10 px-3 py-1 rounded-full text-[#3457DC] text-[11px] font-semibold uppercase tracking-wider">
                         {tag}
@@ -143,21 +122,17 @@ const ResearchPaperCard = ({ title, authors, year, journal, description, tags, l
     );
 };
 
-function ProjectCard({ title, description, hasDemo = false }) {
+function ProjectCard({ title, description, hRTL, hasDemo = false }) {
   return (
     <motion.div 
       initial={{ opacity: 0, scale: 0.95 }}
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true }}
-      className="bg-[rgba(255,255,255,0.05)] border border-[#2e2e38] border-solid rounded-[16px] p-6 hover:bg-[rgba(255,255,255,0.08)] transition-all h-full flex flex-col"
+      className={`bg-[rgba(255,255,255,0.05)] border border-[#2e2e38] border-solid rounded-[16px] p-6 hover:bg-[rgba(255,255,255,0.08)] transition-all h-full flex flex-col ${hRTL ? 'text-right' : 'text-left'}`}
     >
-      <div className="flex items-center gap-4 mb-4">
+      <div className={`flex items-center gap-4 mb-4 ${hRTL ? 'flex-row-reverse' : 'flex-row'}`}>
         <div className="size-[20px] flex-shrink-0">
-          <svg className="block size-full" fill="none" viewBox="0 0 20 20">
-            <path d="M0.833333 7.5L4.16667 4.16667L0.833333 0.833333" stroke="#395ED5" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.66667" />
-            <path d="M4.16667 0.833333L0.833333 4.16667L4.16667 7.5" stroke="#395ED5" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.66667" />
-            <path d="M5.00022 0.833556L0.833556 14.1669" stroke="#395ED5" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.66667" />
-          </svg>
+          <Cpu className="text-[#395ED5]" size={20} />
         </div>
         <h3 className="font-['Inter:Bold',sans-serif] font-bold text-[#f5f5f5] text-[16px] leading-[24px]">
           {title}
@@ -166,21 +141,12 @@ function ProjectCard({ title, description, hasDemo = false }) {
       <p className="font-['Inter:Regular','Noto_Sans_Arabic:Regular',sans-serif] font-normal text-[#7b829d] text-[14px] leading-[22.75px] mb-6 flex-1" dir="auto">
         {description}
       </p>
-      <div className="flex gap-4 mt-auto">
+      <div className={`flex gap-4 mt-auto ${hRTL ? 'flex-row-reverse' : 'flex-row'}`}>
         <a href="#" className="flex items-center gap-2 text-[#395ed5] text-[12px] leading-[16px] font-['Inter:Regular',sans-serif] hover:underline">
-          <svg className="size-[14px]" fill="none" viewBox="0 0 14 14">
-            <path d="M8.75 12.8333V10.5C8.83115 9.76925 8.62163 9.03591 8.16667 8.45833C9.91667 8.45833 11.6667 7.29167 11.6667 5.25C11.7133 4.52083 11.5092 3.80333 11.0833 3.20833" stroke="#395ED5" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.16667" />
-            <path d="M5.25 10.5C2.61917 11.6667 2.33333 9.33333 1.16667 9.33333" stroke="#395ED5" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.16667" />
-          </svg>
           GitHub
         </a>
         {hasDemo && (
           <a href="#" className="flex items-center gap-2 text-[#395ed5] text-[12px] leading-[16px] font-['Inter:Regular',sans-serif] hover:underline">
-            <svg className="size-[14px]" fill="none" viewBox="0 0 14 14">
-              <path d="M8.75 1.75H12.25V5.25" stroke="#395ED5" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.16667" />
-              <path d="M5.83333 8.16667L12.25 1.75" stroke="#395ED5" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.16667" />
-              <path d="M10.5 7.58333V11.0833C10.5 11.3928 10.3771 11.6895 10.1583 11.9083C9.9395 12.1271 9.64275 12.25 9.33333 12.25H2.91667C2.60725 12.25 2.3105 12.1271 2.09171 11.9083C1.87292 11.6895 1.75 11.3928 1.75 11.0833V4.66667C1.75 4.35725 1.87292 4.0605 2.09171 3.84171C2.3105 3.62292 2.60725 3.50 2.91667 3.5H6.41667" stroke="#395ED5" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.16667" />
-            </svg>
             Demo
           </a>
         )}
@@ -189,7 +155,7 @@ function ProjectCard({ title, description, hasDemo = false }) {
   );
 }
 
-function AchievementCard({ icon, title }) {
+function AchievementCard({ icon, title, isRTL }) {
   const renderIcon = () => {
     switch (icon) {
       case "trophy":
@@ -208,7 +174,7 @@ function AchievementCard({ icon, title }) {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="bg-[rgba(255,255,255,0.05)] border border-[#2e2e38] border-solid rounded-[12px] p-5 flex items-center gap-4 hover:border-blue-500/20 transition-all group shrink-0"
+      className={`bg-[rgba(255,255,255,0.05)] border border-[#2e2e38] border-solid rounded-[12px] p-5 flex items-center gap-4 hover:border-blue-500/20 transition-all group shrink-0 ${isRTL ? 'flex-row-reverse text-right' : 'flex-row text-left'}`}
     >
       <div className="bg-[rgba(57,94,213,0.1)] rounded-[9999px] size-[40px] flex items-center justify-center flex-shrink-0 group-hover:bg-[#3457DC] transition-all group-hover:text-white text-[#3457DC]">
         {renderIcon()}
@@ -221,6 +187,23 @@ function AchievementCard({ icon, title }) {
 }
 
 export default function TeamsResearches() {
+  const { language } = useLanguage();
+  const isRTL = language === "ar";
+
+  const text = {
+      badge: isRTL ? 'فرقنا' : 'TEAMS',
+      interestsTitle: isRTL ? 'اهتمامات البحث' : 'Research Interests',
+      publicationsTitle: isRTL ? 'منشورات مختارة' : 'Selected Publications',
+      projectsTitle: isRTL ? 'مشاريع مميزة' : 'Featured Projects',
+      achievementsTitle: isRTL ? 'الإنجازات والجوائز' : 'Achievements & Awards',
+      achievementsSubtitle: isRTL ? 'التكريمات والتقدير الذي حصلنا عليه' : "Honors and recognition we've received",
+      of: isRTL ? 'من' : 'of',
+      noPubs: isRTL ? 'لا توجد منشورات لهذا الفريق.' : 'No team publications found.',
+      noProjs: isRTL ? 'لا توجد مشاريع لهذا الفريق.' : 'No team projects found.',
+      defaultTeamName: isRTL ? 'فريق أبحاث علوم البيانات' : 'Data Science Research Team',
+      defaultTeamFocus: isRTL ? 'تطوير الأبحاث في الذكاء الاصطناعي والأمن السيبراني' : 'Advancing research in AI and Cybersecurity'
+  };
+
   const [currentPage, setCurrentPage] = useState(1);
   const [teams, setTeams] = useState([]);
   const [activeTeam, setActiveTeam] = useState(null);
@@ -263,14 +246,12 @@ export default function TeamsResearches() {
         try {
           const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : '';
           
-          // Fetch Team Publications
           const pubRes = await fetch(`${baseUrl}/api/publications?team=${activeTeam._id}`);
           if (pubRes.ok) {
             const pubData = await pubRes.json();
             setTeamPublications(pubData);
           }
 
-          // Fetch Team Projects
           const projRes = await fetch(`${baseUrl}/api/projects?team=${activeTeam._id}`);
           if (projRes.ok) {
             const projData = await projRes.json();
@@ -286,34 +267,16 @@ export default function TeamsResearches() {
 
   const totalPages = teams.length || 1;
 
-  // Fallback if no real teams exist yet
-  const dummyTeamMembers = [
-    {
-      name: "Prof. Ahmed Benali",
-      title: "Professor - Lab Director",
-      role: "Lead Researcher",
-      image: `https://ui-avatars.com/api/?background=3457DC&color=fff&name=Ahmed+Benali`,
-      showTwitter: true,
-    },
-    {
-      name: "Dr. Sara Mansouri",
-      title: "PhD Researcher",
-      role: "AI Research Scientist",
-      image: `https://ui-avatars.com/api/?background=3457DC&color=fff&name=Sara+Mansouri`,
-      showTwitter: true,
-    }
-  ];
-
   const getActiveTeamMembers = () => {
-    if (!activeTeam) return dummyTeamMembers;
+    if (!activeTeam) return [];
     
     const members = [];
     if (activeTeam.leader) {
       members.push({
-        name: activeTeam.leader.username || activeTeam.leader,
-        title: activeTeam.leader.role || "Team Leader",
-        role: "Leader",
-        image: `https://ui-avatars.com/api/?background=3457DC&color=fff&name=${encodeURIComponent(activeTeam.leader.username || activeTeam.leader)}`,
+        name: isRTL ? (activeTeam.leader.nameAr || activeTeam.leader.username) : activeTeam.leader.username,
+        title: isRTL ? (activeTeam.leader.roleAr || "قائد الفريق") : (activeTeam.leader.role || "Team Leader"),
+        role: isRTL ? "قائد" : "Leader",
+        image: `https://ui-avatars.com/api/?background=3457DC&color=fff&name=${encodeURIComponent(activeTeam.leader.username)}`,
         showTwitter: true
       });
     }
@@ -321,67 +284,62 @@ export default function TeamsResearches() {
     if (activeTeam.members) {
       activeTeam.members.forEach(m => {
         members.push({
-          name: m.username || m,
-          title: m.role || "Researcher",
-          role: "Member",
-          image: `https://ui-avatars.com/api/?background=3457DC&color=fff&name=${encodeURIComponent(m.username || m)}`,
+          name: isRTL ? (m.nameAr || m.username) : m.username,
+          title: isRTL ? (m.roleAr || "باحث") : (m.role || "Researcher"),
+          role: isRTL ? "عضو" : "Member",
+          image: `https://ui-avatars.com/api/?background=3457DC&color=fff&name=${encodeURIComponent(m.username)}`,
           showTwitter: false
         });
       });
     }
     
-    return members.length > 0 ? members : dummyTeamMembers;
+    return members;
   };
 
   const getActiveInterests = () => {
-    if (!activeTeam || !activeTeam.focus) return ["Machine Learning", "Network Security", "Cloud Computing"];
+    if (!activeTeam || !activeTeam.focus) return [];
     return activeTeam.focus.split(',').map(i => i.trim());
   };
 
   const achievements = [
-    { icon: "trophy", title: "1st Place - ICPC Regional 2024" },
-    { icon: "award", title: "Best Research Paper - IEEE Conference 2023" },
-    { icon: "book", title: "Research Grant from the Ministry of Higher Education" },
-    { icon: "trophy", title: "Best Project Award - Hackathon Algeria 2024" }
+    { icon: "trophy", title: isRTL ? "المركز الأول - ICPC الإقليمي 2024" : "1st Place - ICPC Regional 2024" },
+    { icon: "award", title: isRTL ? "أفضل ورقة بحثية - مؤتمر IEEE 2023" : "Best Research Paper - IEEE Conference 2023" },
+    { icon: "book", title: isRTL ? "منحة بحثية من وزارة التعليم العالي" : "Research Grant from the Ministry of Higher Education" },
+    { icon: "trophy", title: isRTL ? "جائزة أفضل مشروع - هكاثون الجزائر 2024" : "Best Project Award - Hackathon Algeria 2024" }
   ];
 
   return (
-    <div className="w-full min-h-screen bg-[#05030D] text-white font-poppins relative overflow-x-hidden">
-      {/* Header Padding */}
+    <div className={`w-full min-h-screen bg-[#05030D] text-white relative overflow-x-hidden ${isRTL ? 'font-tajawal' : 'font-poppins'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="h-20 w-full" />
 
-      {/* Main Content Sections */}
       <div className="flex flex-col items-center w-full">
-        {/* Full width Hero Section */}
         <div className="w-full py-20 px-8 relative overflow-hidden">
           <div className="absolute bg-[rgba(57,94,213,0.2)] blur-[60px] w-[400px] h-[400px] opacity-20 rounded-full top-[-100px] left-1/2 -translate-x-1/2" />
           
           <div className="container mx-auto relative z-10 text-center mb-20">
               <div className="flex flex-col items-center mb-8">
-                <span className="text-[#3457DC] text-[13px] uppercase font-bold tracking-[0.2em] mb-2">TEAMS</span>
+                <span className="text-[#3457DC] text-[13px] uppercase font-bold tracking-[0.2em] mb-2">{text.badge}</span>
                 <h1 className="font-gilroy font-extrabold text-[60px] md:text-[80px] leading-tight mb-4 bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(156.197deg, rgb(60, 97, 221) 0%, rgb(117, 146, 240) 100%)" }}>
-                  {activeTeam?.name || "Data Science Research Team"}
+                  {activeTeam?.name || text.defaultTeamName}
                 </h1>
              </div>
             <p className="font-normal text-[#7b829d] text-[20px] leading-[28px] max-w-2xl mx-auto">
-              {activeTeam?.focus ? `Advancing research in ${activeTeam.focus}` : "We are a research team specializing in Artificial Intelligence, Cybersecurity, and Data Analytics."} 
+              {activeTeam?.focus ? (isRTL ? `نطور الأبحاث في ${activeTeam.focus}` : `Advancing research in ${activeTeam.focus}`) : text.defaultTeamFocus} 
             </p>
           </div>
 
-          <div className="container mx-auto relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-32">
+          <div className="container mx-auto relative z-10 grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 mb-32">
             {getActiveTeamMembers().map((member, index) => (
-              <TeamMemberCard key={index} {...member} />
+              <TeamMemberCard key={index} {...member} isRTL={isRTL} />
             ))}
           </div>
         </div>
 
-        {/* Interests & Publications */}
         <div className="container mx-auto px-6 w-full space-y-32">
-          {/* Interests */}
           <section className="relative z-10">
             <div className="bg-[rgba(255,255,255,0.03)] border border-white/5 rounded-[24px] p-12">
               <h2 className="font-gilroy font-bold text-[36px] text-center mb-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-blue-300">
-                Research Interests
+                {text.interestsTitle}
               </h2>
               <div className="flex flex-wrap gap-3 justify-center">
                 {getActiveInterests().map((interest, index) => <TagBadge key={index} label={interest} />)}
@@ -389,10 +347,9 @@ export default function TeamsResearches() {
             </div>
           </section>
 
-          {/* Publications */}
           <section className="relative z-10">
             <h2 className="font-gilroy font-bold text-[36px] text-center mb-16 text-white">
-              Selected Publications
+              {text.publicationsTitle}
             </h2>
             <div className="space-y-6 max-w-[1100px] mx-auto">
               {teamPublications.length > 0 ? (
@@ -406,19 +363,19 @@ export default function TeamsResearches() {
                     description={pub.contribution}
                     tags={pub.tags}
                     link={pub.documentUrl ? (pub.documentUrl.startsWith('http') ? pub.documentUrl : `http://localhost:5000${pub.documentUrl}`) : '#'}
+                    isRTL={isRTL}
                   />
                 ))
               ) : (
-                <div className="text-center py-20 opacity-40">No team publications found.</div>
+                <div className="text-center py-20 opacity-40">{text.noPubs}</div>
               )}
             </div>
           </section>
 
-          {/* Projects */}
           <section className="relative z-10">
             <div className="bg-[rgba(255,255,255,0.03)] border border-white/5 rounded-[24px] p-12">
               <h2 className="font-gilroy font-bold text-[36px] text-center mb-12 text-white">
-                Featured Projects
+                {text.projectsTitle}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {teamProjects.length > 0 ? (
@@ -428,47 +385,46 @@ export default function TeamsResearches() {
                         title={project.title}
                         description={project.description}
                         hasDemo={!!project.imageUrl}
+                        hRTL={isRTL}
                     />
                   ))
                 ) : (
-                  <div className="col-span-full text-center py-10 opacity-40">No team projects found.</div>
+                  <div className="col-span-full text-center py-10 opacity-40">{text.noProjs}</div>
                 )}
               </div>
             </div>
           </section>
         </div>
 
-        {/* Bottom Section Integrated with Footer */}
         <div className="w-full bg-[#070710] py-32 mt-32 relative overflow-hidden">
           <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
           
           <div className="container mx-auto px-6 relative z-10">
             <div className="text-center mb-16">
-              <h2 className="text-white font-gilroy font-extrabold text-[48px] mb-4">Achievements & Awards</h2>
-              <p className="text-[#7b829d] text-[18px]">Honors and recognition we've received</p>
+              <h2 className="text-white font-gilroy font-extrabold text-[48px] mb-4">{text.achievementsTitle}</h2>
+              <p className="text-[#7b829d] text-[18px]">{text.achievementsSubtitle}</p>
             </div>
 
             <div className="max-w-[1100px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 mb-20">
               {achievements.map((achievement, index) => (
-                <AchievementCard key={index} {...achievement} />
+                <AchievementCard key={index} {...achievement} isRTL={isRTL} />
               ))}
             </div>
 
-            {/* Pagination Footer */}
-            <div className="max-w-[1240px] mx-auto flex items-center justify-between pt-8 border-t border-white/5">
+            <div className={`max-w-[1240px] mx-auto flex items-center justify-between pt-8 border-t border-white/5 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                 <button
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
                     className={`w-12 h-12 flex items-center justify-center rounded-full transition-all ${currentPage === 1 ? 'bg-white/5 opacity-30 cursor-not-allowed' : 'bg-[#3457DC] hover:scale-110 active:scale-95'}`}
                 >
-                    <ChevronLeft size={20} />
+                    {isRTL ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
                 </button>
 
-                <div className="flex items-center gap-4">
+                <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                     <div className="bg-[#1e1e24] border border-white/5 rounded-xl px-4 py-2 font-bold min-w-[50px] text-center">
                         {currentPage}
                     </div>
-                    <span className="text-[#a5a5b2] text-sm">of {totalPages}</span>
+                    <span className="text-[#a5a5b2] text-sm">{text.of} {totalPages}</span>
                 </div>
 
                 <button
@@ -476,12 +432,11 @@ export default function TeamsResearches() {
                     disabled={currentPage === totalPages}
                     className={`w-12 h-12 flex items-center justify-center rounded-full transition-all ${currentPage === totalPages ? 'bg-white/5 opacity-30 cursor-not-allowed' : 'bg-[#3457DC] hover:scale-110 active:scale-95'}`}
                 >
-                    <ChevronRight size={20} />
+                    {isRTL ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
                 </button>
             </div>
           </div>
           
-          {/* Visual spacer for footer slant */}
           <div className="h-20 w-full" />
         </div>
       </div>

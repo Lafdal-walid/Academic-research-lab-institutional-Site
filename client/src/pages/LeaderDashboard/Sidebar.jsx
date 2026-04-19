@@ -9,7 +9,7 @@ import iconManageContent from '@/assets/svg/LeaderDashboard/sidebar/web-design 1
 import iconTeamContact from '@/assets/svg/LeaderDashboard/sidebar/user-headset (2) 1.svg';
 import iconAdminTools from '@/assets/svg/LeaderDashboard/sidebar/settings 1.svg';
 
-const Sidebar = ({ isSidebarOpen = true }) => {
+const Sidebar = ({ isSidebarOpen = true, closeSidebar }) => {
   const { language } = useLanguage();
 
   const navItems = useMemo(
@@ -24,7 +24,7 @@ const Sidebar = ({ isSidebarOpen = true }) => {
     []
   );
 
-  return <SidebarCommon items={navItems} isSidebarOpen={isSidebarOpen} />;
+  return <SidebarCommon items={navItems} isSidebarOpen={isSidebarOpen} closeSidebar={closeSidebar} />;
 };
 
 export default React.memo(Sidebar);
