@@ -35,7 +35,7 @@ const generateStaticData = () => {
 
 const staticProjectsData = generateStaticData();
 
-const ProjectCatalog = () => {
+const ProjectCatalog = ({ setSelectedProject }) => {
     const { language } = useLanguage();
     const { user } = useAuth();
     const isRTL = language === "ar";
@@ -406,6 +406,7 @@ const ProjectCatalog = () => {
                         currentItems.map((project, index) => (
                             <motion.div
                                 key={`${project.title}-${index}`}
+                                onClick={() => setSelectedProject(project)}
                                 layout
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
