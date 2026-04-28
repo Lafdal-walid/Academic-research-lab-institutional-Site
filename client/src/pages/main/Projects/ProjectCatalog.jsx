@@ -207,7 +207,7 @@ const ProjectCatalog = () => {
 
     const text = {
         title: isRTL ? 'كتالوج المشاريع' : 'Project Catalog',
-        searchPlaceholder: isRTL ? "ابحث هنا..." : "Search e.g AI models",
+        searchPlaceholder: isRTL ? "ابحث مثلاً عن مخبر..." : "Search e.g Lab",
         sortByLabel: isRTL ? 'ترتيب حسب' : 'Sort By',
         categoriesLabel: isRTL ? 'الفرق البحثية' : 'Research Teams',
         filterStatus: isRTL ? 'حسب الحالة' : 'Filter by Status',

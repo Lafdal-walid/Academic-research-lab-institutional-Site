@@ -120,7 +120,7 @@ export default function NewsGallery() {
     };
 
     return (
-        <div className={`min-h-screen bg-[#05030D] text-white pt-32 pb-20 ${isRTL ? 'font-tajawal text-right' : 'font-poppins text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className={`w-full min-h-screen bg-[#05030D] text-white pt-32 pb-20 relative overflow-x-hidden ${isRTL ? 'font-tajawal text-right' : 'font-poppins text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
             <div className="container mx-auto px-6">
                 {/* Header Section */}
                 <div className="text-center mb-16 relative">
@@ -133,10 +133,10 @@ export default function NewsGallery() {
                         <span className="inline-block px-4 py-1 rounded-full bg-[#3457DC]/10 border border-[#3457DC]/20 text-[#3457DC] text-[12px] font-bold tracking-[0.2em] mb-6 uppercase">
                             {isRTL ? 'التحديثات والوسائط' : 'Updates & Media'}
                         </span>
-                        <h1 className="text-5xl md:text-7xl font-gilroy font-black mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/40">
+                        <h1 className="text-4xl md:text-7xl font-gilroy font-black mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/40 leading-tight">
                             {text.title}
                         </h1>
-                        <p className="text-[#80808a] text-xl max-w-2xl mx-auto leading-relaxed">
+                        <p className="text-[#80808a] text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
                             {text.subtitle}
                         </p>
                     </motion.div>
@@ -144,19 +144,19 @@ export default function NewsGallery() {
 
                 {/* Tab Switcher & Search & Filters */}
                 <div className="flex flex-col gap-8 mb-16 max-w-[1240px] mx-auto">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+                    <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-6">
                         {/* News/Gallery Toggle */}
-                        <div className="flex bg-white/[0.03] border border-white/[0.05] p-1.5 rounded-2xl relative z-10 shadow-[0_0_20px_rgba(0,0,0,0.5)]">
+                        <div className="flex bg-white/[0.03] border border-white/[0.05] p-1.5 rounded-2xl relative z-10 shadow-[0_0_20px_rgba(0,0,0,0.5)] w-full md:w-auto">
                             <button
                                 onClick={() => { setActiveTab('news'); setSelectedProject('All'); }}
-                                className={`flex items-center gap-3 px-8 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'news' ? 'bg-[#3457DC] text-white shadow-lg' : 'text-[#80808a] hover:text-white'}`}
+                                className={`flex items-center justify-center gap-2 md:gap-3 flex-1 md:flex-none px-4 md:px-8 py-3 rounded-xl text-xs md:text-sm font-bold transition-all duration-300 ${activeTab === 'news' ? 'bg-[#3457DC] text-white shadow-lg' : 'text-[#80808a] hover:text-white'}`}
                             >
                                 <Newspaper size={18} />
                                 {text.newsTab}
                             </button>
                             <button
                                 onClick={() => { setActiveTab('gallery'); setSelectedProject('All'); }}
-                                className={`flex items-center gap-3 px-8 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'gallery' ? 'bg-[#3457DC] text-white shadow-lg' : 'text-[#80808a] hover:text-white'}`}
+                                className={`flex items-center justify-center gap-2 md:gap-3 flex-1 md:flex-none px-4 md:px-8 py-3 rounded-xl text-xs md:text-sm font-bold transition-all duration-300 ${activeTab === 'gallery' ? 'bg-[#3457DC] text-white shadow-lg' : 'text-[#80808a] hover:text-white'}`}
                             >
                                 <ImageIcon size={18} />
                                 {text.galleryTab}

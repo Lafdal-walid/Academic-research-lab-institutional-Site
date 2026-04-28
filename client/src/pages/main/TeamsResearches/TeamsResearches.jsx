@@ -22,15 +22,15 @@ const ResearchPaperCard = ({ id, title, authors, year, journal, description, tag
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className={`bg-white/[0.02] border border-white/[0.05] rounded-[24px] p-8 flex flex-col gap-5 group hover:border-[#3457DC]/40 transition-all duration-300 relative overflow-hidden ${isRTL ? 'text-right' : 'text-left'}`}
+            className={`bg-white/[0.02] border border-white/[0.05] rounded-[24px] p-5 md:p-8 flex flex-col gap-5 group hover:border-[#3457DC]/40 transition-all duration-300 relative overflow-hidden ${isRTL ? 'text-right' : 'text-left'}`}
         >
             <div className="absolute top-0 left-0 w-1 h-full bg-[#3457DC]/0 group-hover:bg-[#3457DC] transition-all" />
             
-            <div className={`flex justify-between items-start gap-4 relative z-10 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                <h3 className="text-xl font-bold text-white/90 font-gilroy leading-tight group-hover:text-white transition-colors">
+            <div className={`flex flex-col sm:flex-row justify-between items-start gap-4 relative z-10 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+                <h3 className="text-lg md:text-xl font-bold text-white/90 font-gilroy leading-tight group-hover:text-white transition-colors flex-1 break-words">
                     {title}
                 </h3>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                     <a href={link} target="_blank" rel="noopener noreferrer" onClick={handleView} className="text-white/20 hover:text-[#3457DC] transition-colors p-2 rounded-xl hover:bg-[#3457DC]/5" title="View Publication">
                         <Eye size={18} />
                     </a>
@@ -40,23 +40,23 @@ const ResearchPaperCard = ({ id, title, authors, year, journal, description, tag
                 </div>
             </div>
 
-            <div className={`flex flex-wrap items-center gap-x-6 gap-y-3 relative z-10 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                <div className="flex items-center gap-2 text-white/40 text-sm">
-                    <UsersIcon size={16} className="text-[#3457DC]/60" />
-                    <span className="font-medium">{authors}</span>
+            <div className={`flex flex-wrap items-center gap-x-4 md:gap-x-6 gap-y-3 relative z-10 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                <div className="flex items-center gap-2 text-white/40 text-xs md:text-sm">
+                    <UsersIcon size={14} className="text-[#3457DC]/60 md:w-4 md:h-4" />
+                    <span className="font-medium truncate max-w-[150px] md:max-w-none">{authors}</span>
                 </div>
-                <div className="flex items-center gap-2 text-white/40 text-sm">
-                    <CalendarIcon size={14} className="text-[#3457DC]/60" />
+                <div className="flex items-center gap-2 text-white/40 text-xs md:text-sm">
+                    <CalendarIcon size={12} className="text-[#3457DC]/60 md:w-[14px] md:h-[14px]" />
                     <span className="font-medium">{year}</span>
                 </div>
-                <div className="flex items-center gap-2 text-white/40 text-sm">
-                    <Eye size={14} className="text-[#3457DC]/60" />
+                <div className="flex items-center gap-2 text-white/40 text-xs md:text-sm">
+                    <Eye size={12} className="text-[#3457DC]/60 md:w-[14px] md:h-[14px]" />
                     <span className="font-medium">{views || 0}</span>
                 </div>
                 {projectName && (
-                    <div className="flex items-center gap-2 text-white/40 text-sm">
-                        <Briefcase size={14} className="text-[#3457DC]/60" />
-                        <span className="font-medium">{projectName}</span>
+                    <div className="flex items-center gap-2 text-white/40 text-xs md:text-sm">
+                        <Briefcase size={12} className="text-[#3457DC]/60 md:w-[14px] md:h-[14px]" />
+                        <span className="font-medium truncate max-w-[150px] md:max-w-none">{projectName}</span>
                     </div>
                 )}
             </div>
@@ -152,17 +152,17 @@ export default function TeamsResearches() {
         <div className={`w-full min-h-screen bg-[#05030D] text-white relative overflow-x-hidden ${isRTL ? 'font-tajawal' : 'font-poppins'}`} dir={isRTL ? 'rtl' : 'ltr'}>
             <div className="h-20 w-full" />
 
-            <div className="container mx-auto px-6 pt-16 pb-24 text-center relative z-10">
+            <div className="container mx-auto px-6 pt-24 md:pt-32 pb-16 md:pb-24 text-center relative z-10">
                 <motion.div 
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="flex flex-col items-center"
                 >
-                    <span className="text-[#3457DC] text-[13px] uppercase font-bold tracking-[0.2em] mb-0">{text.badge}</span>
-                    <h1 className="font-gilroy font-extrabold text-[64px] md:text-[96px] leading-tight mb-4">
+                    <span className="text-[#3457DC] text-[11px] md:text-[13px] uppercase font-bold tracking-[0.2em] mb-4">{text.badge}</span>
+                    <h1 className="font-gilroy font-extrabold text-[42px] md:text-[72px] lg:text-[96px] leading-[1.1] mb-6">
                         {text.title}
                     </h1>
-                    <p className="text-white/60 text-lg max-w-2xl mx-auto">{text.subtitle}</p>
+                    <p className="text-white/60 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">{text.subtitle}</p>
                 </motion.div>
             </div>
 
@@ -200,9 +200,9 @@ export default function TeamsResearches() {
                                                 <h2 className="text-white font-gilroy font-extrabold text-4xl md:text-5xl tracking-tight">{team.name}</h2>
                                             </div>
                                             <div className="flex flex-col gap-3">
-                                                <div className="bg-white/[0.03] border border-white/[0.05] rounded-2xl p-4 inline-flex flex-col gap-1 max-w-fit">
+                                                <div className="bg-white/[0.03] border border-white/[0.05] rounded-2xl p-4 inline-flex flex-col gap-1 max-w-full">
                                                     <span className="text-[10px] uppercase tracking-[0.2em] text-[#3457DC] font-black">{text.leader}</span>
-                                                    <span className="text-white text-[16px] font-medium">{team.leader?.email || team.leader?.username || team.leader || 'N/A'}</span>
+                                                    <span className="text-white text-[15px] md:text-[16px] font-medium break-all">{team.leader?.email || team.leader?.username || team.leader || 'N/A'}</span>
                                                 </div>
                                                 <p className="text-[#80808a] text-[15px] flex items-center gap-2 px-4">
                                                     <UsersIcon size={16} className="text-[#3457DC]/80" />
@@ -225,29 +225,29 @@ export default function TeamsResearches() {
                                                         
                                                         <div className="flex flex-col gap-10">
                                                             <div className="flex flex-col gap-4">
-                                                                <h4 className="text-2xl md:text-3xl font-bold text-white group-hover:text-[#3457DC] transition-colors">{project.title}</h4>
+                                                                <h4 className="text-xl md:text-3xl font-bold text-white group-hover:text-[#3457DC] transition-colors break-words">{project.title}</h4>
                                                                 <div className="h-1 w-20 bg-gradient-to-r from-[#3457DC] to-transparent rounded-full" />
                                                             </div>
 
-                                                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 bg-white/[0.02] p-6 rounded-2xl border border-white/[0.03]">
-                                                                <div className="flex flex-col gap-2">
-                                                                    <span className="text-[10px] uppercase tracking-widest text-[#80808a] font-extrabold">{text.status}</span>
+                                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 bg-white/[0.02] p-5 md:p-6 rounded-2xl border border-white/[0.03]">
+                                                                <div className="flex flex-col gap-1.5">
+                                                                    <span className="text-[9px] md:text-[10px] uppercase tracking-widest text-[#80808a] font-extrabold">{text.status}</span>
                                                                     <div className="flex items-center gap-2">
                                                                         <div className={`w-2 h-2 rounded-full ${project.status === 'Ongoing' ? 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]' : project.status === 'Completed' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]'}`} />
-                                                                        <span className="text-sm font-bold text-white/90">{project.status}</span>
+                                                                        <span className="text-xs md:text-sm font-bold text-white/90">{project.status}</span>
                                                                     </div>
                                                                 </div>
-                                                                <div className="flex flex-col gap-2">
-                                                                    <span className="text-[10px] uppercase tracking-widest text-[#80808a] font-extrabold">{text.teamMembers}</span>
-                                                                    <span className="text-sm text-white/90 font-bold">{project.members?.length || 0}</span>
+                                                                <div className="flex flex-col gap-1.5">
+                                                                    <span className="text-[9px] md:text-[10px] uppercase tracking-widest text-[#80808a] font-extrabold">{text.teamMembers}</span>
+                                                                    <span className="text-xs md:text-sm text-white/90 font-bold">{project.members?.length || 0}</span>
                                                                 </div>
-                                                                <div className="flex flex-col gap-2">
-                                                                    <span className="text-[10px] uppercase tracking-widest text-[#80808a] font-extrabold">{text.startDate}</span>
-                                                                    <span className="text-sm text-white/90 font-bold">{project.startDate ? new Date(project.startDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short' }) : 'N/A'}</span>
+                                                                <div className="flex flex-col gap-1.5">
+                                                                    <span className="text-[9px] md:text-[10px] uppercase tracking-widest text-[#80808a] font-extrabold">{text.startDate}</span>
+                                                                    <span className="text-xs md:text-sm text-white/90 font-bold">{project.startDate ? new Date(project.startDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short' }) : 'N/A'}</span>
                                                                 </div>
-                                                                <div className="flex flex-col gap-2">
-                                                                    <span className="text-[10px] uppercase tracking-widest text-[#80808a] font-extrabold">{text.endDate}</span>
-                                                                    <span className="text-sm text-white/90 font-bold">{project.endDate ? new Date(project.endDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short' }) : text.ongoing}</span>
+                                                                <div className="flex flex-col gap-1.5">
+                                                                    <span className="text-[9px] md:text-[10px] uppercase tracking-widest text-[#80808a] font-extrabold">{text.endDate}</span>
+                                                                    <span className="text-xs md:text-sm text-white/90 font-bold">{project.endDate ? new Date(project.endDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short' }) : text.ongoing}</span>
                                                                 </div>
                                                             </div>
 
@@ -269,11 +269,11 @@ export default function TeamsResearches() {
                                                                     <span className="text-[10px] uppercase tracking-widest text-[#80808a] font-extrabold">{text.researchMembers} ({project.members?.length || 0})</span>
                                                                     <div className="flex flex-wrap gap-3">
                                                                         {project.members?.map((member, mIdx) => (
-                                                                            <div key={mIdx} className="bg-white/[0.02] border border-white/[0.03] px-5 py-3 rounded-2xl flex items-center gap-3 hover:bg-white/[0.04] transition-colors group/member">
-                                                                                <div className="w-8 h-8 rounded-full bg-[#3457DC]/10 flex items-center justify-center text-[#3457DC] text-[10px] font-bold border border-[#3457DC]/20">
+                                                                            <div key={mIdx} className="bg-white/[0.02] border border-white/[0.03] px-4 md:px-5 py-2.5 md:py-3 rounded-2xl flex items-center gap-3 hover:bg-white/[0.04] transition-colors group/member max-w-full overflow-hidden">
+                                                                                <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#3457DC]/10 flex items-center justify-center text-[#3457DC] text-[9px] md:text-[10px] font-bold border border-[#3457DC]/20 shrink-0">
                                                                                     {member.username?.[0]?.toUpperCase() || member.email?.[0]?.toUpperCase() || 'U'}
                                                                                 </div>
-                                                                                <span className="text-xs text-white/50 group-hover/member:text-white/80 transition-colors">{member.email || member.username || member}</span>
+                                                                                <span className="text-[11px] md:text-xs text-white/50 group-hover/member:text-white/80 transition-colors break-all line-clamp-1">{member.email || member.username || member}</span>
                                                                             </div>
                                                                         ))}
                                                                     </div>

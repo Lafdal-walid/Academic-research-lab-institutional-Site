@@ -79,16 +79,16 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-14 lg:gap-[0.9em] mb-[45px] items-start">
 
           {/* Left Column: Brand & Logo */}
-          <div className="lg:col-span-5 flex flex-col gap-[18px]">
+          <div className="lg:col-span-5 flex flex-col items-center lg:items-start gap-[18px] text-center lg:text-left">
             <div className="flex items-center gap-2">
               <Link to="/">
                 <img src="/Saad Dahlab white.png" alt={language === 'ar' ? 'شعار معهد أبحاث سعد دحلب' : "Saad Dahlab Research Institute"} className="h-[42px] md:h-[68px] w-auto object-contain" />
               </Link>
             </div>
-            <p className="text-white text-[13px] max-w-[288px] leading-relaxed font-normal">
+            <p className="text-white text-[13px] max-w-[288px] leading-relaxed font-normal mx-auto lg:mx-0">
               {text.brand_description}
             </p>
-            <div className="flex gap-[21px] items-center mt-2">
+            <div className="flex gap-[21px] items-center mt-2 justify-center lg:justify-start">
               {[
                 { Icon: RiDiscordFill, key: 'discord' },
                 { Icon: FaTiktok, key: 'tiktok' },
@@ -108,16 +108,16 @@ const Footer = () => {
           </div>
 
           {/* Middle Column: Quick Links */}
-          <div className={`lg:col-span-3 lg:ml-[4.2vw] lg:-mt-[2vh] ${language === 'ar' ? 'text-right' : ''}`}>
+          <div className={`lg:col-span-3 lg:ml-[4.2vw] lg:-mt-[2vh] flex flex-col items-center ${language === 'ar' ? 'lg:items-end text-center lg:text-right' : 'lg:items-start text-center lg:text-left'}`}>
             <div className="relative mb-[28px]">
-              <svg className={`absolute -top-[21px] ${language === 'ar' ? '-right-10' : '-left-10'}`} width="7" height="7" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg className={`absolute -top-[21px] hidden lg:block ${language === 'ar' ? '-right-10' : '-left-10'}`} width="7" height="7" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M8 0V8H0L8 0Z" fill="white" />
               </svg>
               <h4 className="font-extrabold text-white text-[14.5px] tracking-tight pt-[7px]">
                 {text.quick_links}
               </h4>
             </div>
-            <ul className="flex flex-col gap-[12px] text-[13px] font-normal text-white">
+            <ul className={`flex flex-col gap-[12px] text-[13px] font-normal text-white items-center ${language === 'ar' ? 'lg:items-end' : 'lg:items-start'}`}>
               <li><Link to="/projects" className="hover:text-[#3457DC] transition-colors">{text.projects}</Link></li>
               <li><Link to="/publications" className="hover:text-[#3457DC] transition-colors">{text.publications}</Link></li>
               <li><Link to="/teams-researches" className="hover:text-[#3457DC] transition-colors">{text.teams}</Link></li>
@@ -126,21 +126,21 @@ const Footer = () => {
           </div>
 
           {/* Right Column: Support */}
-          <div className={`lg:col-span-3 lg:ml-[6vw] lg:-mt-[2vh] ${language === 'ar' ? 'text-right' : ''}`}>
+          <div className={`lg:col-span-3 lg:ml-[6vw] lg:-mt-[2vh] flex flex-col items-center ${language === 'ar' ? 'lg:items-end text-center lg:text-right' : 'lg:items-start text-center lg:text-left'}`}>
             <div className="relative mb-[28px]">
-              <svg className={`absolute -top-[21px] ${language === 'ar' ? '-right-10' : '-left-10'}`} width="7" height="7" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg className={`absolute -top-[21px] hidden lg:block ${language === 'ar' ? '-right-10' : '-left-10'}`} width="7" height="7" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M8 0V8H0L8 0Z" fill="white" />
               </svg>
               <h4 className="font-extrabold text-white text-[14.5px] tracking-tight pt-[7px]">
                 {text.support}
               </h4>
             </div>
-            <ul className="flex flex-col gap-[12px] text-[13px] font-normal text-white">
+            <ul className={`flex flex-col gap-[12px] text-[13px] font-normal text-white items-center ${language === 'ar' ? 'lg:items-end' : 'lg:items-start'}`}>
               <li><Link to="/support" className="hover:text-[#3457DC] transition-colors">{text.contact}</Link></li>
               <li><Link to="/support" className="hover:text-[#3457DC] transition-colors">{text.faq}</Link></li>
               <li><Link to="/support" className="hover:text-[#3457DC] transition-colors">{text.suggestions}</Link></li>
               <li>
-                <a href="mailto:oualidlafdaI50@gmail.com" className={`hover:text-[#3457DC] transition-colors flex items-center gap-[4px] text-[13px] ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+                <a href="mailto:oualidlafdaI50@gmail.com" className={`hover:text-[#3457DC] transition-colors flex items-center gap-[4px] text-[13px] ${language === 'ar' ? 'flex-row-reverse lg:flex-row-reverse' : ''}`}>
                   oualidlafdaI50@gmail.com <FiArrowUpRight size={13} />
                 </a>
               </li>
