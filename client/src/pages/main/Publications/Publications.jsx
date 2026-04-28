@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ChevronDown, ChevronLeft, ChevronRight, Link as LinkIcon, Users as UsersIcon, Calendar as CalendarIcon, ExternalLink } from 'lucide-react';
+import { Search, ChevronDown, ChevronLeft, ChevronRight, Link as LinkIcon, Users as UsersIcon, Calendar as CalendarIcon, ExternalLink, Quote, Copy, Check, Eye, Download } from 'lucide-react';
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { useLanguage } from "@/contexts/LanguageContext";
+import API_BASE_URL from '@/config';
 
 const svgPathsTeams = {
     p11b7c570: "M8.25 10.0833C10.275 10.0833 11.9167 8.44171 11.9167 6.41667C11.9167 4.39162 10.275 2.75 8.25 2.75C6.22496 2.75 4.58333 4.39162 4.58333 6.41667C4.58333 8.44171 6.22496 10.0833 8.25 10.0833Z",
@@ -39,7 +40,27 @@ const ResearchTeamCard = ({ title, leader, members, membersCount, gradient, isRT
     </div>
 );
 
-const ResearchPaperCard = ({ title, authors, year, journal, description, tags, link, isRTL }) => {
+const ResearchPaperCard = ({ title, authors, year, journal, description, tags, link, isRTL, activeFilds }) => {
+    const [isCiteOpen, setIsCiteOpen] = useState(false);
+    const [copied, setCopied] = useState(null);
+
+    const generateAPA = () => {
+        const authorList = authors;
+        return `${authorList} (${year}). ${title}. ${journal || 'Institutional Research Lab'}.`;
+    };
+
+    const generateBibTeX = () => {
+        const firstAuthor = authors.split(',')[0].split(' ').pop().toLowerCase();
+        const key = `${firstAuthor}${year}${title.split(' ')[0].toLowerCase()}`;
+        return `@article{${key},\n  author = {${authors.replace(/, /g, ' and ')}},\n  title = {${title}},\n  journal = {${journal || 'Institutional Research Lab'}},\n  year = {${year}}\n}`;
+    };
+
+    const handleCopy = (text, type) => {
+        navigator.clipboard.writeText(text);
+        setCopied(type);
+        setTimeout(() => setCopied(null), 2000);
+    };
+
     return (
         <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -51,10 +72,18 @@ const ResearchPaperCard = ({ title, authors, year, journal, description, tags, l
                 <h3 className="text-xl font-bold text-white font-gilroy leading-tight group-hover:text-[#3457DC] transition-colors">
                     {title}
                 </h3>
-                <a href={link} target="_blank" rel="noopener noreferrer" className="text-white/20 hover:text-white transition-colors p-1">
-                    <ExternalLink size={20} />
-                </a>
+                <div className="flex items-center gap-2">
+
+                    <a href={link} target="_blank" rel="noopener noreferrer" className="text-white/20 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/5" title="View Publication">
+                        <Eye size={18} />
+                    </a>
+                    <a href={link} download className="text-white/20 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/5" title="Download Publication">
+                        <Download size={18} />
+                    </a>
+                </div>
             </div>
+
+
 
             <div className={`flex flex-wrap items-center gap-x-6 gap-y-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                 <div className="flex items-center gap-2 text-white/40 text-sm">
@@ -68,18 +97,23 @@ const ResearchPaperCard = ({ title, authors, year, journal, description, tags, l
             </div>
 
             {journal && (
-                <div className="text-sm font-medium text-blue-500/80 uppercase tracking-wide">
+                <div className={`text-sm font-medium text-blue-500/80 uppercase tracking-wide ${isRTL ? 'text-right' : 'text-left'}`}>
                     {journal}
                 </div>
             )}
 
             {description && (
-                <p className="text-white/60 text-sm leading-relaxed line-clamp-3">
+                <p className={`text-white/60 text-sm leading-relaxed line-clamp-3 ${isRTL ? 'text-right' : 'text-left'}`}>
                     {description}
                 </p>
             )}
 
             <div className={`flex flex-wrap gap-2 mt-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                {activeFilds && activeFilds.map((field, idx) => (
+                    <span key={idx} className="bg-[#3457DC] px-3 py-1 rounded-full text-white text-[11px] font-semibold uppercase tracking-wider">
+                        {field}
+                    </span>
+                ))}
                 {tags && tags.map((tag, idx) => (
                     <span key={idx} className="bg-[#3457DC]/10 px-3 py-1 rounded-full text-[#3457DC] text-[11px] font-semibold uppercase tracking-wider">
                         {tag}
@@ -122,6 +156,14 @@ const STATIC_PUBLICATIONS = [
         publisher: "Robotics and Autonomous Systems",
         tags: ["Robotics", "Autonomous Systems", "Transformers"],
         contribution: "Developed a transformer-based spatial encoder that predicts obstacle trajectories with sub-centimeter precision."
+    },
+    {
+        title: "Deep Learning, Machine Learning, AI Test",
+        authors: ["oualidlafdal50@gmail.com", "walidbusiness50@gmail.com", "walidbusiness10@gmail.com", "wwalidlaf@gmail.com"],
+        year: "2026",
+        publisher: "Institutional Lab",
+        tags: ["Deep Learning", "Machine Learning", "AI Test"],
+        contribution: "test lorem testtest lorem test"
     }
 ];
 
@@ -139,6 +181,7 @@ export default function Publications() {
         categoryLabel: isRTL ? 'الفئة' : 'Categorie',
         all: isRTL ? 'الكل' : 'All',
         requestResearch: isRTL ? 'طلب إضافة بحث؟' : 'Request a Research?',
+        tagLabel: isRTL ? 'الوسوم' : 'Tags',
         loading: isRTL ? 'جاري تحميل الأوراق البحثية...' : 'Loading research papers...',
         noPublications: isRTL ? 'لم يتم العثور على منشورات.' : 'No publications found.',
         of: isRTL ? 'من' : 'of',
@@ -150,12 +193,13 @@ export default function Publications() {
     const [searchTerm, setSearchTerm] = useState('');
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [selectedSort, setSelectedSort] = useState(text.sortByRecent);
-    const [selectedCategory, setSelectedCategory] = useState(text.categoryLabel);
+    const [selectedCategory, setSelectedCategory] = useState(text.all);
+    const [selectedTag, setSelectedTag] = useState(text.all);
     const [publications, setPublications] = useState(STATIC_PUBLICATIONS);
     const [teams, setTeams] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
-    const totalPages = 1;
+    const totalPages = Math.ceil(publications.length / 10) || 1;
 
     const dropdownRef = useRef(null);
 
@@ -165,7 +209,7 @@ export default function Publications() {
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : '';
+                const baseUrl = API_BASE_URL;
                 
                 const pubRes = await fetch(`${baseUrl}/api/publications`);
                 if (pubRes.ok) {
@@ -198,11 +242,14 @@ export default function Publications() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Update internal state when language changes
     useEffect(() => {
         setSelectedSort(isRTL ? 'الأحدث' : 'sort by recent');
-        setSelectedCategory(isRTL ? 'الفئة' : 'Categorie');
+        setSelectedCategory(isRTL ? 'الكل' : 'All');
+        setSelectedTag(isRTL ? 'الكل' : 'All');
     }, [language, isRTL]);
+
+    const allFields = [...new Set(teams.flatMap(t => t.activeFilds || []))];
+    const allTags = [...new Set(publications.flatMap(p => p.tags || []))];
 
     const filteredPublications = publications
         .filter(pub => {
@@ -211,10 +258,12 @@ export default function Publications() {
                 (pub.tags && pub.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
             
             const categoryMatch = selectedCategory === 'Categorie' || selectedCategory === 'All' || selectedCategory === 'الفئة' || selectedCategory === 'الكل' ||
-                (pub.field && pub.field.toLowerCase() === selectedCategory.toLowerCase()) ||
-                (pub.tags && pub.tags.some(tag => tag.toLowerCase() === selectedCategory.toLowerCase()));
+                (pub.activeFilds && Array.isArray(pub.activeFilds) ? pub.activeFilds.some(f => f.toLowerCase() === selectedCategory.toLowerCase()) : (pub.field && pub.field.toLowerCase() === selectedCategory.toLowerCase()));
             
-            return matchesSearch && categoryMatch;
+            const tagMatch = selectedTag === 'Tags' || selectedTag === 'All' || selectedTag === 'الوسوم' || selectedTag === 'الكل' ||
+                (pub.tags && pub.tags.some(tag => tag.toLowerCase() === selectedTag.toLowerCase()));
+            
+            return matchesSearch && categoryMatch && tagMatch;
         })
         .sort((a, b) => {
             if (selectedSort === 'sort by recent' || selectedSort === 'الأحدث') {
@@ -305,7 +354,7 @@ export default function Publications() {
                                         exit={{ opacity: 0, y: 10 }}
                                         className="absolute top-full left-0 right-0 mt-2 bg-[#1e1e24] border border-white/10 rounded-xl p-2 z-50 shadow-2xl"
                                     >
-                                        {[text.all, 'AI & Vision', 'Networks', 'Embedded Systems'].map(opt => (
+                                        {[text.all, ...allFields].map(opt => (
                                             <button
                                                 key={opt}
                                                 onClick={() => { setSelectedCategory(opt); setActiveDropdown(null); }}
@@ -319,9 +368,35 @@ export default function Publications() {
                             </AnimatePresence>
                         </div>
 
-                        <button className="bg-[#1e1e24] flex items-center justify-center px-8 py-3 rounded-2xl w-full border border-white/5 hover:bg-[#25252d] transition-all whitespace-nowrap">
-                            <span className="text-[#a5a5b2] font-medium text-[14px]">{text.requestResearch}</span>
-                        </button>
+                        <div className="relative w-full">
+                            <button
+                                onClick={() => setActiveDropdown(activeDropdown === 'tags' ? null : 'tags')}
+                                className="bg-[#1e1e24] flex items-center justify-between px-6 py-3 rounded-2xl w-full border border-white/5 hover:bg-[#25252d] transition-all"
+                            >
+                                <span className="text-[#a5a5b2] text-[14px]">{selectedTag === text.all ? text.tagLabel : selectedTag}</span>
+                                <ChevronDown className={`text-[#3457DC] transition-transform duration-300 ${activeDropdown === 'tags' ? 'rotate-180' : ''}`} size={20} />
+                            </button>
+                            <AnimatePresence>
+                                {activeDropdown === 'tags' && (
+                                    <motion.div 
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 10 }}
+                                        className="absolute top-full left-0 right-0 mt-2 bg-[#1e1e24] border border-white/10 rounded-xl p-2 z-50 shadow-2xl max-h-[300px] overflow-y-auto"
+                                    >
+                                        {[text.all, ...allTags].map(opt => (
+                                            <button
+                                                key={opt}
+                                                onClick={() => { setSelectedTag(opt); setActiveDropdown(null); }}
+                                                className={`w-full text-left px-4 py-2 rounded-lg text-sm transition-colors ${selectedTag === opt ? 'bg-[#3457DC] text-white' : 'text-[#a5a5b2] hover:bg-white/5'}`}
+                                            >
+                                                {opt}
+                                            </button>
+                                        ))}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -338,11 +413,12 @@ export default function Publications() {
                                 key={pub._id || idx} 
                                 title={pub.title}
                                 authors={Array.isArray(pub.authors) ? pub.authors.join(', ') : pub.authors}
-                                year={pub.year}
-                                journal={pub.publisher}
-                                description={pub.contribution}
+                                year={pub.publishedDate ? new Date(pub.publishedDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : (pub.year || '2024')}
+                                journal={pub.team?.name || pub.publisher}
+                                description={pub.description || pub.contribution || pub.abstract}
                                 tags={pub.tags}
-                                link={pub.documentUrl ? (pub.documentUrl.startsWith('http') ? pub.documentUrl : `http://localhost:5000${pub.documentUrl}`) : '#'}
+                                activeFilds={pub.activeFilds}
+                                link={pub.documentUrl ? (pub.documentUrl.startsWith('http') ? pub.documentUrl : `${API_BASE_URL}${pub.documentUrl}`) : '#'}
                                 isRTL={isRTL}
                             />
                         ))

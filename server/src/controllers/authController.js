@@ -232,6 +232,7 @@ exports.googleLogin = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
+    console.log(`Login attempt for: ${req.body?.email}`);
     try {
         const { email, password } = req.body;
 
@@ -256,7 +257,7 @@ exports.login = async (req, res) => {
 
 exports.getProfile = async (req, res) => {
     try {
-        const user = await User.findById(req.user.id).select('-password');
+        const user = await User.findById(req.user.id).select('-password').populate('team');
         if (user) {
             res.json(user);
         } else {
@@ -348,7 +349,23 @@ exports.updateUser = async (req, res) => {
 
         if (role) user.role = role;
         if (degree) user.degree = degree;
-        if (req.body.team) user.team = req.body.team;
+        
+        if (req.body.team !== undefined) {
+            const oldTeamId = user.team;
+            const newTeamId = req.body.team;
+
+            if (oldTeamId && oldTeamId.toString() !== newTeamId) {
+                // Remove from old team
+                await Team.findByIdAndUpdate(oldTeamId, { $pull: { members: user._id } });
+            }
+
+            if (newTeamId) {
+                // Add to new team
+                await Team.findByIdAndUpdate(newTeamId, { $addToSet: { members: user._id } });
+            }
+            
+            user.team = newTeamId || null;
+        }
 
         const updatedUser = await user.save();
         const populatedUser = await User.findById(updatedUser._id).populate('team');
@@ -383,7 +400,7 @@ exports.getDashboardStats = async (req, res) => {
 
 exports.getMemberSelection = async (req, res) => {
     try {
-        const users = await User.find({}).select('username email');
+        const users = await User.find({}).select('username email team');
         res.json(users);
     } catch (error) {
         res.status(500).json({ message: error.message });

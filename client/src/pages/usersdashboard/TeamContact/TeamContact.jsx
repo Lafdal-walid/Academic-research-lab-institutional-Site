@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import NewChatModal from './NewChatModal';
+import API_BASE_URL from '@/config';
 
 const svgPaths = {
   searchNormal: "M9.58333 17.5C13.9556 17.5 17.5 13.9556 17.5 9.58333C17.5 5.21108 13.9556 1.66667 9.58333 1.66667C5.21108 1.66667 1.66667 5.21108 1.66667 9.58333C1.66667 13.9556 5.21108 17.5 9.58333 17.5Z",
@@ -82,7 +83,7 @@ const TeamContact = () => {
     const fetchChats = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/messages/list', {
+            const res = await fetch(`${API_BASE_URL}/api/messages/list`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -101,7 +102,7 @@ const TeamContact = () => {
         setIsLoadingMsgs(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/messages/conversation/${otherId}`, {
+            const res = await fetch(`${API_BASE_URL}/api/messages/conversation/${otherId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -151,7 +152,7 @@ const TeamContact = () => {
             formData.append('type', 'text');
         }
 
-        const res = await fetch('http://localhost:5000/api/messages/send', {
+        const res = await fetch(`${API_BASE_URL}/api/messages/send`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` },
             body: formData
@@ -187,7 +188,7 @@ const TeamContact = () => {
             formData.append('fileSize', (file.size / 1024 / 1024).toFixed(2) + ' mo');
         }
 
-        const res = await fetch('http://localhost:5000/api/messages/send', {
+        const res = await fetch(`${API_BASE_URL}/api/messages/send`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` },
             body: formData

@@ -4,13 +4,7 @@ import PauseIcon from '@/assets/svg/userDashboard/Progress/pause_1.svg';
 import ComputerIcon from '@/assets/svg/userDashboard/Progress/calendar-clock_(1)_2.svg';
 import LockIcon from '@/assets/svg/userDashboard/Progress/lock_3.svg';
 const RoadmapSection = ({ project }) => {
-  if (!project) {
-    return (
-      <div style={{ marginTop: '5vh', padding: '3vh', textAlign: 'center', color: '#a5a5b2', border: '1px solid #1e1d22', borderRadius: '1vw' }}>
-        Select a project to view its roadmap.
-      </div>
-    );
-  }
+  if (!project) return null;
 
   // Sort milestones by date assuming date is chronological, but they are stored as strings or dates in schema.
   const milestones = project.milestones || [];

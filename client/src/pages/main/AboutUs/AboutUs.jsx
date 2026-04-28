@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Users, BookOpen, Cpu, Trophy, Mail, MapPin, ChevronRight, ChevronLeft, ArrowUpRight, Rocket, Eye, Globe } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import API_BASE_URL from '@/config';
 
 const FadeIn = ({ children, delay = 0, direction = 'up' }) => (
   <motion.div
@@ -55,11 +56,10 @@ export default function AboutUs() {
   useEffect(() => {
     const fetchTeams = async () => {
       try {
-        const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : '';
+        const baseUrl = API_BASE_URL;
         const res = await fetch(`${baseUrl}/api/teams`);
         if (res.ok) {
           const teamsData = await res.json();
-          // Map teams to timeline entries
           const teamMilestones = teamsData.map(team => ({
             year: team.createdAt ? new Date(team.createdAt).getFullYear().toString() : "2024",
             title: isRTL ? `تأسيس فريق ${team.name}` : `${team.name} Team Founded`,
@@ -69,7 +69,6 @@ export default function AboutUs() {
             isDynamic: true
           }));
 
-          // Merge and sort by year
           const merged = [...staticTimeline, ...teamMilestones].sort((a, b) => parseInt(a.year) - parseInt(b.year));
           setDynamicTimeline(merged);
         } else {
@@ -121,11 +120,8 @@ export default function AboutUs() {
 
   return (
     <div className={`w-full bg-[#05030D] text-white selection:bg-blue-500/30 overflow-x-hidden pt-20 ${isRTL ? 'font-tajawal' : 'font-poppins'}`} dir={isRTL ? "rtl" : "ltr"}>
-
-      {/* 1. HERO SECTION */}
       <section className="relative w-full py-32 md:py-48 px-6 flex flex-col items-center justify-center overflow-hidden border-b border-white/5">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-blue-600/20 blur-[120px] rounded-full mix-blend-screen opacity-30 pointer-events-none" />
-
         <div className="container mx-auto max-w-[1200px] text-center relative z-10">
           <FadeIn>
             <span className="inline-block px-4 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[#3457DC] text-[12px] font-bold tracking-[0.2em] mb-6 uppercase">
@@ -135,7 +131,6 @@ export default function AboutUs() {
               {text.title}
             </h1>
           </FadeIn>
-
           <FadeIn delay={0.2}>
             <p className="text-[#7b829d] text-[20px] md:text-[24px] leading-relaxed max-w-4xl mx-auto">
               {text.description}
@@ -144,7 +139,6 @@ export default function AboutUs() {
         </div>
       </section>
 
-      {/* 2. STATS SECTION */}
       <section className="w-full py-32 relative z-20">
         <div className="container mx-auto px-6 max-w-[1240px]">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
@@ -167,16 +161,13 @@ export default function AboutUs() {
         </div>
       </section>
 
-      {/* 3. MISSION & VISION GRID */}
       <section className="w-full py-32 bg-[#070710]/50 relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
-
         <div className="container mx-auto px-6 max-w-[1240px] relative z-10">
           <div className="text-center mb-24">
             <h2 className="text-5xl font-gilroy font-black mb-4">{text.strategicGoals}</h2>
             <p className="text-[#7b829d] text-lg">{text.visionSubtitle}</p>
           </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
             {values.map((item, i) => (
               <FadeIn key={i} delay={i * 0.2}>
@@ -194,7 +185,6 @@ export default function AboutUs() {
         </div>
       </section>
 
-      {/* 4. OUR JOURNEY */}
       <section className="w-full py-40 border-t border-white/5">
         <div className="container mx-auto px-6 max-w-[1000px]">
           <div className="text-center mb-32">
@@ -202,10 +192,8 @@ export default function AboutUs() {
             <div className="h-1.5 w-24 bg-blue-600 mx-auto rounded-full" />
             <p className="text-[#7b829d] mt-8 text-xl">{text.journeySubtitle}</p>
           </div>
-
           <div className="relative">
             <div className={`absolute ${isRTL ? 'right-[20px] md:right-1/2 translate-x-1/2' : 'left-[20px] md:left-1/2 -translate-x-1/2'} top-0 bottom-0 w-[1px] bg-gradient-to-b from-blue-600 via-blue-500/20 to-transparent`} />
-
             <div className="space-y-24">
               {timeline.map((item, i) => (
                 <FadeIn key={i} direction={i % 2 === 0 ? (isRTL ? "left" : "right") : (isRTL ? "right" : "left")}>
@@ -228,16 +216,13 @@ export default function AboutUs() {
         </div>
       </section>
 
-      {/* 5. CONTACT CTA */}
       <section className="w-full py-40 bg-[#070710] relative overflow-hidden border-t border-white/5">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-blue-600/5 blur-[150px] pointer-events-none" />
-
         <div className="container mx-auto px-6 max-w-[1200px] text-center relative z-10">
           <FadeIn>
             <h2 className="text-5xl md:text-6xl font-gilroy font-black text-white mb-8">{text.contactTitle}</h2>
             <p className="text-[#7b829d] text-xl mb-16 max-w-2xl mx-auto">{text.contactSubtitle}</p>
           </FadeIn>
-
           <div className="flex flex-col md:flex-row justify-center gap-12 mb-20">
             <div className="flex items-center gap-4 bg-white/[0.03] px-8 py-4 rounded-2xl border border-white/[0.05]">
               <Mail className="text-blue-500" />
@@ -248,7 +233,6 @@ export default function AboutUs() {
               <span className="text-white font-medium text-sm">{text.universityName}</span>
             </div>
           </div>
-
           <div className="flex flex-wrap justify-center gap-6">
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -258,7 +242,6 @@ export default function AboutUs() {
               <span>{text.joinTeam}</span>
               <ArrowUpRight size={20} className={`${isRTL ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'} group-hover:-translate-y-1 transition-transform`} />
             </motion.button>
-
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}

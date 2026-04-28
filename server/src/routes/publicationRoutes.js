@@ -2,13 +2,13 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-const { createPublication, getPublications, deletePublication } = require('../controllers/publicationController');
+const { createPublication, getPublications, deletePublication, updatePublicationStatus } = require('../controllers/publicationController');
 const { protect } = require('../midddlewares/authMiddleware');
 
 // Multer Storage Configuration
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'src/uploads/publications');
+        cb(null, 'uploads/publications');
     },
     filename: (req, file, cb) => {
         cb(null, `${Date.now()}-${file.originalname}`);
@@ -31,6 +31,7 @@ const upload = multer({
 
 router.post('/', protect, upload.single('document'), createPublication);
 router.get('/', getPublications);
+router.patch('/:id/status', protect, updatePublicationStatus);
 router.delete('/:id', protect, deletePublication);
 
 module.exports = router;

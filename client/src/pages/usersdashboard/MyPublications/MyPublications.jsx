@@ -5,7 +5,7 @@ import {
     RiArrowRightSLine, RiBold, RiItalic, RiUnderline, RiStrikethrough,
     RiImageLine, RiSeparator, RiDoubleQuotesL, RiLinksLine, RiListOrdered, RiListUnordered,
     RiFormatClear, RiAlignLeft, RiRefreshLine, RiErrorWarningLine, RiFileWordLine, RiCloseLine,
-    RiEdit2Fill, RiDeleteBin6Line, RiCodeSSlashLine, RiCodeView
+    RiEdit2Fill, RiDeleteBin6Line, RiCodeSSlashLine, RiCodeView, RiEyeLine, RiDownload2Line
 } from "react-icons/ri";
 import { motion, AnimatePresence } from 'framer-motion';
 import DropdownIcon from "@/assets/svg/userDashboard/PhdTracker/angle-small-down 1.svg";
@@ -80,7 +80,15 @@ const Tab = ({ label, isActive, onClick }) => {
     );
 };
 
-const ResearchPaperCard = ({ title, authors, year, journal, description, tags, link }) => {
+const ResearchPaperCard = ({ title, authors, year, journal, description, tags, link, status }) => {
+    const statusColors = {
+        'Waiting': { bg: 'rgba(255, 193, 7, 0.1)', text: '#ffc107' },
+        'Approved': { bg: 'rgba(40, 167, 69, 0.1)', text: '#28a745' },
+        'Rejected': { bg: 'rgba(220, 53, 69, 0.1)', text: '#dc3545' }
+    };
+    const currentStatus = status || 'Waiting';
+    const color = statusColors[currentStatus] || statusColors['Waiting'];
+
     return (
         <div className="publication-paper-card" style={{
             backgroundColor: '#151519',
@@ -97,20 +105,39 @@ const ResearchPaperCard = ({ title, authors, year, journal, description, tags, l
         }}>
             {/* Header: Title and Link Icon */}
             <div className="pub-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
-                <h3 className="pub-card-title" style={{
-                    margin: 0,
-                    fontSize: '1.1vw',
-                    fontWeight: 700,
-                    color: '#f5f5f5',
-                    fontFamily: 'Inter, sans-serif',
-                    lineHeight: '1.4',
-                    maxWidth: '85%'
-                }}>
-                    {title}
-                </h3>
-                <a href={link} target="_blank" rel="noopener noreferrer" className="pub-card-link-icon" style={{ transition: 'opacity 0.2s' }} onMouseOver={e => e.currentTarget.style.opacity = 0.7} onMouseOut={e => e.currentTarget.style.opacity = 1}>
-                    <img src={LinkIcon} alt="link" style={{ width: '1.2vw' }} />
-                </a>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8vh', maxWidth: '85%' }}>
+                    <h3 className="pub-card-title" style={{
+                        margin: 0,
+                        fontSize: '1.1vw',
+                        fontWeight: 700,
+                        color: '#f5f5f5',
+                        fontFamily: 'Inter, sans-serif',
+                        lineHeight: '1.4'
+                    }}>
+                        {title}
+                    </h3>
+                    <div style={{
+                        backgroundColor: color.bg,
+                        color: color.text,
+                        fontSize: '0.7vw',
+                        padding: '0.4vh 0.6vw',
+                        borderRadius: '0.4vw',
+                        width: 'fit-content',
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05vw'
+                    }}>
+                        {currentStatus}
+                    </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8vw' }}>
+                    <a href={link} target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,0.2)', transition: 'color 0.2s' }} onMouseOver={e => e.currentTarget.style.color = '#fff'} onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,0.2)'} title="View">
+                        <RiEyeLine size="1.2vw" />
+                    </a>
+                    <a href={link} download style={{ color: 'rgba(255,255,255,0.2)', transition: 'color 0.2s' }} onMouseOver={e => e.currentTarget.style.color = '#fff'} onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,0.2)'} title="Download">
+                        <RiDownload2Line size="1.2vw" />
+                    </a>
+                </div>
             </div>
 
             {/* Sub-header: Authors and Year */}
@@ -177,7 +204,8 @@ const TeamPublicationContent = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [selectedSort, setSelectedSort] = useState('sort by recent');
-    const [selectedCategory, setSelectedCategory] = useState('Categorie');
+    const [selectedCategory, setSelectedCategory] = useState('All');
+    const [selectedTag, setSelectedTag] = useState('All');
     const dropdownRef = useRef(null);
 
     useEffect(() => {
@@ -192,29 +220,58 @@ const TeamPublicationContent = () => {
 
     const [publications, setPublications] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [teams, setTeams] = useState([]);
 
     useEffect(() => {
-        const fetchPublications = async () => {
+        const fetchData = async () => {
             try {
-                const res = await fetch('http://localhost:5000/api/publications');
+                const res = await fetch(`${API_BASE_URL}/api/publications?status=all`);
                 if (res.ok) {
                     const data = await res.json();
                     setPublications(data);
                 }
+
+                const teamRes = await fetch(`${API_BASE_URL}/api/teams`);
+                if (teamRes.ok) {
+                    const teamData = await teamRes.json();
+                    setTeams(teamData);
+                }
             } catch (err) {
-                console.error("Failed to fetch publications", err);
+                console.error("Failed to fetch data", err);
             } finally {
                 setIsLoading(false);
             }
         };
-        fetchPublications();
+        fetchData();
     }, []);
 
-    const filteredPublications = publications.filter(pub =>
-        pub.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        pub.authors.some(auth => auth.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        pub.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    const allFields = [...new Set(teams.flatMap(t => t.activeFilds || []))];
+    const allTags = [...new Set(publications.flatMap(p => p.tags || []))];
+
+    const filteredPublications = publications.filter(pub => {
+        const matchesSearch = pub.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            pub.authors.some(auth => auth.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (pub.tags && pub.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
+        
+        const categoryMatch = selectedCategory === 'Categorie' || selectedCategory === 'All' ||
+            (pub.activeFilds && pub.activeFilds.some(f => f.toLowerCase() === selectedCategory.toLowerCase())) ||
+            (pub.field && pub.field.toLowerCase() === selectedCategory.toLowerCase());
+            
+        const tagMatch = selectedTag === 'Tags' || selectedTag === 'All' ||
+            (pub.tags && pub.tags.some(tag => tag.toLowerCase() === selectedTag.toLowerCase()));
+            
+        return matchesSearch && categoryMatch && tagMatch;
+    }).sort((a, b) => {
+        const dateA = a.publishedDate ? new Date(a.publishedDate) : new Date(a.year, 0, 1);
+        const dateB = b.publishedDate ? new Date(b.publishedDate) : new Date(b.year, 0, 1);
+        
+        if (selectedSort === 'sort by recent') {
+            return dateB - dateA;
+        } else if (selectedSort === 'sort by oldest') {
+            return dateA - dateB;
+        }
+        return 0;
+    });
 
     const dropdownMenuStyle = {
         position: 'absolute', top: '100%', left: 0, right: 0,
@@ -327,7 +384,7 @@ const TeamPublicationContent = () => {
                         <img src={DropdownIcon} alt="arrow" style={{ width: '14px', height: '14px', transform: activeDropdown === 'category' ? 'rotate(180deg)' : 'none', transition: '0.3s' }} />
                         {activeDropdown === 'category' && (
                             <div style={dropdownMenuStyle}>
-                                {['All', 'AI & Vision', 'Networks', 'Embedded Systems'].map(opt => (
+                                {[ 'All', ...allFields].map(opt => (
                                     <div
                                         key={opt}
                                         style={dropdownItemStyle(selectedCategory === opt)}
@@ -342,22 +399,39 @@ const TeamPublicationContent = () => {
                         )}
                     </div>
 
-                    {/* Request Research */}
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        gap: '8px',
-                        padding: '9px 16px',
-                        border: '1px solid #1e1d22',
-                        borderRadius: '16px',
-                        backgroundColor: '#1e1e24',
-                        cursor: 'pointer',
-                        flex: 1.5
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span style={{ fontSize: '14px', color: '#f0f0f2' }}>Request a Research?</span>
-                        </div>
+                    {/* Tags Dropdown */}
+                    <div
+                        onClick={() => setActiveDropdown(activeDropdown === 'tags' ? null : 'tags')}
+                        style={{
+                            position: 'relative',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '8px',
+                            padding: '9px 16px',
+                            border: '1px solid #1e1d22',
+                            borderRadius: '16px',
+                            backgroundColor: '#1e1e24',
+                            cursor: 'pointer',
+                            flex: 1.5
+                        }}>
+                        <span style={{ fontSize: '14px', color: '#f0f0f2' }}>{selectedTag === 'All' ? 'Tags' : selectedTag}</span>
+                        <img src={DropdownIcon} alt="arrow" style={{ width: '14px', height: '14px', transform: activeDropdown === 'tags' ? 'rotate(180deg)' : 'none', transition: '0.3s' }} />
+                        {activeDropdown === 'tags' && (
+                            <div style={{ ...dropdownMenuStyle, maxHeight: '250px', overflowY: 'auto' }}>
+                                {['All', ...allTags].map(opt => (
+                                    <div
+                                        key={opt}
+                                        style={dropdownItemStyle(selectedTag === opt)}
+                                        onClick={(e) => { e.stopPropagation(); setSelectedTag(opt); setActiveDropdown(null); }}
+                                        onMouseOver={(e) => { if (selectedTag !== opt) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)' }}
+                                        onMouseOut={(e) => { if (selectedTag !== opt) e.currentTarget.style.backgroundColor = 'transparent' }}
+                                    >
+                                        {opt}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -374,11 +448,12 @@ const TeamPublicationContent = () => {
                             key={pub._id || idx} 
                             title={pub.title}
                             authors={pub.authors.join(', ')}
-                            year={pub.year}
-                            journal={pub.publisher}
-                            description={pub.contribution}
+                            year={pub.publishedDate ? new Date(pub.publishedDate).getFullYear() : (pub.year || '2024')}
+                            journal={pub.team?.name || pub.publisher || 'Institutional Research Lab'}
+                            description={pub.description || pub.contribution || pub.abstract}
                             tags={pub.tags}
-                            link={pub.documentUrl ? `http://localhost:5000${pub.documentUrl}` : '#'}
+                            status={pub.status}
+                            link={pub.documentUrl ? (pub.documentUrl.startsWith('http') ? pub.documentUrl : `${API_BASE_URL}${pub.documentUrl}`) : '#'}
                         />
                     ))
                 )}
@@ -432,6 +507,7 @@ const TeamPublicationContent = () => {
 };
 
 import AddPublicationContent from './AddPublicationContent';
+import API_BASE_URL from '@/config';
 
 const MyPublications = () => {
     const [activeTab, setActiveTab] = useState('Team Publication');

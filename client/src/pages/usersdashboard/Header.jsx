@@ -20,6 +20,7 @@ import iconSettings from '@/assets/svg/leftbaruser/settings 1.svg';
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
+import API_BASE_URL from '@/config';
 
 // Icons moved from src/icons
 const Logoicon = ({ width = '2.25rem', height = '1.625rem', className = '', alt = '' }) => (
@@ -112,7 +113,7 @@ const Header = ({ onToggleSidebar, title, navItems }) => {
             try {
                 const token = localStorage.getItem('token');
                 if (!token) return;
-                const res = await fetch('http://localhost:5000/api/notifications/my', {
+                const res = await fetch(`${API_BASE_URL}/api/notifications/my`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {
@@ -388,7 +389,7 @@ const Header = ({ onToggleSidebar, title, navItems }) => {
                                 onClick={toggleLang}
                             >
                                 <div className="relative shrink-0 flex items-center justify-center w-5 md:w-[1.1vw] h-auto">
-                                    {language === 'en' ? <EnglishIcon width="100%" height="auto" /> : <ArabicIcon width="100%" height="auto" />}
+                                    {language === 'en' ? <EnglishIcon width="100%" /> : <ArabicIcon width="100%" />}
                                 </div>
                                 <div
                                     className="relative shrink-0 transition-transform duration-300 flex items-center justify-center ml-[0.2vw] text-white w-4 md:w-[1vw]"

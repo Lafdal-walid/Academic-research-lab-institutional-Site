@@ -14,6 +14,8 @@ import p4 from './assets/games/Frame 8404.png';
 import p5 from './assets/games/Physics_Today_cover_1.png';
 import p6 from './assets/games/SEI_237554230_1.png';
 import p7 from './assets/games/images_(1)_1.png';
+import API_BASE_URL from '@/config';
+import ComputerIcon from "@/assets/svg/userDashboard/PhdTracker/computer_(1)_1.svg";
 
 const imagePool = [p1, p2, p3, p4, p5, p6, p7];
 
@@ -21,99 +23,263 @@ const generateStaticData = () => {
     const categoriesList = ["AI & NLP", "Quantum Physics", "Data Science", "Bioinformatics", "Neuroscience", "Cybersecurity"];
     const baseTitles = ["Advanced Analysis", "Deep Learning", "Predictive Models", "Molecular Study", "Neural Networks", "Cognitive Framework", "Encryption Methods", "Data Mining", "Quantum States", "Bioinformatics Review"];
     const data = [];
-    
+
     for (let i = 0; i < 42; i++) {
-        // Randomly assign image, category, and construct a title
         const randImg = imagePool[Math.floor(Math.random() * imagePool.length)];
         const randCat = categoriesList[Math.floor(Math.random() * categoriesList.length)];
         const randTitle = baseTitles[Math.floor(Math.random() * baseTitles.length)] + ` Vol. ${Math.floor(Math.random() * 20 + 1)}`;
-        
-        data.push({ title: randTitle, image: randImg, category: randCat });
+
+        data.push({ 
+            title: randTitle, 
+            image: randImg, 
+            category: randCat,
+            description: `This research project explores the integration of ${randCat} methodologies within institutional frameworks to optimize performance and data-driven decision making. Focused on innovation and academic excellence.`,
+            members: ["Dr. Jane Smith", "Prof. Alan Turing", "Maria Curie"],
+            status: "Ongoing",
+            startDate: new Date(Date.now() - Math.random() * 10000000000).toISOString()
+        });
     }
     return data;
 };
 
 const staticProjectsData = generateStaticData();
 
-const ProjectCatalog = ({ setSelectedProject }) => {
+const ProjectDetails = ({ project }) => {
+    const { language } = useLanguage();
+    const isRTL = language === "ar";
+    if (!project) return null;
+    const { raw } = project;
+    
+    const description = raw?.description || project.description || 'No description available for this research project.';
+    const status = raw?.status || project.status || 'Ongoing';
+    const startDate = raw?.startDate || project.startDate || raw?.createdAt;
+    const endDate = raw?.endDate || project.endDate;
+    const teamName = raw?.team?.name || project.category || 'General Research';
+    const members = raw?.members || [];
+
+    const detailItem = (label, value) => (
+        <div className="flex flex-col gap-1 items-center md:items-start text-center md:text-left">
+            <span className="text-[10px] uppercase tracking-wider text-[#80808a] font-bold">{label}</span>
+            <span className="text-sm text-white font-medium">{value || 'N/A'}</span>
+        </div>
+    );
+
+    return (
+        <div className="bg-[#151519] border border-[#1e1d22] rounded-[16px] p-6 md:p-8 flex flex-col gap-8 w-full mb-6">
+            <div className="flex flex-col items-center md:items-start gap-2">
+                <h3 className="text-xl font-bold text-white tracking-tight text-center md:text-left">Project Overview</h3>
+                <div className="h-1 w-12 bg-blue-500 rounded-full" />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-12 gap-y-8">
+                {detailItem("Status", status)}
+                {detailItem(isRTL ? "أعضاء الفريق" : "Team Members", members.length.toString())}
+                {detailItem("Start Date", startDate ? new Date(startDate).toLocaleDateString() : 'N/A')}
+                {detailItem("End Date", endDate ? new Date(endDate).toLocaleDateString() : 'Active')}
+            </div>
+
+            <div className="flex flex-col gap-6 pt-4 border-t border-white/5">
+                <div className="flex flex-col items-center md:items-start gap-4">
+                    <div className="flex flex-col items-center md:items-start gap-2">
+                        <span className="text-[10px] uppercase tracking-wider text-[#80808a] font-bold">Description</span>
+                        <p className="text-sm text-gray-400 leading-relaxed max-w-4xl text-center md:text-left">
+                            {description}
+                        </p>
+                    </div>
+                    
+                    {/* Research Fields / activeFilds badges */}
+                    <div className="flex flex-wrap justify-center md:justify-start gap-2">
+                        {(raw?.team?.activeFilds || raw?.team?.teamFields || raw?.team?.activeProjects || [1, 2, 3, 4]).map((field, idx) => (
+                            <div key={idx} className="bg-[#3457DC]/10 border border-[#3457DC]/20 px-3 py-1 rounded-lg">
+                                <span className="text-[11px] text-[#3457DC] font-semibold uppercase tracking-wider">
+                                    {typeof field === 'number' || !isNaN(field) ? `${isRTL ? "مشروع " : "Project "} ${field}` : field}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="flex flex-col items-center md:items-start gap-3">
+                    <span className="text-[10px] uppercase tracking-wider text-[#80808a] font-bold">Research Members ({members.length})</span>
+                    <div className="flex flex-wrap justify-center md:justify-start gap-2">
+                        {members.length > 0 ? (
+                            members.map((member, idx) => (
+                                <div key={idx} className="bg-[#1e1e24] border border-white/5 px-4 py-2 rounded-xl flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-blue-500" />
+                                    <span className="text-xs text-gray-300">
+                                        {member?.email || member?.name || member?.username || (typeof member === 'string' ? member : 'Research Member')}
+                                    </span>
+                                </div>
+                            ))
+                        ) : (
+                            <span className="text-xs text-gray-500 italic">Team members information is currently restricted or not assigned.</span>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const ProjectRoadmap = ({ projectName, projectId, milestones = [], createdAt, onRefresh }) => {
+    return (
+        <div className="bg-[#151519] border border-[#1e1d22] rounded-[16px] p-6 md:p-8 flex flex-col gap-8 w-full">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative w-full">
+                <div className="flex flex-col gap-2 text-center md:text-left">
+                    <h3 className="text-lg font-extrabold text-white font-[Gilroy]">
+                        {projectName} Project Roadmap
+                    </h3>
+                    <p className="text-sm text-[#a5a5b2]">Key Objectives & Milestones.</p>
+                </div>
+                
+                <div className="md:absolute md:left-1/2 md:-translate-x-1/2 flex flex-col items-center gap-1.5">
+                    <span className="text-sm text-[#3457DC] font-medium whitespace-nowrap">
+                         {milestones.filter(m => m.completed).length + 1} of {milestones.length + 1} Completed
+                    </span>
+                    <div className="w-[60px] h-1 bg-[#1e1e24] rounded-full overflow-hidden">
+                        <div 
+                            className="h-full bg-[#3457DC] transition-all duration-500" 
+                            style={{ width: `${((milestones.filter(m => m.completed).length + 1) / (milestones.length + 1)) * 100}%` }} 
+                        />
+                    </div>
+                </div>
+
+                <div className="hidden md:block w-[200px]" />
+            </div>
+
+            <div style={{ height: '1px', backgroundColor: '#2A2A30' }} />
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', maxHeight: '300px', overflowY: 'auto', paddingRight: '12px' }}>
+                <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '46px', position: 'relative' }}>
+                        <div style={{ backgroundColor: '#3457DC', padding: '14px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}>
+                            <img src={ComputerIcon} alt="phase" style={{ width: '16px', height: '16px' }} />
+                        </div>
+                        {(milestones.length > 0) && (
+                            <div style={{ width: '2px', height: '100px', backgroundColor: '#3457DC', position: 'absolute', top: '22px', zIndex: 1 }} />
+                        )}
+                    </div>
+                    <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <span style={{ fontSize: '14px', color: '#a5a5b2', fontWeight: 500 }}>
+                                {createdAt ? new Date(createdAt).toLocaleDateString() : 'Initial phase'}
+                            </span>
+                            <span style={{ fontSize: '14px', color: 'white', fontWeight: 400 }}>Project Creation & Planning</span>
+                        </div>
+                        <div style={{ backgroundColor: '#1e1e24', padding: '10px 24px', borderRadius: '16px', color: 'white', fontSize: '14px', fontWeight: 500 }}>Completed</div>
+                    </div>
+                </div>
+
+                {milestones.map((phase, index) => (
+                    <div key={index} style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '46px', position: 'relative' }}>
+                            <div style={{ backgroundColor: phase.completed ? '#3457DC' : '#1e1e24', padding: '14px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}>
+                                <img src={ComputerIcon} alt="phase" style={{ width: '16px', height: '16px', opacity: phase.completed ? 1 : 0.3 }} />
+                            </div>
+                            {index !== milestones.length - 1 && (
+                                <div style={{ width: '2px', height: '100px', backgroundColor: '#3457DC', position: 'absolute', top: '22px', zIndex: 1 }} />
+                            )}
+                        </div>
+                        <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <span style={{ fontSize: '14px', color: '#a5a5b2', fontWeight: 500 }}>{phase.date || 'TBD'}</span>
+                                <span style={{ fontSize: '14px', color: 'white', fontWeight: 400 }}>{phase.title}</span>
+                            </div>
+                            <div style={{ backgroundColor: phase.completed ? '#3457DC' : '#1e1e24', padding: '10px 24px', borderRadius: '16px', color: 'white', fontSize: '14px', fontWeight: 500 }}>
+                                {phase.completed ? 'Completed' : 'Upcoming'}
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+const ProjectCatalog = () => {
     const { language } = useLanguage();
     const { user } = useAuth();
     const isRTL = language === "ar";
-
+    
     const text = {
         title: isRTL ? 'كتالوج المشاريع' : 'Project Catalog',
         searchPlaceholder: isRTL ? "ابحث هنا..." : "Search e.g AI models",
         sortByLabel: isRTL ? 'ترتيب حسب' : 'Sort By',
-        categoriesLabel: isRTL ? 'الفئات' : 'Categories',
-        requestProject: isRTL ? 'طلب إضافة بحث' : 'Request research ?',
+        categoriesLabel: isRTL ? 'الفرق البحثية' : 'Research Teams',
+        filterStatus: isRTL ? 'حسب الحالة' : 'Filter by Status',
+        allStatuses: isRTL ? 'كل الحالات' : 'All Statuses',
         maybeLater: isRTL ? 'ربما لاحقاً' : 'Maybe later',
         openDiscord: isRTL ? 'فتح Discord' : 'Open Discord',
         noResults: isRTL ? 'لا توجد أبحاث تطابق بحثك' : 'No projects match your search',
         of: isRTL ? 'من' : 'of',
         sortRecent: isRTL ? 'الأحدث' : 'sort by recent',
-        allCategories: isRTL ? 'الكل' : 'All Categories',
+        allCategories: isRTL ? 'حسب الفريق' : 'By Research Team',
         joinDiscordMsg: isRTL ? "لم تجد البحث الذي تريده؟ شارك طلبك في مجتمعنا عبر Discord." : "Can't find the project? , request it in our Discord community.",
         requestTitle: isRTL ? "اطلب إضافة بحث" : "Request a project"
     };
 
     const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
-    const [categoryFilter, setCategoryFilter] = useState("All Categories");
+    const [categoryFilter, setCategoryFilter] = useState("By Research Team");
+    const [statusFilter, setStatusFilter] = useState("All Statuses");
     const [sortOrder, setSortOrder] = useState("sort by recent");
     const [currentPage, setCurrentPage] = useState(1);
     const [isSearching, setIsSearching] = useState(false);
     const [isFiltering, setIsFiltering] = useState(false);
+    const [expandedProjectId, setExpandedProjectId] = useState(null);
 
-    // API State
     const [projectsData, setProjectsData] = useState(staticProjectsData);
     const [isLoadingProjects, setIsLoadingProjects] = useState(true);
 
     const itemsPerPage = 21;
 
-    const [categories, setCategories] = useState(["All Categories"]);
+    const [categories, setCategories] = useState(["By Research Team"]);
+    const statusOptions = ["All Statuses", "Ongoing", "Completed", "Proposed", "Suspended", "Canceled"];
     const sortOptions = ["sort by recent", "A-Z", "Z-A"];
 
-    // Load projects from API
-    useEffect(() => {
-        const fetchProjects = async () => {
-            setIsLoadingProjects(true);
-            try {
-                const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : '';
-                const res = await fetch(`${baseUrl}/api/projects`);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data && data.length > 0) {
-                        // Map backend data to frontend structure
-                        const mappedData = data.map(project => ({
-                            title: project.title,
-                            image: project.imageUrl 
-                                ? (project.imageUrl.startsWith('http') ? project.imageUrl : `${baseUrl}${project.imageUrl}`)
-                                : imagePool[Math.floor(Math.random() * imagePool.length)], // fallback to pool if no image
-                            category: project.team?.name || (isRTL ? "بحث عام" : "General Research"),
-                            status: project.status
-                        }));
-                        setProjectsData(mappedData);
-                        
-                        // Dynamically update categories
-                        const uniqueTeams = ["All Categories", ...new Set(mappedData.map(p => p.category))];
-                        setCategories(uniqueTeams);
-                    }
+    const fetchProjects = async () => {
+        setIsLoadingProjects(true);
+        try {
+            const baseUrl = API_BASE_URL;
+            const res = await fetch(`${baseUrl}/api/projects`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data && data.length > 0) {
+                    const mappedData = data.map(project => ({
+                        id: project._id,
+                        title: project.title,
+                        image: project.imageUrl 
+                            ? (project.imageUrl.startsWith('http') ? project.imageUrl : `${baseUrl}${project.imageUrl.startsWith('/') ? '' : '/'}${project.imageUrl}`)
+                            : imagePool[Math.floor(Math.random() * imagePool.length)],
+                        category: project.team?.name || (isRTL ? "بحث عام" : "General Research"),
+                        status: project.status,
+                        milestones: project.milestones || [],
+                        createdAt: project.createdAt,
+                        raw: project
+                    }));
+                    setProjectsData(mappedData);
+                    
+                    const uniqueTeams = ["By Research Team", ...new Set(mappedData.map(p => p.category))];
+                    setCategories(uniqueTeams);
                 }
-            } catch (err) {
-                console.error("Failed to fetch projects", err);
-            } finally {
-                setIsLoadingProjects(false);
             }
-        };
-        fetchProjects();
-    }, [language, user, isRTL]); 
+        } catch (err) {
+            console.error("Failed to fetch projects", err);
+        } finally {
+            setIsLoadingProjects(false);
+        }
+    };
 
-    // Filter and Sort Logic
+    useEffect(() => {
+        fetchProjects();
+    }, [language, user]);
+
     const filteredProjects = React.useMemo(() => {
         let result = projectsData.filter(project => {
             const matchesSearch = project.title.toLowerCase().includes(searchQuery.toLowerCase());
-            const matchesCategory = categoryFilter === "All Categories" || project.category === categoryFilter;
-            return matchesSearch && matchesCategory;
+            const matchesCategory = categoryFilter === "By Research Team" || project.category === categoryFilter;
+            const matchesStatus = statusFilter === "All Statuses" || project.status === statusFilter;
+            return matchesSearch && matchesCategory && matchesStatus;
         });
 
         if (sortOrder === "A-Z") {
@@ -123,17 +289,15 @@ const ProjectCatalog = ({ setSelectedProject }) => {
         }
 
         return result;
-    }, [searchQuery, categoryFilter, sortOrder, projectsData]);
+    }, [searchQuery, categoryFilter, statusFilter, sortOrder, projectsData]);
 
-    // Pagination Logic
     const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
     const currentItems = filteredProjects.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchQuery, categoryFilter, sortOrder]);
+    }, [searchQuery, categoryFilter, statusFilter, sortOrder]);
 
-    // Close modal on ESC key
     useEffect(() => {
         const handleEsc = (e) => {
             if (e.key === 'Escape') setIsRequestModalOpen(false);
@@ -148,7 +312,6 @@ const ProjectCatalog = ({ setSelectedProject }) => {
                 <AnimatePresence>
                     {isRequestModalOpen && (
                         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6">
-                            {/* Overlay */}
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
@@ -157,13 +320,12 @@ const ProjectCatalog = ({ setSelectedProject }) => {
                                 className="absolute inset-0 bg-black/60 backdrop-blur-sm"
                             />
 
-                            {/* Modal Content */}
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.97, y: 8 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.97, y: 8 }}
                                 transition={{ duration: 0.3, ease: 'easeOut' }}
-                                className="relative w-full max-w-[400px] md:max-w-[430px] bg-[#151519]  rounded-[12px] p-8 md:p-10 py-12 md:py-14  text-center"
+                                className="relative w-full max-w-[400px] md:max-w-[430px] bg-[#151519] rounded-[12px] p-8 md:p-10 py-12 md:py-14 text-center"
                             >
                                 <div className="absolute top-6 right-6">
                                     <button
@@ -187,24 +349,10 @@ const ProjectCatalog = ({ setSelectedProject }) => {
                                     {text.joinDiscordMsg}
                                 </p>
 
-                                <div className="flex items-center justify-center gap-2 mb-[16px]">
-                                    <span className="text-[12px] font-semibold text-white tracking-tight">#IQ-Optimzer89</span>
-                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <g clipPath="url(#clip0_5680_91044)">
-                                            <path d="M19.2698 8.22354L17.4773 6.42854V4.99687C17.4773 3.62104 16.359 2.50104 14.9848 2.50104H13.5548L11.7623 0.706875C10.8198 -0.235625 9.17813 -0.235625 8.23646 0.706875L6.44396 2.50104H5.01396C3.63896 2.50104 2.52146 3.62021 2.52146 4.99687V6.42854L0.728125 8.22354C-0.242708 9.19687 -0.242708 10.7794 0.728125 11.7527L2.52063 13.5477V14.9794C2.52063 16.3552 3.63896 17.4752 5.01313 17.4752H6.44313L8.23563 19.2694C8.70646 19.7402 9.33313 20.0002 9.99896 20.0002C10.6648 20.0002 11.2906 19.7402 11.7615 19.2694L13.554 17.4752H14.984C16.359 17.4752 17.4765 16.356 17.4765 14.9794V13.5477L19.2698 11.7527C20.2406 10.7794 20.2406 9.19687 19.2698 8.22354ZM15.1681 8.50937L10.9565 12.6719C10.4448 13.1802 9.77063 13.4352 9.09729 13.4352C8.42396 13.4352 7.75313 13.181 7.23979 12.6744L5.07396 10.5919C4.74729 10.2677 4.74396 9.74104 5.06813 9.41354C5.39313 9.08771 5.91896 9.08354 6.24729 9.40771L8.41229 11.4894C8.78979 11.8635 9.40396 11.8644 9.78229 11.4894L13.9948 7.32604C14.3231 7.00104 14.8498 7.00437 15.174 7.33187C15.4981 7.65937 15.4948 8.18521 15.1681 8.50937Z" fill="#01CBB1" />
-                                        </g>
-                                        <defs>
-                                            <clipPath id="clip0_5680_91044">
-                                                <rect width="20" height="20" fill="white" />
-                                            </clipPath>
-                                        </defs>
-                                    </svg>
-                                </div>
-
                                 <div className="flex flex-row gap-4 md:gap-16">
                                     <button
                                         onClick={() => setIsRequestModalOpen(false)}
-                                        className="flex-1 bg-white/5 text-gray-400 md:py-3.5 rounded-xl font-medium text-[12px] hover:bg-white/10 transition-all"
+                                        className="flex-1 bg-white/5 text-gray-400 py-3.5 rounded-xl font-medium text-[12px] hover:bg-white/10 transition-all"
                                     >
                                         {text.maybeLater}
                                     </button>
@@ -225,12 +373,8 @@ const ProjectCatalog = ({ setSelectedProject }) => {
                     )}
                 </AnimatePresence>
 
-                {/* Toolbar */}
                 <div className="flex flex-col lg:flex-row items-center justify-between gap-6 md:gap-10 mb-16 w-full">
-
-                    {/* Desktop Toolbar (Hidden on Mobile) */}
                     <div className="hidden md:flex flex-col lg:flex-row items-center justify-between gap-10 w-full">
-                        {/* Search Bar (Takes 50% width on LG) */}
                         <div className="relative w-full lg:w-1/2">
                             <input
                                 type="text"
@@ -243,9 +387,7 @@ const ProjectCatalog = ({ setSelectedProject }) => {
                             <Search className={`absolute ${isRTL ? 'left-4' : 'right-4'} top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500`} />
                         </div>
 
-                        {/* Filters and Request Button (Takes the other 50% width on LG) */}
                         <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-1/2">
-                            {/* Sort Dropdown */}
                             <div className="relative flex-1 w-full group">
                                 <button className="w-full flex items-center justify-between gap-4 bg-[#1A1A22] border border-white/5 rounded-xl px-6 py-3.5 text-sm font-medium text-gray-400 hover:bg-[#22222C] transition-all whitespace-nowrap">
                                     <span>{sortOrder === "sort by recent" ? text.sortRecent : sortOrder}</span>
@@ -264,10 +406,9 @@ const ProjectCatalog = ({ setSelectedProject }) => {
                                 </div>
                             </div>
 
-                            {/* Category Dropdown */}
                             <div className="relative flex-1 w-full group">
                                 <button className="w-full flex items-center justify-between gap-4 bg-[#1A1A22] border border-white/5 rounded-xl px-6 py-3.5 text-sm font-medium text-gray-400 hover:bg-[#22222C] transition-all whitespace-nowrap">
-                                    <span>{categoryFilter === "All Categories" ? text.allCategories : categoryFilter}</span>
+                                    <span>{isRTL && categoryFilter === "By Research Team" ? text.allCategories : categoryFilter}</span>
                                     <ChevronDown className="w-4 h-4 text-gray-600 transition-transform group-hover:rotate-90" />
                                 </button>
                                 <div className="absolute top-full left-0 w-full mt-2 bg-[#1A1A22] border border-white/5 rounded-xl p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 shadow-2xl backdrop-blur-xl">
@@ -277,25 +418,34 @@ const ProjectCatalog = ({ setSelectedProject }) => {
                                             onClick={() => setCategoryFilter(cat)}
                                             className="w-full text-left px-4 py-2.5 rounded-lg text-sm text-gray-400 hover:bg-white/5 hover:text-white transition-colors"
                                         >
-                                            {cat === "All Categories" ? text.allCategories : cat}
+                                            {isRTL && cat === "By Research Team" ? text.allCategories : cat}
                                         </button>
                                     ))}
                                 </div>
                             </div>
 
-                            <button
-                                onClick={() => setIsRequestModalOpen(true)}
-                                className="flex-1 lg:flex-initial lg:min-w-[180px] bg-[#3457DC] text-white px-8 py-3.5 rounded-xl font-bold text-sm hover:brightness-110 active:scale-95 transition-all whitespace-nowrap"
-                            >
-                                {text.requestProject}
-                            </button>
+                            <div className="relative group/status">
+                                <button className="flex items-center justify-between gap-3 bg-[#1A1A22] border border-white/5 px-5 py-3.5 rounded-xl text-sm text-white hover:border-blue-500/30 transition-all min-w-[180px]">
+                                    <span className="truncate">{statusFilter === "All Statuses" ? text.allStatuses : statusFilter}</span>
+                                    <ChevronDown className="w-4 h-4 text-gray-500 group-hover/status:rotate-180 transition-transform" />
+                                </button>
+                                <div className="absolute top-full mt-2 w-full bg-[#12121A] border border-white/5 rounded-xl py-2 opacity-0 invisible group-hover/status:opacity-100 group-hover/status:visible transition-all z-50 shadow-2xl">
+                                    {statusOptions.map(stat => (
+                                        <button
+                                            key={stat}
+                                            onClick={() => setStatusFilter(stat)}
+                                            className="w-full text-left px-4 py-2.5 rounded-lg text-sm text-gray-400 hover:bg-white/5 hover:text-white transition-colors"
+                                        >
+                                            {isRTL && stat === "All Statuses" ? text.allStatuses : stat}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Mobile Toolbar */}
                     <div className="flex md:hidden flex-col gap-4 w-full">
                         <div className="flex items-center gap-3 w-full">
-                            {/* Search Icon Button */}
                             <button
                                 onClick={() => {
                                     setIsSearching(!isSearching);
@@ -303,13 +453,9 @@ const ProjectCatalog = ({ setSelectedProject }) => {
                                 }}
                                 className={`h-14 w-14 flex items-center justify-center rounded-2xl bg-[#1A1A22] border border-white/5 transition-all active:scale-90 ${isSearching ? 'border-blue-500/50' : ''}`}
                             >
-                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9.58268 17.5013C13.9549 17.5013 17.4993 13.9569 17.4993 9.58464C17.4993 5.21238 13.9549 1.66797 9.58268 1.66797C5.21043 1.66797 1.66602 5.21238 1.66602 9.58464C1.66602 13.9569 5.21043 17.5013 9.58268 17.5013Z" stroke="#3457DC" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                    <path d="M18.3327 18.3346L16.666 16.668" stroke="#3457DC" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
+                                <Search className="w-5 h-5 text-[#3457DC]" />
                             </button>
 
-                            {/* Filter Icon Button */}
                             <button
                                 onClick={() => {
                                     setIsFiltering(!isFiltering);
@@ -322,16 +468,14 @@ const ProjectCatalog = ({ setSelectedProject }) => {
                                 </svg>
                             </button>
 
-                            {/* Request Button */}
                             <button
-                                onClick={() => setIsRequestModalOpen(true)}
-                                className="flex-1 h-14 bg-[#3457DC] text-white rounded-2xl font-bold text-sm tracking-wide transition-all active:scale-95"
+                                onClick={() => setIsFiltering(!isFiltering)}
+                                className={`flex-1 h-14 bg-[#3457DC] text-white rounded-2xl font-bold text-sm tracking-wide transition-all active:scale-95 ${isFiltering ? 'brightness-110' : ''}`}
                             >
-                                {text.requestProject}
+                                {text.filterStatus}
                             </button>
                         </div>
 
-                        {/* Mobile Functional Inputs (Conditional) */}
                         <AnimatePresence>
                             {isSearching && (
                                 <motion.div
@@ -363,7 +507,6 @@ const ProjectCatalog = ({ setSelectedProject }) => {
                                     exit={{ opacity: 0, y: -10 }}
                                     className="flex flex-col gap-4 bg-[#12121A] border border-white/5 rounded-2xl p-4 shadow-2xl"
                                 >
-                                    {/* Sort Selection */}
                                     <div className="space-y-2">
                                         <p className="text-[10px] uppercase tracking-widest text-gray-500 font-bold px-1">{text.sortByLabel}</p>
                                         <div className="flex flex-wrap gap-2">
@@ -379,7 +522,6 @@ const ProjectCatalog = ({ setSelectedProject }) => {
                                         </div>
                                     </div>
 
-                                    {/* Category Selection */}
                                     <div className="space-y-2">
                                         <p className="text-[10px] uppercase tracking-widest text-gray-500 font-bold px-1">{text.categoriesLabel}</p>
                                         <div className="flex flex-wrap gap-2">
@@ -389,7 +531,22 @@ const ProjectCatalog = ({ setSelectedProject }) => {
                                                     onClick={() => setCategoryFilter(cat)}
                                                     className={`px-4 py-2 rounded-xl text-xs font-medium transition-all ${categoryFilter === cat ? 'bg-[#3457DC] text-white shadow-[0_0_15px_rgba(52,87,220,0.3)]' : 'bg-[#1A1A22] text-gray-400 border border-white/5'}`}
                                                 >
-                                                    {cat === "All Categories" ? text.allCategories : cat}
+                                                    {isRTL && cat === "By Research Team" ? text.allCategories : cat}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="space-y-2">
+                                        <p className="text-[10px] uppercase tracking-widest text-gray-500 font-bold px-1">{isRTL ? 'الحالة' : 'Status'}</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {statusOptions.map(stat => (
+                                                <button
+                                                    key={stat}
+                                                    onClick={() => setStatusFilter(stat)}
+                                                    className={`px-4 py-2 rounded-xl text-xs font-medium transition-all ${statusFilter === stat ? 'bg-[#3457DC] text-white shadow-[0_0_15px_rgba(52,87,220,0.3)]' : 'bg-[#1A1A22] text-gray-400 border border-white/5'}`}
+                                                >
+                                                    {isRTL && stat === "All Statuses" ? 'الكل' : stat}
                                                 </button>
                                             ))}
                                         </div>
@@ -400,68 +557,93 @@ const ProjectCatalog = ({ setSelectedProject }) => {
                     </div>
                 </div>
 
-                {/* Projects Grid */}
                 <div className="flex flex-wrap gap-x-6 gap-y-12 align-center justify-center lg:justify-start">
                     {currentItems.length > 0 ? (
                         currentItems.map((project, index) => (
                             <motion.div
-                                key={`${project.title}-${index}`}
-                                onClick={() => setSelectedProject(project)}
+                                key={`${project.id}-${index}`}
                                 layout
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
+                                onClick={() => setExpandedProjectId(expandedProjectId === project.id ? null : project.id)}
                                 className="w-[calc(50%-0.75rem)] md:w-[calc(25%-1.125rem)] lg:w-[calc(14.28%-1.3rem)] flex flex-col gap-4 group cursor-pointer"
                             >
-                                <div className="relative aspect-[3/4.2] rounded-[5px] overflow-hidden border border-white/5 bg-[#1A1A22] shadow-2xl transition-all duration-500 group-hover:scale-[1.01] group-hover:border-blue-500/40">
+                                <div className={`relative aspect-[3/4.2] rounded-[5px] overflow-hidden border transition-all duration-500 group-hover:scale-[1.01] ${expandedProjectId === project.id ? 'border-blue-500 shadow-[0_0_20px_rgba(52,87,220,0.3)]' : 'border-white/5 bg-[#1A1A22]'}`}>
                                     <img
                                         src={project.image}
                                         alt={project.title}
-                                        className="w-full h-full object-cover group-hover:scale-101 transition-transform duration-700"
+                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                     />
-                                    {/* Glow effect on hover */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                 </div>
-                                <h3 className="text-[#88888C] text-md font-medium tracking-tight px-1 group-hover:text-white transition-colors duration-300 break-words line-clamp-2">
-                                    {project.title}
-                                </h3>
+                                <div className="flex flex-col gap-1.5 px-1">
+                                    <h4 className="text-[13px] font-bold text-white leading-tight line-clamp-2 group-hover:text-blue-400 transition-colors">
+                                        {project.title}
+                                    </h4>
+                                </div>
                             </motion.div>
                         ))
                     ) : (
-                        <div className="w-full py-20 text-center">
-                            <p className="text-gray-500 text-lg">{text.noResults}</p>
+                        <div className="w-full py-20 flex flex-col items-center justify-center gap-4">
+                            <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-2">
+                                <Search className="w-6 h-6 text-gray-600" />
+                            </div>
+                            <h3 className="text-white text-lg font-bold">{text.noResults}</h3>
                         </div>
                     )}
                 </div>
 
-                {/* Pagination */}
+                <AnimatePresence>
+                    {expandedProjectId && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 20 }}
+                            className="w-full mt-16 mb-8 flex flex-col gap-6"
+                        >
+                            {(() => {
+                                const project = projectsData.find(p => p.id === expandedProjectId);
+                                if (!project) return null;
+                                return (
+                                    <>
+                                        <ProjectDetails project={project} />
+                                        <ProjectRoadmap 
+                                            projectName={project.title} 
+                                            projectId={project.id} 
+                                            milestones={project.milestones}
+                                            createdAt={project.createdAt}
+                                            onRefresh={fetchProjects}
+                                        />
+                                    </>
+                                );
+                            })()}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
                 {totalPages > 1 && (
-                    <div className="flex items-center justify-between mt-16 pt-8 border-t border-white/5">
+                    <div className="flex items-center justify-center gap-6 mt-20 pt-10 border-t border-white/5">
                         <button
-                            onClick={() => { if (currentPage > 1) setCurrentPage(p => p - 1); }}
-                            className={`w-10 h-10 rounded-full bg-[#3457DC] flex items-center justify-center text-white waves-effect waves ${currentPage === 1 ? 'opacity-40 pointer-events-auto' : ''}`}
+                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                            disabled={currentPage === 1}
+                            className="p-3 rounded-xl bg-[#1A1A22] border border-white/5 text-gray-400 hover:text-white hover:border-blue-500/30 disabled:opacity-30 transition-all"
                         >
-                            {isRTL ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+                            <ChevronLeft className="w-5 h-5" />
                         </button>
-
-                        <div className="flex items-center gap-4">
-                            <div className="bg-[#15151A] border border-white/5 rounded-lg px-3 py-1 text-sm text-gray-500">
-                                <span className="text-white font-bold">{String(currentPage).padStart(2, '0')}</span>
-                            </div>
-                            <span className="text-gray-600 text-sm font-medium">{text.of} {totalPages}</span>
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold text-white">{currentPage}</span>
+                            <span className="text-sm text-gray-600">/</span>
+                            <span className="text-sm text-gray-500">{totalPages}</span>
                         </div>
-
                         <button
-                            onClick={() => { if (currentPage < totalPages) setCurrentPage(p => p + 1); }}
-                            className={`w-10 h-10 rounded-full bg-[#3457DC] flex items-center justify-center text-white waves-effect waves ${currentPage === totalPages ? 'opacity-40 pointer-events-auto' : ''}`}
+                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                            disabled={currentPage === totalPages}
+                            className="p-3 rounded-xl bg-[#1A1A22] border border-white/5 text-gray-400 hover:text-white hover:border-blue-500/30 disabled:opacity-30 transition-all"
                         >
-                            {isRTL ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+                            <ChevronRight className="w-5 h-5" />
                         </button>
                     </div>
                 )}
             </div>
-
-            {/* Full-width sections outside the constrained container */}
-
         </>
     );
 };

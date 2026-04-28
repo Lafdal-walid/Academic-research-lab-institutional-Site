@@ -9,6 +9,7 @@ import LockIcon from "@/assets/svg/userDashboard/Progress/lock_3.svg";
 import img1 from "@/assets/svg/userDashboard/Progress/01-ai-cover-mar2024-static_(2) (2) 1.png";
 import img2 from "@/assets/svg/userDashboard/Progress/5a30797ac91abd1c88194b924cf3eaa9 2.png";
 import img3 from "@/assets/svg/userDashboard/Progress/imagesf.png";
+import API_BASE_URL from '@/config';
 
 const ProjectsTable = ({ projects, selectedProject, setSelectedProject }) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -83,7 +84,7 @@ const ProjectsTable = ({ projects, selectedProject, setSelectedProject }) => {
               <div className="flex items-center w-[20vw]" style={{ gap: '1.2vw' }}>
                  <div className="overflow-hidden bg-white/5 shrink-0 border border-white/5"
                       style={{ width: '2.5vw', height: '8vh', borderRadius: '0.4vw' }}>
-                    <img src={project.imageUrl ? `http://localhost:5000${project.imageUrl}` : img1} alt={project.title} className="w-full h-full object-cover" />
+                    <img src={project.imageUrl ? `${API_BASE_URL}${project.imageUrl}` : img1} alt={project.title} className="w-full h-full object-cover" />
                  </div>
                  <div className="flex flex-col" style={{ gap: '0.3vh' }}>
                     <p className="font-bold text-white m-0" style={{ fontSize: '0.95vw', fontFamily: 'Gilroy, Poppins, sans-serif' }}>{project.title}</p>
@@ -134,13 +135,7 @@ const ProjectsTable = ({ projects, selectedProject, setSelectedProject }) => {
   };
 
 const RoadmapSection = ({ project }) => {
-    if(!project) {
-        return (
-            <div style={{ marginTop: '5vh', padding: '3vh', textAlign: 'center', color: '#a5a5b2', border: '1px solid #1e1d22', borderRadius: '1vw' }}>
-                Select a project to view its roadmap.
-            </div>
-        );
-    }
+    if(!project) return null;
     
     // Sort milestones by date assuming date is chronological, but they are stored as strings or dates in schema.
     const milestones = project.milestones || [];
@@ -291,7 +286,7 @@ const Progress = () => {
     const fetchProjects = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch('http://localhost:5000/api/projects', {
+        const res = await fetch(`${API_BASE_URL}/api/projects`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {

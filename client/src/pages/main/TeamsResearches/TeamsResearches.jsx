@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ExternalLink, Users as UsersIcon, Calendar as CalendarIcon, Trophy, Award, BookOpen, Cpu, Shield, BarChart3, Cloud, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ExternalLink, Users as UsersIcon, Calendar as CalendarIcon, Trophy, Award, BookOpen, Cpu, Shield, BarChart3, Cloud, ChevronLeft, ChevronRight, Eye, Download } from 'lucide-react';
 import { useLanguage } from "@/contexts/LanguageContext";
+import API_BASE_URL from '@/config';
 
 const svgPaths = {
   p11263c80: "M10.5 7.58333V11.0833C10.5 11.3928 10.3771 11.6895 10.1583 11.9083C9.9395 12.1271 9.64275 12.25 9.33333 12.25H2.91667C2.60725 12.25 2.3105 12.1271 2.09171 11.9083C1.87292 11.6895 1.75 11.3928 1.75 11.0833V4.66667C1.75 4.35725 1.87292 4.0605 2.09171 3.84171C2.3105 3.62292 2.60725 3.5 2.91667 3.5H6.41667",
@@ -59,7 +60,6 @@ function TeamMemberCard({ name, title, role, image, showTwitter = true, isRTL })
       </div>
 
       <div className="flex gap-[30px] items-center">
-        {/* Social Icons Placeholder */}
         <div className="h-[18px] w-[18px] opacity-40 hover:opacity-100 transition-opacity cursor-pointer">
            <ExternalLink size={18} className="text-[#7B829D]" />
         </div>
@@ -71,7 +71,7 @@ function TeamMemberCard({ name, title, role, image, showTwitter = true, isRTL })
   );
 }
 
-const ResearchPaperCard = ({ title, authors, year, journal, description, tags, link, isRTL }) => {
+const ResearchPaperCard = ({ title, authors, year, journal, description, tags, link, isRTL, activeFilds }) => {
     return (
         <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -83,9 +83,14 @@ const ResearchPaperCard = ({ title, authors, year, journal, description, tags, l
                 <h3 className="text-xl font-bold text-white font-gilroy leading-tight group-hover:text-[#3457DC] transition-colors">
                     {title}
                 </h3>
-                <a href={link} target="_blank" rel="noopener noreferrer" className="text-white/20 hover:text-white transition-colors p-1">
-                    <ExternalLink size={20} />
-                </a>
+                <div className="flex items-center gap-2">
+                    <a href={link} target="_blank" rel="noopener noreferrer" className="text-white/20 hover:text-white transition-colors p-1" title="View Publication">
+                        <Eye size={20} />
+                    </a>
+                    <a href={link} download className="text-white/20 hover:text-white transition-colors p-1" title="Download Publication">
+                        <Download size={20} />
+                    </a>
+                </div>
             </div>
 
             <div className={`flex flex-wrap items-center gap-x-6 gap-y-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
@@ -112,6 +117,11 @@ const ResearchPaperCard = ({ title, authors, year, journal, description, tags, l
             )}
 
             <div className={`flex flex-wrap gap-2 mt-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                {activeFilds && activeFilds.map((field, idx) => (
+                    <span key={idx} className="bg-[#3457DC] px-3 py-1 rounded-full text-white text-[11px] font-semibold uppercase tracking-wider">
+                        {field}
+                    </span>
+                ))}
                 {tags && tags.map((tag, idx) => (
                     <span key={idx} className="bg-[#3457DC]/10 px-3 py-1 rounded-full text-[#3457DC] text-[11px] font-semibold uppercase tracking-wider">
                         {tag}
@@ -215,7 +225,7 @@ export default function TeamsResearches() {
     const fetchTeams = async () => {
       setIsLoading(true);
       try {
-        const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : '';
+        const baseUrl = API_BASE_URL;
         const res = await fetch(`${baseUrl}/api/teams`);
         if (res.ok) {
           const data = await res.json();
@@ -244,7 +254,7 @@ export default function TeamsResearches() {
     if (activeTeam) {
       const fetchTeamContent = async () => {
         try {
-          const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : '';
+          const baseUrl = API_BASE_URL;
           
           const pubRes = await fetch(`${baseUrl}/api/publications?team=${activeTeam._id}`);
           if (pubRes.ok) {
@@ -320,7 +330,7 @@ export default function TeamsResearches() {
               <div className="flex flex-col items-center mb-8">
                 <span className="text-[#3457DC] text-[13px] uppercase font-bold tracking-[0.2em] mb-2">{text.badge}</span>
                 <h1 className="font-gilroy font-extrabold text-[60px] md:text-[80px] leading-tight mb-4 bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(156.197deg, rgb(60, 97, 221) 0%, rgb(117, 146, 240) 100%)" }}>
-                  {activeTeam?.name || text.defaultTeamName}
+                   {activeTeam?.name || text.defaultTeamName}
                 </h1>
              </div>
             <p className="font-normal text-[#7b829d] text-[20px] leading-[28px] max-w-2xl mx-auto">
@@ -358,11 +368,12 @@ export default function TeamsResearches() {
                     key={pub._id || index} 
                     title={pub.title}
                     authors={Array.isArray(pub.authors) ? pub.authors.join(', ') : pub.authors}
-                    year={pub.year}
-                    journal={pub.publisher}
-                    description={pub.contribution}
+                    year={pub.publishedDate ? new Date(pub.publishedDate).getFullYear() : (pub.year || '2024')}
+                    journal={pub.team?.name || pub.publisher}
+                    description={pub.description || pub.contribution || pub.abstract}
                     tags={pub.tags}
-                    link={pub.documentUrl ? (pub.documentUrl.startsWith('http') ? pub.documentUrl : `http://localhost:5000${pub.documentUrl}`) : '#'}
+                    activeFilds={pub.activeFilds}
+                    link={pub.documentUrl ? (pub.documentUrl.startsWith('http') ? pub.documentUrl : `${API_BASE_URL}${pub.documentUrl}`) : '#'}
                     isRTL={isRTL}
                   />
                 ))

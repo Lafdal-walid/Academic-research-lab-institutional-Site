@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RiCloseLine } from 'react-icons/ri';
+import API_BASE_URL from '@/config';
 
 const AssignTeamModal = ({ isOpen, onClose, user, onUpdate }) => {
     const [teams, setTeams] = useState([]);
@@ -19,7 +20,7 @@ const AssignTeamModal = ({ isOpen, onClose, user, onUpdate }) => {
         setIsFetchingTeams(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/teams', {
+            const res = await fetch(`${API_BASE_URL}/api/teams`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
@@ -38,15 +39,10 @@ const AssignTeamModal = ({ isOpen, onClose, user, onUpdate }) => {
     };
 
     const handleAssign = async () => {
-        if (!selectedTeamId) {
-            alert('Please select a team');
-            return;
-        }
-
         setIsLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/auth/admin/users/${user.id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/auth/admin/users/${user.id}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -57,7 +53,9 @@ const AssignTeamModal = ({ isOpen, onClose, user, onUpdate }) => {
 
             const data = await res.json();
             if (res.ok) {
-                const teamName = teams.find(t => t._id === selectedTeamId)?.name || 'Assigned';
+                const teamName = selectedTeamId ? 
+                    (teams.find(t => t._id === selectedTeamId)?.name || 'Assigned') : 
+                    'Not Assigned';
                 onUpdate(user.id, { team: teamName });
                 onClose();
             } else {
@@ -72,7 +70,9 @@ const AssignTeamModal = ({ isOpen, onClose, user, onUpdate }) => {
 
     if (!isOpen) return null;
 
-    const selectedTeamName = teams.find(t => t._id === selectedTeamId)?.name || 'Select a team';
+    const selectedTeamName = selectedTeamId ? 
+        (teams.find(t => t._id === selectedTeamId)?.name || 'Select a team') : 
+        (user?.team && user.team !== 'Not Assigned' ? 'No Team (Remove)' : 'Select a team');
 
     return (
         <AnimatePresence>
@@ -136,24 +136,39 @@ const AssignTeamModal = ({ isOpen, onClose, user, onUpdate }) => {
                                         <div className="max-h-[200px] overflow-y-auto custom-scrollbar">
                                             {isFetchingTeams ? (
                                                 <div className="px-[14px] py-[10px] text-[#a5a5b2] text-[14px]">Loading teams...</div>
-                                            ) : teams.length === 0 ? (
-                                                <div className="px-[14px] py-[10px] text-[#a5a5b2] text-[14px]">No teams found</div>
                                             ) : (
-                                                teams.map((team) => (
+                                                <>
+                                                    {/* Remove from team option */}
                                                     <div 
-                                                        key={team._id}
-                                                        className="px-[14px] py-[10px] text-white text-[14px] font-['Poppins',sans-serif] hover:bg-[#3457DC] cursor-pointer transition-colors"
+                                                        className="px-[14px] py-[10px] text-[#eb5757] text-[14px] font-['Poppins',sans-serif] hover:bg-white/5 cursor-pointer transition-colors border-b border-[#2a2a30]"
                                                         onClick={() => {
-                                                            setSelectedTeamId(team._id);
+                                                            setSelectedTeamId('');
                                                             setIsDropdownOpen(false);
                                                         }}
                                                     >
-                                                        <div className="flex flex-col">
-                                                            <span>{team.name}</span>
-                                                            <span className="text-[10px] opacity-60 truncate">{team.focus}</span>
-                                                        </div>
+                                                        Remove from team (Unassign)
                                                     </div>
-                                                ))
+                                                    
+                                                    {teams.length === 0 ? (
+                                                        <div className="px-[14px] py-[10px] text-[#a5a5b2] text-[14px]">No teams found</div>
+                                                    ) : (
+                                                        teams.map((team) => (
+                                                            <div 
+                                                                key={team._id}
+                                                                className="px-[14px] py-[10px] text-white text-[14px] font-['Poppins',sans-serif] hover:bg-[#3457DC] cursor-pointer transition-colors"
+                                                                onClick={() => {
+                                                                    setSelectedTeamId(team._id);
+                                                                    setIsDropdownOpen(false);
+                                                                }}
+                                                            >
+                                                                <div className="flex flex-col">
+                                                                    <span>{team.name}</span>
+                                                                    <span className="text-[10px] opacity-60 truncate">{team.focus}</span>
+                                                                </div>
+                                                            </div>
+                                                        ))
+                                                    )}
+                                                </>
                                             )}
                                         </div>
                                     </motion.div>
@@ -185,8 +200,8 @@ const AssignTeamModal = ({ isOpen, onClose, user, onUpdate }) => {
                             </button>
                             <button 
                                 onClick={handleAssign}
-                                disabled={isLoading || !selectedTeamId}
-                                className={`flex-1 ${isLoading || !selectedTeamId ? 'bg-[#3457DC]/50 cursor-not-allowed' : 'bg-[#3457DC] hover:bg-[#4a6dec]'} text-white h-[50px] rounded-[16px] font-['Poppins',sans-serif] font-medium text-[14px] transition-all`}
+                                disabled={isLoading}
+                                className={`flex-1 ${isLoading ? 'bg-[#3457DC]/50 cursor-not-allowed' : 'bg-[#3457DC] hover:bg-[#4a6dec]'} text-white h-[50px] rounded-[16px] font-['Poppins',sans-serif] font-medium text-[14px] transition-all`}
                             >
                                 {isLoading ? 'Updating...' : 'Assign Team'}
                             </button>

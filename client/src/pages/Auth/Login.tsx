@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGoogleLogin } from '@react-oauth/google';
 import ColorBends from '../../components/ui/ColorBends';
+import API_BASE_URL from '@/config';
 
 // SVG Paths provided by USER
 const svgPaths = {
@@ -146,7 +147,7 @@ const Login = () => {
         setIsSubmitting(true);
 
         try {
-            const res = await fetch('http://localhost:5000/api/auth/login', {
+            const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
@@ -196,7 +197,7 @@ const Login = () => {
         onSuccess: async (tokenResponse) => {
             setIsSubmitting(true);
             try {
-                const res = await fetch('http://localhost:5000/api/auth/google-login', {
+                const res = await fetch(`${API_BASE_URL}/api/auth/google-login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token: tokenResponse.access_token })

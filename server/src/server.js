@@ -118,7 +118,7 @@ app.get('/api/stats/overview', protect, async (req, res) => {
 });
 
 // Static uploads folder
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
@@ -131,7 +131,8 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Start server regardless of DB connection for debugging
 app.listen(port, "0.0.0.0", () => {
-    console.log("App listening on port " + port);
+    console.log(`Server running at http://localhost:${port}`);
+    console.log(`API check: http://localhost:${port}/api/auth/login`);
 });
 
 app.get("/", (req, res) => {

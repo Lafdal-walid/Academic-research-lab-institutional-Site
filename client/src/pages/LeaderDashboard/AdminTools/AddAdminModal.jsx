@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RiCloseLine, RiSearch2Line, RiArrowDownSLine, RiUserAddLine } from 'react-icons/ri';
+import API_BASE_URL from '@/config';
 
 const AddAdminModal = ({ isOpen, onClose, onAdd }) => {
     const [users, setUsers] = useState([]);
@@ -28,7 +29,7 @@ const AddAdminModal = ({ isOpen, onClose, onAdd }) => {
         setIsLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/auth/admin/users', {
+            const res = await fetch(`${API_BASE_URL}/api/auth/admin/users`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
@@ -45,7 +46,7 @@ const AddAdminModal = ({ isOpen, onClose, onAdd }) => {
         
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/auth/admin/users/${selectedUser._id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/auth/admin/users/${selectedUser._id}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,

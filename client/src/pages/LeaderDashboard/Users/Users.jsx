@@ -20,6 +20,7 @@ import GrowthIcon from "@/assets/svg/LeaderDashboard/users/dashboard (4) 1.svg";
 import TrendUpIcon from "@/assets/svg/LeaderDashboard/users/arrow-trend-up_(1)_4.svg";
 import TrashIcon from "@/assets/svg/LeaderDashboard/users/Frame 6489.svg";
 import DetailsIcon from "@/assets/svg/LeaderDashboard/users/Frame 6492.svg";
+import API_BASE_URL from '@/config';
 
 const StatCard = ({ icon, title, value, growth }) => {
     return (
@@ -140,16 +141,20 @@ const ManageUsersTable = () => {
     const [selectedStatus, setSelectedStatus] = useState('Status');
     const [selectedRole, setSelectedRole] = useState('By Role');
     const [availableTeams, setAvailableTeams] = useState(['By Team']);
-    const [currentPage, setCurrentPage] = useState(2);
+    
+    // Pagination & Table States
+    const [users, setUsers] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [isItemsPerPageDropdownOpen, setIsItemsPerPageDropdownOpen] = useState(false);
+
+    // Modal & Action States
     const [activeActionMenu, setActiveActionMenu] = useState(null);
     const [isChangeRoleModalOpen, setIsChangeRoleModalOpen] = useState(false);
     const [isAssignTeamModalOpen, setIsAssignTeamModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
-    const totalPages = 12;
-
-    const [users, setUsers] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchInitialData = async () => {
@@ -158,13 +163,13 @@ const ManageUsersTable = () => {
                 const token = localStorage.getItem('token');
                 
                 // Fetch Users
-                const usersRes = await fetch('http://localhost:5000/api/auth/admin/users', {
+                const usersRes = await fetch(`${API_BASE_URL}/api/auth/admin/users`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const usersData = await usersRes.json();
                 
                 // Fetch Teams
-                const teamsRes = await fetch('http://localhost:5000/api/teams', {
+                const teamsRes = await fetch(`${API_BASE_URL}/api/teams`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const teamsData = await teamsRes.json();
@@ -206,7 +211,7 @@ const ManageUsersTable = () => {
     const handleRoleUpdate = async (userId, updateData) => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/auth/admin/users/${userId}`, {
+            const res = await fetch(`${API_BASE_URL}/api/auth/admin/users/${userId}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -272,6 +277,17 @@ const ManageUsersTable = () => {
 
         return result;
     }, [users, searchTerm, selectedSort, selectedRole, selectedTeam, selectedStatus]);
+
+    const totalPages = Math.ceil(filteredUsers.length / itemsPerPage) || 1;
+    const paginatedUsers = React.useMemo(() => {
+        const start = (currentPage - 1) * itemsPerPage;
+        return filteredUsers.slice(start, start + itemsPerPage);
+    }, [filteredUsers, currentPage, itemsPerPage]);
+
+    // Reset to page 1 when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, selectedSort, selectedRole, selectedTeam, selectedStatus, itemsPerPage]);
 
     const dropdownRef = useRef(null);
 
@@ -387,7 +403,6 @@ const ManageUsersTable = () => {
                     <thead>
                         <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                             <th style={{ padding: '1.5vh 0.5vw', width: '3vw' }}></th>
-                            <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>User Id</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>email</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>User name</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Role</th>
@@ -400,17 +415,17 @@ const ManageUsersTable = () => {
                     <tbody>
                         {isLoading ? (
                             <tr>
-                                <td colSpan="9" style={{ textAlign: 'center', padding: '5vh', color: '#a5a5b2' }}>Loading users...</td>
+                                <td colSpan="8" style={{ textAlign: 'center', padding: '5vh', color: '#a5a5b2' }}>Loading users...</td>
                             </tr>
                         ) : error ? (
                             <tr>
-                                <td colSpan="9" style={{ textAlign: 'center', padding: '5vh', color: '#eb5757' }}>{error}</td>
+                                <td colSpan="8" style={{ textAlign: 'center', padding: '5vh', color: '#eb5757' }}>{error}</td>
                             </tr>
-                        ) : filteredUsers.length === 0 ? (
+                        ) : paginatedUsers.length === 0 ? (
                             <tr>
-                                <td colSpan="9" style={{ textAlign: 'center', padding: '5vh', color: '#a5a5b2' }}>No users found</td>
+                                <td colSpan="8" style={{ textAlign: 'center', padding: '5vh', color: '#a5a5b2' }}>No users found</td>
                             </tr>
-                        ) : filteredUsers.map((user) => (
+                        ) : paginatedUsers.map((user) => (
                             <tr key={user.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', height: '8vh' }}>
                                 <td style={{ padding: '0 0.5vw' }}>
                                     <div onClick={() => handleToggleRow(user.id)}
@@ -418,7 +433,6 @@ const ManageUsersTable = () => {
                                         {user.checked && <RiCheckLine color="white" size="0.8vw" />}
                                     </div>
                                 </td>
-                                <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{user.userId}</td>
                                 <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{user.email}</td>
                                 <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'white' }}>{user.username}</td>
                                 <td style={{ padding: '0 0.5vw' }}>
@@ -500,32 +514,57 @@ const ManageUsersTable = () => {
 
             {/* 4. Pagination Section */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginTop: '4vh' }}>
-                <div style={{ display: 'flex', gap: '12vw', alignItems: 'center' }}>
-                    <button style={{ width: '2.4vw', height: '2.4vw', backgroundColor: '#3457DC', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                <div style={{ display: 'flex', gap: '8vw', alignItems: 'center' }}>
+                    <button 
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                        style={{ width: '2.4vw', height: '2.4vw', backgroundColor: '#3457DC', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', opacity: currentPage === 1 ? 0.5 : 1 }}>
                         <RiArrowLeftSLine color="#F7F7F7" size="1.2vw" />
                     </button>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '2vw' }}>
                         <div style={{ border: '1px solid #2a2a30', borderRadius: '0.6vw', padding: '1vh 0.6vw', backgroundColor: 'rgba(255,255,255,0.01)', minWidth: '2.5vw', textAlign: 'center' }}>
-                            <span style={{ fontSize: '0.9vw', color: '#ffffff' }}>2</span>
+                            <span style={{ fontSize: '0.9vw', color: '#ffffff' }}>{currentPage}</span>
                         </div>
-                        <span style={{ fontSize: '0.95vw', color: '#80808a' }}>of 12</span>
+                        <span style={{ fontSize: '0.95vw', color: '#80808a' }}>of {totalPages}</span>
                     </div>
 
-                    <button style={{ width: '2.4vw', height: '2.4vw', backgroundColor: '#3457DC', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                    <button 
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        disabled={currentPage === totalPages}
+                        style={{ width: '2.4vw', height: '2.4vw', backgroundColor: '#3457DC', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', opacity: currentPage === totalPages ? 0.5 : 1 }}>
                         <RiArrowRightSLine color="#F7F7F7" size="1.2vw" />
                     </button>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8vw' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8vw', position: 'relative' }}>
                     <span style={{ fontSize: '0.9vw', color: '#a5a5b2' }}>results per page</span>
-                    <div style={{
+                    <div 
+                        onClick={() => setIsItemsPerPageDropdownOpen(!isItemsPerPageDropdownOpen)}
+                        style={{
                         backgroundColor: '#1e1e24', border: '1px solid rgba(255,255,255,0.08)',
                         borderRadius: '0.6vw', padding: '0.8vh 1vw', display: 'flex', alignItems: 'center', gap: '0.5vw', cursor: 'pointer'
                     }}>
-                        <span style={{ color: 'white', fontSize: '0.85vw' }}>10</span>
+                        <span style={{ color: 'white', fontSize: '0.85vw' }}>{itemsPerPage}</span>
                         <RiArrowDownSLine color="#3457DC" size="1vw" />
                     </div>
+                    {isItemsPerPageDropdownOpen && (
+                        <div style={{
+                            position: 'absolute', bottom: '110%', right: 0,
+                            backgroundColor: '#1e1e24', border: '1px solid rgba(255,255,255,0.08)',
+                            borderRadius: '0.6vw', padding: '0.5vw', zIndex: 100, minWidth: '5vw'
+                        }}>
+                            {[10, 20, 50, 100].map(val => (
+                                <div 
+                                    key={val} 
+                                    onClick={() => { setItemsPerPage(val); setIsItemsPerPageDropdownOpen(false); }}
+                                    style={dropdownItemStyle(itemsPerPage === val)}
+                                >
+                                    {val}
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -618,13 +657,16 @@ const UsersPublicationsTable = () => {
     const [publications, setPublications] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [isItemsPerPageDropdownOpen, setIsItemsPerPageDropdownOpen] = useState(false);
 
     useEffect(() => {
         const fetchPublications = async () => {
             setIsLoading(true);
             try {
                 const token = localStorage.getItem('token');
-                const res = await fetch('http://localhost:5000/api/publications', {
+                const res = await fetch(`${API_BASE_URL}/api/publications?status=all`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 
@@ -656,8 +698,24 @@ const UsersPublicationsTable = () => {
         fetchPublications();
     }, []);
 
-    const handleToggleRow = (id) => {
-        setPublications(prev => prev.map(p => p.id === id ? { ...p, checked: !p.checked } : p));
+    const handleUpdateStatus = async (id, newStatus) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE_URL}/api/publications/${id}/status`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ status: newStatus })
+            });
+            if (res.ok) {
+                setPublications(prev => prev.map(p => p.id === id ? { ...p, status: newStatus } : p));
+                setActiveRowAction(null);
+            }
+        } catch (err) {
+            console.error("Failed to update status", err);
+        }
     };
 
     const availableProjects = React.useMemo(() => {
@@ -707,6 +765,16 @@ const UsersPublicationsTable = () => {
 
         return result;
     }, [publications, searchTerm, selectedSort, selectedProject, selectedTeam, selectedStatus]);
+
+    const totalPages = Math.ceil(filteredPublications.length / itemsPerPage) || 1;
+    const paginatedPublications = React.useMemo(() => {
+        const start = (currentPage - 1) * itemsPerPage;
+        return filteredPublications.slice(start, start + itemsPerPage);
+    }, [filteredPublications, currentPage, itemsPerPage]);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, selectedSort, selectedProject, selectedTeam, selectedStatus, itemsPerPage]);
 
     return (
         <div style={{
@@ -790,11 +858,11 @@ const UsersPublicationsTable = () => {
                             <tr>
                                 <td colSpan="8" style={{ textAlign: 'center', padding: '5vh', color: '#eb5757' }}>{error}</td>
                             </tr>
-                        ) : filteredPublications.length === 0 ? (
+                        ) : paginatedPublications.length === 0 ? (
                             <tr>
                                 <td colSpan="8" style={{ textAlign: 'center', padding: '5vh', color: '#a5a5b2' }}>No publications found</td>
                             </tr>
-                        ) : filteredPublications.map((row) => (
+                        ) : paginatedPublications.map((row) => (
                             <tr key={row.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
                                 <td style={{ padding: '2.5vh 0.5vw' }}>
                                     <div onClick={() => handleToggleRow(row.id)}
@@ -811,8 +879,10 @@ const UsersPublicationsTable = () => {
                                         display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                                         padding: '0.9vh 1.2vw', borderRadius: '100px',
                                         fontSize: '0.75vw',
-                                        backgroundColor: 'rgba(39, 189, 173, 0.1)',
-                                        color: '#27bdad',
+                                        backgroundColor: row.status === 'Approved' ? 'rgba(39, 189, 173, 0.1)' : 
+                                                         row.status === 'Rejected' ? 'rgba(235, 87, 87, 0.1)' : 'rgba(255, 193, 7, 0.1)',
+                                        color: row.status === 'Approved' ? '#27bdad' : 
+                                               row.status === 'Rejected' ? '#eb5757' : '#ffc107',
                                         fontWeight: 600, width: '8.5vw'
                                     }}>
                                         {row.status}
@@ -850,8 +920,11 @@ const UsersPublicationsTable = () => {
                                             
                                             {activeRowAction === row.id && (
                                                 <div ref={rowActionRef} style={{ ...rowActionMenuStyle, top: '100%', right: '0', marginTop: '0.2vw' }}>
-                                                    <div style={dropdownItemStyle(false)} onClick={() => setActiveRowAction(null)}>
+                                                    <div style={dropdownItemStyle(false)} onClick={() => handleUpdateStatus(row.id, 'Approved')}>
                                                         Accept publication
+                                                    </div>
+                                                    <div style={dropdownItemStyle(row.status === 'Rejected')} onClick={() => handleUpdateStatus(row.id, 'Rejected')}>
+                                                        Reject publication
                                                     </div>
                                                     <div style={dropdownItemStyle(false)} onClick={() => setActiveRowAction(null)}>
                                                         contact user
@@ -869,32 +942,57 @@ const UsersPublicationsTable = () => {
 
             {/* 4. Pagination Section */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginTop: '4vh' }}>
-                <div style={{ display: 'flex', gap: '12vw', alignItems: 'center' }}>
-                    <button style={{ width: '2.4vw', height: '2.4vw', backgroundColor: '#3457DC', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                <div style={{ display: 'flex', gap: '8vw', alignItems: 'center' }}>
+                    <button 
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                        style={{ width: '2.4vw', height: '2.4vw', backgroundColor: '#3457DC', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', opacity: currentPage === 1 ? 0.5 : 1 }}>
                         <RiArrowLeftSLine color="#F7F7F7" size="1.2vw" />
                     </button>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '2vw' }}>
                         <div style={{ border: '1px solid #2a2a30', borderRadius: '0.6vw', padding: '1vh 0.6vw', backgroundColor: 'rgba(255,255,255,0.01)', minWidth: '2.5vw', textAlign: 'center' }}>
-                            <span style={{ fontSize: '0.9vw', color: '#ffffff' }}>2</span>
+                            <span style={{ fontSize: '0.9vw', color: '#ffffff' }}>{currentPage}</span>
                         </div>
-                        <span style={{ fontSize: '0.95vw', color: '#80808a' }}>of 12</span>
+                        <span style={{ fontSize: '0.95vw', color: '#80808a' }}>of {totalPages}</span>
                     </div>
 
-                    <button style={{ width: '2.4vw', height: '2.4vw', backgroundColor: '#3457DC', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                    <button 
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        disabled={currentPage === totalPages}
+                        style={{ width: '2.4vw', height: '2.4vw', backgroundColor: '#3457DC', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', opacity: currentPage === totalPages ? 0.5 : 1 }}>
                         <RiArrowRightSLine color="#F7F7F7" size="1.2vw" />
                     </button>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8vw' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8vw', position: 'relative' }}>
                     <span style={{ fontSize: '0.9vw', color: '#a5a5b2' }}>results per page</span>
-                    <div style={{
+                    <div 
+                        onClick={() => setIsItemsPerPageDropdownOpen(!isItemsPerPageDropdownOpen)}
+                        style={{
                         backgroundColor: '#1e1e24', border: '1px solid rgba(255,255,255,0.08)',
                         borderRadius: '0.6vw', padding: '0.8vh 1vw', display: 'flex', alignItems: 'center', gap: '0.5vw', cursor: 'pointer'
                     }}>
-                        <span style={{ color: 'white', fontSize: '0.85vw' }}>10</span>
+                        <span style={{ color: 'white', fontSize: '0.85vw' }}>{itemsPerPage}</span>
                         <RiArrowDownSLine color="#3457DC" size="1vw" />
                     </div>
+                    {isItemsPerPageDropdownOpen && (
+                        <div style={{
+                            position: 'absolute', bottom: '110%', right: 0,
+                            backgroundColor: '#1e1e24', border: '1px solid rgba(255,255,255,0.08)',
+                            borderRadius: '0.6vw', padding: '0.5vw', zIndex: 100, minWidth: '5vw'
+                        }}>
+                            {[10, 20, 50, 100].map(val => (
+                                <div 
+                                    key={val} 
+                                    onClick={() => { setItemsPerPage(val); setIsItemsPerPageDropdownOpen(false); }}
+                                    style={dropdownItemStyle(itemsPerPage === val)}
+                                >
+                                    {val}
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
@@ -981,6 +1079,9 @@ const UsersTrackTable = ({ records = [], selectedId, onSelect, onUpdateStatus })
     const [searchTerm, setSearchTerm] = useState('');
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [activeRowAction, setActiveRowAction] = useState(null);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [isItemsPerPageDropdownOpen, setIsItemsPerPageDropdownOpen] = useState(false);
     
     const dropdownRef = useRef(null);
     const rowActionRef = useRef(null);
@@ -1025,6 +1126,30 @@ const UsersTrackTable = ({ records = [], selectedId, onSelect, onUpdateStatus })
         transition: '0.2s', marginBottom: '2px'
     });
 
+    const filteredRecords = React.useMemo(() => {
+        let result = [...records];
+        if (searchTerm) {
+            const lower = searchTerm.toLowerCase();
+            result = result.filter(r => 
+                r.user.toLowerCase().includes(lower) ||
+                r.document.toLowerCase().includes(lower) ||
+                r.university.toLowerCase().includes(lower)
+            );
+        }
+        // Add more filters if needed
+        return result;
+    }, [records, searchTerm]);
+
+    const totalPages = Math.ceil(filteredRecords.length / itemsPerPage) || 1;
+    const paginatedRecords = React.useMemo(() => {
+        const start = (currentPage - 1) * itemsPerPage;
+        return filteredRecords.slice(start, start + itemsPerPage);
+    }, [filteredRecords, currentPage, itemsPerPage]);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, itemsPerPage]);
+
     return (
         <div style={{
             backgroundColor: '#151519', border: '1px solid rgba(255, 255, 255, 0.05)',
@@ -1067,7 +1192,9 @@ const UsersTrackTable = ({ records = [], selectedId, onSelect, onUpdateStatus })
                         </tr>
                     </thead>
                     <tbody>
-                        {records.map((row) => (
+                        {paginatedRecords.length === 0 ? (
+                            <tr><td colSpan="7" style={{ textAlign: 'center', padding: '5vh', color: '#a5a5b2' }}>No records found</td></tr>
+                        ) : paginatedRecords.map((row) => (
                             <tr key={row.id} 
                                 onClick={() => onSelect(row.id)}
                                 style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', cursor: 'pointer', backgroundColor: selectedId === row.id ? 'rgba(255, 255, 255, 0.03)' : 'transparent', transition: '0.2s' }}
@@ -1094,7 +1221,7 @@ const UsersTrackTable = ({ records = [], selectedId, onSelect, onUpdateStatus })
                                 <td style={{ padding: '2.5vh 0.5vw', textAlign: 'right' }}>
                                     <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1.2vw' }}>
                                         <a
-                                            href={row.fileUrl ? `http://localhost:5000${row.fileUrl}` : '#'}
+                                            href={row.fileUrl ? `${API_BASE_URL}${row.fileUrl}` : '#'}
                                             download
                                             target="_blank"
                                             rel="noreferrer"
@@ -1127,19 +1254,57 @@ const UsersTrackTable = ({ records = [], selectedId, onSelect, onUpdateStatus })
 
             {/* Pagination */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginTop: '4vh' }}>
-                <div style={{ display: 'flex', gap: '12vw', alignItems: 'center' }}>
-                    <button style={{ width: '2.4vw', height: '2.4vw', backgroundColor: '#3457DC', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ display: 'flex', gap: '8vw', alignItems: 'center' }}>
+                    <button 
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                        style={{ width: '2.4vw', height: '2.4vw', backgroundColor: '#3457DC', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', opacity: currentPage === 1 ? 0.5 : 1 }}>
                         <RiArrowLeftSLine color="#F7F7F7" size="1.2vw" />
                     </button>
+
                     <div style={{ display: 'flex', alignItems: 'center', gap: '2vw' }}>
                         <div style={{ border: '1px solid #2a2a30', borderRadius: '0.6vw', padding: '1vh 0.6vw', backgroundColor: 'rgba(255,255,255,0.01)', minWidth: '2.5vw', textAlign: 'center' }}>
-                            <span style={{ fontSize: '0.9vw', color: '#ffffff' }}>2</span>
+                            <span style={{ fontSize: '0.9vw', color: '#ffffff' }}>{currentPage}</span>
                         </div>
-                        <span style={{ fontSize: '0.95vw', color: '#80808a' }}>of 12</span>
+                        <span style={{ fontSize: '0.95vw', color: '#80808a' }}>of {totalPages}</span>
                     </div>
-                    <button style={{ width: '2.4vw', height: '2.4vw', backgroundColor: '#3457DC', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+
+                    <button 
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        disabled={currentPage === totalPages}
+                        style={{ width: '2.4vw', height: '2.4vw', backgroundColor: '#3457DC', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', opacity: currentPage === totalPages ? 0.5 : 1 }}>
                         <RiArrowRightSLine color="#F7F7F7" size="1.2vw" />
                     </button>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8vw', position: 'relative' }}>
+                    <span style={{ fontSize: '0.9vw', color: '#a5a5b2' }}>results per page</span>
+                    <div 
+                        onClick={() => setIsItemsPerPageDropdownOpen(!isItemsPerPageDropdownOpen)}
+                        style={{
+                        backgroundColor: '#1e1e24', border: '1px solid rgba(255,255,255,0.08)',
+                        borderRadius: '0.6vw', padding: '0.8vh 1vw', display: 'flex', alignItems: 'center', gap: '0.5vw', cursor: 'pointer'
+                    }}>
+                        <span style={{ color: 'white', fontSize: '0.85vw' }}>{itemsPerPage}</span>
+                        <RiArrowDownSLine color="#3457DC" size="1vw" />
+                    </div>
+                    {isItemsPerPageDropdownOpen && (
+                        <div style={{
+                            position: 'absolute', bottom: '110%', right: 0,
+                            backgroundColor: '#1e1e24', border: '1px solid rgba(255,255,255,0.08)',
+                            borderRadius: '0.6vw', padding: '0.5vw', zIndex: 100, minWidth: '5vw'
+                        }}>
+                            {[10, 20, 50, 100].map(val => (
+                                <div 
+                                    key={val} 
+                                    onClick={() => { setItemsPerPage(val); setIsItemsPerPageDropdownOpen(false); }}
+                                    style={dropdownItemStyle(itemsPerPage === val)}
+                                >
+                                    {val}
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
@@ -1154,7 +1319,7 @@ const UsersTrackManager = () => {
     const fetchReports = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/reports', {
+            const res = await fetch(`${API_BASE_URL}/api/reports`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -1215,7 +1380,7 @@ const UsersTrackManager = () => {
     const handleUpdateStatus = async (id, newStatus) => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/reports/${id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/reports/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1263,7 +1428,7 @@ const Users = () => {
         const fetchStats = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const res = await fetch('http://localhost:5000/api/auth/admin/stats', {
+                const res = await fetch(`${API_BASE_URL}/api/auth/admin/stats`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await res.json();

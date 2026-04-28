@@ -16,6 +16,7 @@ import PauseIcon from "@/assets/svg/userDashboard/Progress/pause_1.svg";
 import img1 from "@/assets/svg/userDashboard/Progress/01-ai-cover-mar2024-static_(2) (2) 1.png";
 import img2 from "@/assets/svg/userDashboard/Progress/5a30797ac91abd1c88194b924cf3eaa9 2.png";
 import img3 from "@/assets/svg/userDashboard/Progress/imagesf.png";
+import API_BASE_URL from '@/config';
 
 const Tab = ({ label, isActive, onClick }) => {
     return (
@@ -105,15 +106,16 @@ const StatCard = ({ icon, title, value }) => {
 
 const ProjectTimeline = ({ projectName, projectId, milestones = [], onRefresh }) => {
     const [isAdding, setIsAdding] = useState(false);
+    const [editingPhase, setEditingPhase] = useState(null);
     const [newM, setNewM] = useState({ title: '', date: '' });
-    const [isSaving, setIsSaving] = useState(false);
+    const [isSaving, setIsLoading] = useState(false);
 
     const handleAddMilestone = async () => {
         if (!newM.title) return alert('Please enter a title');
-        setIsSaving(true);
+        setIsLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/projects/${projectId}/milestones`, {
+            const res = await fetch(`${API_BASE_URL}/api/projects/${projectId}/milestones`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -121,15 +123,35 @@ const ProjectTimeline = ({ projectName, projectId, milestones = [], onRefresh })
                 },
                 body: JSON.stringify(newM)
             });
+            const data = await res.json();
             if (res.ok) {
                 setIsAdding(false);
                 setNewM({ title: '', date: '' });
-                if (onRefresh) onRefresh();
+                if (onRefresh) onRefresh(true);
+                alert('Phase saved successfully!');
+            } else {
+                alert(`Error: ${data.message || 'Failed to save phase'}`);
             }
         } catch (err) {
             console.error(err);
+            alert('Connection failed while saving phase');
         } finally {
-            setIsSaving(false);
+            setIsLoading(false);
+        }
+    };
+
+    const handleToggleMilestone = async (milestoneId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE_URL}/api/projects/${projectId}/milestones/${milestoneId}/toggle`, {
+                method: 'PATCH',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                if (onRefresh) onRefresh(true);
+            }
+        } catch (err) {
+            console.error(err);
         }
     };
 
@@ -154,10 +176,14 @@ const ProjectTimeline = ({ projectName, projectId, milestones = [], onRefresh })
                     display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center'
                 }}>
                     <span style={{ fontSize: '14px', color: '#3457DC', fontWeight: 500 }}>
-                         {milestones.filter(m => m.completed).length + 1} of {milestones.length + 1} Completed
+                         {milestones.filter(m => m.completed).length} of {milestones.length} Phases Completed
                     </span>
                     <div style={{ width: '60px', height: '4px', backgroundColor: '#1e1e24', borderRadius: '400px', overflow: 'hidden' }}>
-                        <div style={{ width: '24px', height: '100%', backgroundColor: '#3457DC' }} />
+                        <div style={{ 
+                            width: milestones.length > 0 ? `${(milestones.filter(m => m.completed).length / milestones.length) * 60}px` : '0px', 
+                            height: '100%', 
+                            backgroundColor: '#3457DC' 
+                        }} />
                     </div>
                 </div>
 
@@ -276,7 +302,7 @@ const ProjectTimeline = ({ projectName, projectId, milestones = [], onRefresh })
                 </div>
 
                 {milestones.map((phase, index) => (
-                    <div key={index} style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
+                    <div key={phase._id || index} style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '46px', position: 'relative' }}>
                             <div style={{
                                 backgroundColor: phase.completed ? '#3457DC' : '#1e1e24',
@@ -294,20 +320,40 @@ const ProjectTimeline = ({ projectName, projectId, milestones = [], onRefresh })
                             )}
                         </div>
                         <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <div 
+                                onClick={() => setEditingPhase(phase)}
+                                style={{ display: 'flex', flexDirection: 'column', gap: '4px', cursor: 'pointer' }}
+                                className="group"
+                            >
                                 <span style={{ fontSize: '14px', color: '#a5a5b2', fontWeight: 500 }}>{phase.date || 'TBD'}</span>
-                                <span style={{ fontSize: '14px', color: 'white', fontWeight: 400 }}>{phase.title}</span>
+                                <span style={{ fontSize: '14px', color: 'white', fontWeight: 400, borderBottom: '1px dashed transparent' }} className="group-hover:border-[#3457DC] group-hover:text-[#3457DC] transition-all">
+                                    {phase.title}
+                                </span>
                             </div>
-                            <div style={{
-                                backgroundColor: '#1e1e24', padding: '10px 24px', borderRadius: '16px',
-                                color: 'white', fontSize: '14px', fontWeight: 500, cursor: 'pointer'
-                            }}>
-                                {phase.completed ? 'Completed' : 'View Details'}
+                            <div 
+                                onClick={() => handleToggleMilestone(phase._id)}
+                                style={{
+                                    backgroundColor: phase.completed ? 'rgba(39, 189, 173, 0.1)' : '#1e1e24', 
+                                    padding: '10px 24px', borderRadius: '16px',
+                                    color: phase.completed ? '#27bdad' : 'white', 
+                                    fontSize: '14px', fontWeight: 500, cursor: 'pointer',
+                                    border: phase.completed ? '1px solid rgba(39, 189, 173, 0.2)' : 'none'
+                                }}
+                            >
+                                {phase.completed ? 'Completed' : 'Mark Complete'}
                             </div>
                         </div>
                     </div>
                 ))}
             </div>
+
+            <EditPhaseModal 
+                isOpen={!!editingPhase} 
+                onClose={() => setEditingPhase(null)} 
+                projectId={projectId} 
+                phase={editingPhase} 
+                onUpdate={onRefresh} 
+            />
 
             {/* Bottom HR Divider */}
             <div style={{ padding: '24px 0 8px 0' }}>
@@ -336,12 +382,23 @@ const ProjectTimeline = ({ projectName, projectId, milestones = [], onRefresh })
 };
 
 const EditProjectModal = ({ isOpen, onClose, project, teams, users, onUpdate }) => {
+    // Determine Team Leader ID for exclusion
+    const assignedTeam = teams.find(t => t._id === (project?.raw?.team?._id || project?.raw?.team));
+    const teamLeaderId = assignedTeam?.leader?._id || assignedTeam?.leader;
+
     const [formData, setFormData] = useState({
         name: project?.name || '',
         description: project?.raw?.description || '',
         teamId: project?.raw?.team?._id || project?.raw?.team || '',
         leaderId: project?.raw?.leader?._id || project?.raw?.leader || '',
-        status: project?.status || 'On going',
+        members: (project?.raw?.members || [])
+            .map(m => m._id || m)
+            .filter(mId => {
+                const isProjectLeader = mId?.toString() === (project?.raw?.leader?._id || project?.raw?.leader)?.toString();
+                const isTeamLeader = teamLeaderId && mId?.toString() === teamLeaderId.toString();
+                return !isProjectLeader && !isTeamLeader;
+            }),
+        status: project?.status || 'Ongoing',
         endDate: project?.raw?.endDate ? new Date(project?.raw?.endDate).toISOString().split('T')[0] : ''
     });
     const [isLoading, setIsLoading] = useState(false);
@@ -352,7 +409,7 @@ const EditProjectModal = ({ isOpen, onClose, project, teams, users, onUpdate }) 
         setIsLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/projects/${project.id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/projects/${project.id}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -363,12 +420,13 @@ const EditProjectModal = ({ isOpen, onClose, project, teams, users, onUpdate }) 
                     description: formData.description,
                     team: formData.teamId,
                     leader: formData.leaderId,
+                    members: formData.members,
                     status: formData.status,
                     endDate: formData.endDate
                 })
             });
             if (res.ok) {
-                onUpdate();
+                onUpdate(true);
                 onClose();
             }
         } catch (err) {
@@ -378,15 +436,34 @@ const EditProjectModal = ({ isOpen, onClose, project, teams, users, onUpdate }) 
         }
     };
 
+    const eligibleMembers = React.useMemo(() => {
+        if (!formData.teamId) return [];
+        const currentTeam = teams.find(t => t._id === formData.teamId);
+        const currentTeamLeaderId = currentTeam?.leader?._id || currentTeam?.leader;
+
+        return users.filter(u => {
+            const userTeamId = u.team?._id || u.team;
+            const isSameTeam = userTeamId?.toString() === formData.teamId?.toString();
+            const isAlreadySelected = (formData.members || []).some(mId => mId?.toString() === u._id?.toString());
+            const isProjectLeader = u._id?.toString() === formData.leaderId?.toString();
+            const isTeamLeader = currentTeamLeaderId && u._id?.toString() === currentTeamLeaderId.toString();
+            const isNotAdmin = u.role !== 'admin' && u.role !== 'superadmin';
+            
+            // Show if it's the right team AND not admin, OR if already selected
+            // BUT always exclude leaders
+            return ((isSameTeam && isNotAdmin) || isAlreadySelected) && !isProjectLeader && !isTeamLeader;
+        }).map(u => ({ id: u._id, name: u.username }));
+    }, [users, formData.teamId, formData.members, formData.leaderId, teams]);
+
     const teamName = teams.find(t => t._id === formData.teamId)?.name || 'Select team';
-    const leaderName = users.find(u => u.id === formData.leaderId)?.name || 'Select leader';
+    const leaderName = users.find(u => u._id === formData.leaderId)?.username || 'Select leader';
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[2000] flex items-center justify-center p-4">
             <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-[#151519] border border-[#1e1d22] rounded-[24px] p-8 w-full max-w-2xl flex flex-col gap-6"
+                className="bg-[#151519] border border-[#1e1d22] rounded-[24px] p-8 w-full max-w-2xl flex flex-col gap-6 max-h-[90vh] overflow-y-auto"
             >
                 <h2 className="text-xl font-bold text-white">Edit Project Details</h2>
                 
@@ -395,7 +472,7 @@ const EditProjectModal = ({ isOpen, onClose, project, teams, users, onUpdate }) 
                     <FormSelect 
                         label="Status" 
                         value={formData.status} 
-                        options={['On going', 'Completed', 'Canceled']} 
+                        options={['Ongoing', 'Completed', 'Suspended']} 
                         onSelect={(val) => setFormData({...formData, status: val})} 
                     />
                 </div>
@@ -426,6 +503,20 @@ const EditProjectModal = ({ isOpen, onClose, project, teams, users, onUpdate }) 
                     </div>
                 </div>
 
+                <FormMultiSelect 
+                    label="Member List" 
+                    selectedIds={formData.members} 
+                    options={eligibleMembers}
+                    onToggle={(id) => {
+                        setFormData(prev => ({
+                            ...prev,
+                            members: prev.members.includes(id) 
+                                ? prev.members.filter(m => m !== id) 
+                                : [...prev.members, id]
+                        }));
+                    }}
+                />
+
                 <div className="flex justify-end gap-4 mt-4">
                     <button onClick={onClose} className="px-6 py-2 text-[#a5a5b2] hover:text-white transition-colors">Cancel</button>
                     <button 
@@ -435,6 +526,121 @@ const EditProjectModal = ({ isOpen, onClose, project, teams, users, onUpdate }) 
                     >
                         {isLoading ? 'Saving...' : 'Update Project'}
                     </button>
+                </div>
+            </motion.div>
+        </div>
+    );
+};
+
+const EditPhaseModal = ({ isOpen, onClose, projectId, phase, onUpdate }) => {
+    const [formData, setFormData] = useState({
+        title: phase?.title || '',
+        date: phase?.date ? new Date(phase.date).toISOString().split('T')[0] : ''
+    });
+    const [isLoading, setIsLoading] = useState(false);
+
+    React.useEffect(() => {
+        if (phase) {
+            setFormData({
+                title: phase.title || '',
+                date: phase.date ? new Date(phase.date).toISOString().split('T')[0] : ''
+            });
+        }
+    }, [phase]);
+
+    if (!isOpen) return null;
+
+    const handleUpdate = async () => {
+        setIsLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE_URL}/api/projects/${projectId}/milestones/${phase._id}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+            if (res.ok) {
+                onUpdate(true);
+                onClose();
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!window.confirm('Are you sure you want to delete this phase?')) return;
+        setIsLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE_URL}/api/projects/${projectId}/milestones/${phase._id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                onUpdate(true);
+                onClose();
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[3000] flex items-center justify-center p-4">
+            <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-[#151519] border border-[#1e1d22] rounded-[24px] p-8 w-full max-w-md flex flex-col gap-6 shadow-2xl"
+            >
+                <h2 className="text-xl font-bold text-white">Edit Phase Details</h2>
+                
+                <FormInput 
+                    label="Phase Title" 
+                    value={formData.title} 
+                    onChange={(val) => setFormData({...formData, title: val})} 
+                />
+                
+                <div className="flex flex-col gap-2">
+                    <p className="text-[#80808a] text-[14px]">Target Date</p>
+                    <input 
+                        type="date"
+                        className="bg-[rgba(255,255,255,0.01)] h-[41px] px-[14px] rounded-[8px] border border-[#2a2a30] text-white outline-none focus:border-[#3457DC] transition-all color-scheme-dark"
+                        value={formData.date}
+                        onChange={(e) => setFormData({...formData, date: e.target.value})}
+                    />
+                </div>
+
+                <div className="flex flex-col gap-3 mt-4">
+                    <button 
+                        onClick={handleUpdate} 
+                        disabled={isLoading}
+                        className="bg-[#3457dc] text-white px-8 py-3 rounded-xl font-bold hover:bg-[#2a4ac0] disabled:opacity-50 transition-all w-full"
+                    >
+                        {isLoading ? 'Saving...' : 'Update Phase'}
+                    </button>
+                    <div className="flex gap-3">
+                         <button 
+                            onClick={handleDelete} 
+                            disabled={isLoading}
+                            className="bg-red-500/10 text-red-500 px-4 py-2 rounded-xl font-medium hover:bg-red-500/20 disabled:opacity-50 transition-all flex-1"
+                        >
+                            Delete
+                        </button>
+                        <button 
+                            onClick={onClose} 
+                            className="px-4 py-2 text-[#a5a5b2] hover:text-white transition-colors flex-1"
+                        >
+                            Cancel
+                        </button>
+                    </div>
                 </div>
             </motion.div>
         </div>
@@ -452,13 +658,13 @@ const ProjectsTable = ({ projects = [], selectedId, onSelect, onRefresh }) => {
         const fetchMeta = async () => {
             const token = localStorage.getItem('token');
             const [tRes, uRes] = await Promise.all([
-                fetch('http://localhost:5000/api/teams', { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch('http://localhost:5000/api/auth/admin/users', { headers: { 'Authorization': `Bearer ${token}` } })
+                fetch(`${API_BASE_URL}/api/teams`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`${API_BASE_URL}/api/auth/admin/users`, { headers: { 'Authorization': `Bearer ${token}` } })
             ]);
             if (tRes.ok) setTeams(await tRes.json());
             if (uRes.ok) {
                 const uData = await uRes.json();
-                setUsers(uData.map(u => ({ id: u._id, name: u.username })));
+                setUsers(uData);
             }
         };
         fetchMeta();
@@ -468,7 +674,7 @@ const ProjectsTable = ({ projects = [], selectedId, onSelect, onRefresh }) => {
         switch (status) {
             case 'Completed': return { color: '#27bdad', bg: 'rgba(39, 189, 173, 0.1)' };
             case 'Canceled': return { color: '#eb5757', bg: 'rgba(235, 87, 87, 0.1)' };
-            case 'On going': return { color: '#f29339', bg: 'rgba(242, 147, 57, 0.1)' };
+            case 'Ongoing': return { color: '#f29339', bg: 'rgba(242, 147, 57, 0.1)' };
             default: return { color: '#fff', bg: 'rgba(255, 255, 255, 0.05)' };
         }
     };
@@ -890,7 +1096,7 @@ const AddProject = ({ onPublished }) => {
             const currentUser = userStr ? JSON.parse(userStr) : null;
 
             // Fetch teams
-            const teamsRes = await fetch('http://localhost:5000/api/teams', {
+            const teamsRes = await fetch(`${API_BASE_URL}/api/teams`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const teamsData = await teamsRes.json();
@@ -907,13 +1113,12 @@ const AddProject = ({ onPublished }) => {
             }
 
             // Fetch users
-            const usersRes = await fetch('http://localhost:5000/api/auth/admin/users', {
+            const usersRes = await fetch(`${API_BASE_URL}/api/auth/admin/users`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const usersData = await usersRes.json();
             if (usersRes.ok) {
-                const mappedUsers = usersData.map(u => ({ id: u._id, name: u.username }));
-                setUsers(mappedUsers);
+                setUsers(usersData);
                 if (currentUser) updateField('leaderId', currentUser._id);
             }
         } catch (err) {
@@ -969,7 +1174,7 @@ const AddProject = ({ onPublished }) => {
         if (formData.endDate) dataToSend.append('endDate', formData.endDate);
         if (imageFile) dataToSend.append('image', imageFile);
 
-        const res = await fetch('http://localhost:5000/api/projects', {
+        const res = await fetch(`${API_BASE_URL}/api/projects`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -1006,11 +1211,28 @@ const AddProject = ({ onPublished }) => {
     });
   };
 
+  const teamMembers = React.useMemo(() => {
+    if (!formData.teamId) return [];
+    return users.filter(u => {
+        const userTeamId = u.team?._id || u.team;
+        const isSameTeam = userTeamId?.toString() === formData.teamId?.toString();
+        const isLeader = u._id?.toString() === formData.leaderId?.toString();
+        const isNotAdmin = u.role !== 'admin' && u.role !== 'superadmin';
+        return isSameTeam && !isLeader && isNotAdmin;
+    }).map(u => ({ id: u._id, name: u.username }));
+  }, [users, formData.teamId, formData.leaderId]);
+
   const teamName = teams.find(t => t._id === formData.teamId)?.name || 'Select team';
-  const leaderName = users.find(u => u.id === formData.leaderId)?.name || 'Select leader';
+  const leaderName = users.find(u => u._id === formData.leaderId)?.username || 'Select leader';
 
   return (
     <div className="flex flex-col gap-[4vh] w-full relative">
+      <style dangerouslySetInnerHTML={{ __html: `
+        .custom-datetime-input::-webkit-calendar-picker-indicator {
+            display: none !important;
+            -webkit-appearance: none;
+        }
+      `}} />
       {/* Project Setup Card */}
       <div className="bg-[#151519] flex flex-col items-start p-[24px] rounded-[16px] border border-[#1e1d22] w-full relative">
         <p className="font-['Gilroy',sans-serif] font-extrabold text-[16px] text-white mb-[24px]">Project Setup</p>
@@ -1035,11 +1257,16 @@ const AddProject = ({ onPublished }) => {
             onSelect={(name) => {
                 const team = teams.find(t => t.name === name);
                 if (team) {
+                    const leaderId = team.leader?._id || team.leader;
+                    const memberIds = (team.members || [])
+                        .map(m => m?._id || m)
+                        .filter(mId => mId?.toString() !== leaderId?.toString());
+
                     setFormData(prev => ({
                         ...prev,
                         teamId: team._id,
-                        leaderId: team.leader?._id || team.leader,
-                        members: (team.members || []).map(m => m?._id || m)
+                        leaderId: leaderId,
+                        members: memberIds
                     }));
                 }
             }}
@@ -1053,7 +1280,7 @@ const AddProject = ({ onPublished }) => {
           <FormMultiSelect 
             label="Member List" 
             selectedIds={formData.members} 
-            options={users}
+            options={teamMembers}
             onToggle={toggleMember}
           />
           
@@ -1269,6 +1496,7 @@ const TeamsHistoryTable = ({ teams, onDelete, onEdit }) => {
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Added</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Created by</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500 }}>Team name</th>
+                            <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, textAlign: 'center' }}>Members</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, textAlign: 'center' }}>Projects</th>
                             <th style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, textAlign: 'right' }}>Action</th>
                         </tr>
@@ -1279,6 +1507,7 @@ const TeamsHistoryTable = ({ teams, onDelete, onEdit }) => {
                                 <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{new Date(row.createdAt).toLocaleDateString()}</td>
                                 <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{row.leader?.email || row.leader?.username || 'Admin'}</td>
                                 <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'white', fontWeight: 500 }}>{row.name}</td>
+                                <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'white', textAlign: 'center' }}>{(row.members?.length || 0) + 1}</td>
                                 <td style={{ padding: '0 0.5vw', fontSize: '0.85vw', color: 'white', textAlign: 'center' }}>{row.projectCount || 0}</td>
                                 <td style={{ padding: '0 0.5vw', textAlign: 'right' }}>
                                     <div className="flex items-center justify-end gap-3">
@@ -1307,7 +1536,7 @@ const TeamsHistoryTable = ({ teams, onDelete, onEdit }) => {
                         ))}
                         {filteredTeams.length === 0 && (
                             <tr>
-                                <td colSpan="5" style={{ textAlign: 'center', padding: '4vh', color: '#a5a5b2' }}>No teams found</td>
+                                <td colSpan="6" style={{ textAlign: 'center', padding: '4vh', color: '#a5a5b2' }}>No teams found</td>
                             </tr>
                         )}
                     </tbody>
@@ -1345,7 +1574,7 @@ const AddTeam = () => {
         activeProjects: ''
     });
 
-    const [users, setUsers] = useState([]);
+    const [userPool, setUserPool] = useState([]);
     const [teams, setTeams] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -1353,8 +1582,8 @@ const AddTeam = () => {
         try {
             const token = localStorage.getItem('token');
             const [teamsRes, projectsRes] = await Promise.all([
-                fetch('http://localhost:5000/api/teams', { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch('http://localhost:5000/api/projects', { headers: { 'Authorization': `Bearer ${token}` } })
+                fetch(`${API_BASE_URL}/api/teams`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`${API_BASE_URL}/api/projects`, { headers: { 'Authorization': `Bearer ${token}` } })
             ]);
             
             const teamsData = await teamsRes.json();
@@ -1373,25 +1602,57 @@ const AddTeam = () => {
     const fetchUsers = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/auth/admin/users', {
+            const res = await fetch(`${API_BASE_URL}/api/auth/admin/users`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
             if (res.ok) {
-                // Filter out guest users
-                const eligibleUsers = data.filter(u => u.role !== 'guest');
-                setUsers(eligibleUsers.map(u => ({ 
-                    id: u._id, 
-                    name: `${u.username} (${u.email})` 
-                })));
+                setUserPool(data);
             }
         } catch (err) { console.error(err); }
     };
 
+    const eligibleUsers = React.useMemo(() => {
+        return userPool.filter(u => {
+            const isRoleAllowed = u.role !== 'admin' && u.role !== 'superadmin' && u.role !== 'guest';
+            const isLeader = u._id?.toString() === formData.leaderId?.toString();
+            const belongsToThisTeam = formData._id && (u.team?._id === formData._id || u.team === formData._id);
+            const hasNoTeam = !u.team;
+            const isSelected = formData.members.includes(u._id);
+            
+            // For resolution, we MUST include isSelected. 
+            // For selection, we only include allowed roles.
+            return !isLeader && (isSelected || (isRoleAllowed && (hasNoTeam || belongsToThisTeam)));
+        }).map(u => ({ 
+            id: u._id, 
+            name: `${u.username} (${u.email})` 
+        }));
+    }, [userPool, formData._id, formData.members, formData.leaderId]);
+
+    const eligibleLeaders = React.useMemo(() => {
+        return userPool.filter(u => {
+            const isRoleAllowed = u.role !== 'admin' && u.role !== 'superadmin' && u.role !== 'guest';
+            const belongsToThisTeam = formData._id && (u.team?._id === formData._id || u.team === formData._id);
+            const hasNoTeam = !u.team;
+            return isRoleAllowed && (hasNoTeam || belongsToThisTeam);
+        }).map(u => ({ 
+            id: u._id, 
+            name: `${u.username} (${u.email})` 
+        }));
+    }, [userPool, formData._id]);
+
+    // For name resolution of currently selected members (even if they were filtered out somehow)
+    const usersForResolution = React.useMemo(() => {
+        return userPool.map(u => ({
+            id: u._id,
+            name: `${u.username} (${u.email})`
+        }));
+    }, [userPool]);
+
     React.useEffect(() => {
         fetchTeams();
         fetchUsers();
-    }, []);
+    }, [formData._id]);
 
     const updateField = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -1416,7 +1677,7 @@ const AddTeam = () => {
         try {
             const token = localStorage.getItem('token');
             const isEdit = !!formData._id;
-            const url = isEdit ? `http://localhost:5000/api/teams/${formData._id}` : 'http://localhost:5000/api/teams';
+            const url = isEdit ? `${API_BASE_URL}/api/teams/${formData._id}` : `${API_BASE_URL}/api/teams`;
             
             const res = await fetch(url, {
                 method: isEdit ? 'PUT' : 'POST',
@@ -1444,7 +1705,7 @@ const AddTeam = () => {
         } catch (err) {
             alert('Connection failed');
         } finally {
-            setIsLoading(true);
+            setIsLoading(false);
         }
     };
 
@@ -1452,7 +1713,7 @@ const AddTeam = () => {
         if (!window.confirm('Are you sure you want to delete this team?')) return;
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/teams/${id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/teams/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -1466,13 +1727,20 @@ const AddTeam = () => {
             name: team.name,
             focus: team.focus,
             leaderId: team.leader?._id || team.leader,
-            members: (team.members || []).map(m => m?._id || m),
+            members: (team.members || [])
+                .map(m => m?._id || m)
+                .filter(mId => {
+                    const u = userPool.find(user => user._id === mId);
+                    const isLeader = mId?.toString() === (team.leader?._id || team.leader)?.toString();
+                    const isRoleAllowed = u ? (u.role !== 'admin' && u.role !== 'superadmin') : true;
+                    return !isLeader && isRoleAllowed;
+                }),
             activeProjects: (team.activeProjects || []).join(', ')
         });
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    const leaderName = users.find(u => u.id === formData.leaderId)?.name || 'Select leader';
+    const leaderName = usersForResolution.find(u => u.id === formData.leaderId)?.name || 'Select leader';
 
     return (
         <div className="flex flex-col gap-[4vh] w-full relative">
@@ -1501,16 +1769,22 @@ const AddTeam = () => {
                          <FormSelect 
                             label="Leadership (Professor/Senior Researcher)" 
                             value={leaderName}
-                            options={users.map(u => u.name)}
+                            options={eligibleLeaders.map(u => u.name)}
                             onSelect={(name) => {
-                                const user = users.find(u => u.name === name);
-                                if (user) updateField('leaderId', user.id);
+                                const user = eligibleLeaders.find(u => u.name === name);
+                                if (user) {
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        leaderId: user.id,
+                                        members: prev.members.filter(mId => mId !== user.id)
+                                    }));
+                                }
                             }}
                         />
                         <FormMultiSelect 
                             label="Member List (Faculty & PhD Students)" 
                             selectedIds={formData.members}
-                            options={users}
+                            options={eligibleUsers}
                             onToggle={toggleMember}
                         />
                     </div>
@@ -1558,11 +1832,11 @@ const ProjectHub = () => {
         progressAvg: "0.00"
     });
 
-    const fetchAllData = async () => {
-        setIsLoading(true);
+    const fetchAllData = async (silent = false) => {
+        if (!silent) setIsLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/projects', {
+            const res = await fetch(`${API_BASE_URL}/api/projects`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
@@ -1573,9 +1847,11 @@ const ProjectHub = () => {
                     update: `Last update ${new Date(p.updatedAt).toLocaleDateString()}`,
                     start: new Date(p.startDate).toLocaleDateString(),
                     deadline: p.endDate ? new Date(p.endDate).toLocaleDateString() : 'No deadline',
-                    progress: `${Math.round(((p.milestones?.filter(m => m.completed).length || 0) + 1) / ((p.milestones?.length || 0) + 1) * 100)}%`, 
-                    status: p.status === 'Proposed' ? 'On going' : p.status,
-                    img: p.imageUrl ? `http://localhost:5000${p.imageUrl}` : img1,
+                    progress: p.status === 'Completed' ? '100%' : (p.milestones?.length > 0 
+                        ? `${Math.round((p.milestones.filter(m => m.completed).length / p.milestones.length) * 100)}%`
+                        : '0%'), 
+                    status: p.status === 'Proposed' ? 'Ongoing' : p.status,
+                    img: p.imageUrl ? `${API_BASE_URL}${p.imageUrl}` : img1,
                     teamName: p.team?.name || 'No Team',
                     milestones: p.milestones || [],
                     raw: p
@@ -1583,7 +1859,7 @@ const ProjectHub = () => {
                 setProjects(formatted);
 
                 // Fetch total views and other system stats
-                const statsRes = await fetch('http://localhost:5000/api/stats/overview', {
+                const statsRes = await fetch(`${API_BASE_URL}/api/stats/overview`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const sData = await statsRes.json();
@@ -1606,7 +1882,7 @@ const ProjectHub = () => {
         } catch (err) {
             console.error('Fetch Stats Error:', err);
         } finally {
-            setIsLoading(false);
+            if (!silent) setIsLoading(false);
         }
     };
 

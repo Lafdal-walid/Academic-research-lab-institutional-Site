@@ -17,6 +17,7 @@ import TeamIcon from "@/assets/svg/userDashboard/Overview/users-alt (7) 1.svg";
 import PublicationsIcon from "@/assets/svg/userDashboard/Overview/Vector.svg";
 import ProjectsIcon from "@/assets/svg/userDashboard/Overview/Vector-1.svg";
 import EngagementIcon from "@/assets/svg/userDashboard/Overview/dashboard (4) 1.svg";
+import API_BASE_URL from '@/config';
 
 const StatCard = ({ icon, title, value }) => {
     return (
@@ -312,7 +313,7 @@ const ReportsHistoryTable = ({ direction = 'ltr', reportsList, setReportsList })
                                     style={{ padding: '2.8vh 1.5vw 2.8vh 0.5vw', textAlign: 'right' }}>
                                     <a
                                         className="download-link"
-                                        href={row.fileUrl ? `http://localhost:5000${row.fileUrl}` : '#'}
+                                        href={row.fileUrl ? `${API_BASE_URL}${row.fileUrl}` : '#'}
                                         download
                                         target="_blank"
                                         rel="noreferrer"
@@ -1185,7 +1186,7 @@ const PhdTracker = () => {
                 if (!token) return;
 
                 // Fetch Stats
-                const statsRes = await fetch('http://localhost:5000/api/stats/overview', {
+                const statsRes = await fetch(`${API_BASE_URL}/api/stats/overview`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (statsRes.ok) {
@@ -1195,7 +1196,7 @@ const PhdTracker = () => {
 
                 // Fetch User Reports
                 const userData = JSON.parse(localStorage.getItem('user') || '{}');
-                const reportsRes = await fetch(`http://localhost:5000/api/reports?user=${userData._id}`, {
+                const reportsRes = await fetch(`${API_BASE_URL}/api/reports?user=${userData._id}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (reportsRes.ok) {
@@ -1226,7 +1227,7 @@ const PhdTracker = () => {
                 }
                 
                 // Fetch Team Reports
-                const teamReportsRes = await fetch('http://localhost:5000/api/reports', {
+                const teamReportsRes = await fetch(`${API_BASE_URL}/api/reports`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (teamReportsRes.ok) {
@@ -1253,7 +1254,7 @@ const PhdTracker = () => {
     const handleAddReport = async (formData) => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/reports', {
+            const res = await fetch(`${API_BASE_URL}/api/reports`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`

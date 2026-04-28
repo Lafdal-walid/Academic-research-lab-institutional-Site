@@ -17,6 +17,7 @@ import VerifyEmailModal from '../popups/VerifyEmailModal';
 import SuccessEmailModal from '../popups/SuccessEmailModal';
 import ChangeProfilePicModal from '../popups/ChangeProfilePicModal';
 import RemovePhotoModal from '../popups/RemovePhotoModal';
+import API_BASE_URL from '@/config';
 
 const theme = {
     accent: '#3457DC',
@@ -143,7 +144,7 @@ export default function PersonalInfo() {
     const handleSaveProfile = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/auth/profile', {
+            const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

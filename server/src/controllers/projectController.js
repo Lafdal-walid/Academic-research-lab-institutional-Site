@@ -15,6 +15,23 @@ exports.addMilestone = async (req, res) => {
     }
 };
 
+exports.toggleMilestone = async (req, res) => {
+    try {
+        const { id, milestoneId } = req.params;
+        const project = await Project.findById(id);
+        if (!project) return res.status(404).json({ message: 'Project not found' });
+
+        const milestone = project.milestones.id(milestoneId);
+        if (!milestone) return res.status(404).json({ message: 'Milestone not found' });
+
+        milestone.completed = !milestone.completed;
+        await project.save();
+        res.status(200).json(project);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 exports.getProjects = async (req, res) => {
     try {
         let query = {};
@@ -35,7 +52,7 @@ exports.getProjects = async (req, res) => {
             }
         }
         
-        const projects = await Project.find(query).populate('team');
+        const projects = await Project.find(query).populate('team').populate('members');
         res.json(projects);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -89,6 +106,39 @@ exports.updateProject = async (req, res) => {
         const project = await Project.findByIdAndUpdate(id, updateData, { new: true });
         if (!project) return res.status(404).json({ message: 'Project not found' });
         
+        res.status(200).json(project);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+exports.updateMilestone = async (req, res) => {
+    try {
+        const { id, milestoneId } = req.params;
+        const { title, date } = req.body;
+        const project = await Project.findById(id);
+        if (!project) return res.status(404).json({ message: 'Project not found' });
+
+        const milestone = project.milestones.id(milestoneId);
+        if (!milestone) return res.status(404).json({ message: 'Milestone not found' });
+
+        if (title) milestone.title = title;
+        if (date) milestone.date = date;
+        
+        await project.save();
+        res.status(200).json(project);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+exports.deleteMilestone = async (req, res) => {
+    try {
+        const { id, milestoneId } = req.params;
+        const project = await Project.findById(id);
+        if (!project) return res.status(404).json({ message: 'Project not found' });
+
+        project.milestones.pull(milestoneId);
+        await project.save();
         res.status(200).json(project);
     } catch (error) {
         res.status(500).json({ message: error.message });

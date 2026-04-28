@@ -11,6 +11,7 @@ import ConfirmIdentityModal from '../popups/ConfirmIdentityModal';
 import SetupTFAModal from '../popups/SetupTFAModal';
 import VerifyTFACodeModal from '../popups/VerifyTFACodeModal';
 import TFASuccessModal from '../popups/TFASuccessModal';
+import API_BASE_URL from '@/config';
 
 // Modal State Constants
 const MODALS = {
@@ -58,7 +59,7 @@ export default function SecurityLogin() {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/auth/change-password', {
+            const res = await fetch(`${API_BASE_URL}/api/auth/change-password`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

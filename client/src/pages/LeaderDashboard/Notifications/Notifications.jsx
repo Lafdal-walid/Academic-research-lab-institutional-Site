@@ -6,6 +6,7 @@ import { RiCheckLine, RiSearch2Line, RiArrowLeftSLine, RiArrowRightSLine, RiArro
 import DropdownIcon from "@/assets/svg/userDashboard/PhdTracker/angle-small-down 1.svg";
 import TrashIcon from "@/assets/svg/LeaderDashboard/notification/trash 3.svg";
 import EditIcon from "@/assets/svg/LeaderDashboard/notification/edit 2.svg";
+import API_BASE_URL from '@/config';
 
 const svgPaths = {
   p1f77ae00: "M8 5.33333C8.55228 5.33333 9 4.88562 9 4.33333C9 3.78105 8.55228 3.33333 8 3.33333C7.44772 3.33333 7 3.78105 7 4.33333C7 4.88562 7.44772 5.33333 8 5.33333Z",
@@ -82,7 +83,7 @@ const NewNotification = ({ onNotificationSent, editData }) => {
         const fetchTeams = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const res = await fetch('http://localhost:5000/api/teams', {
+                const res = await fetch(`${API_BASE_URL}/api/teams`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {
@@ -112,8 +113,8 @@ const NewNotification = ({ onNotificationSent, editData }) => {
 
         const isEdit = editData && editData._id;
         const url = isEdit 
-            ? `http://localhost:5000/api/notifications/${editData._id}` 
-            : 'http://localhost:5000/api/notifications';
+            ? `${API_BASE_URL}/api/notifications/${editData._id}` 
+            : `${API_BASE_URL}/api/notifications`;
 
         setIsSending(true);
         try {
@@ -694,7 +695,7 @@ const Notifications = () => {
 
     const fetchNotifications = async () => {
         try {
-            const res = await fetch('http://localhost:5000/api/notifications');
+            const res = await fetch(`${API_BASE_URL}/api/notifications`);
             if (res.ok) {
                 const data = await res.json();
                 setNotifications(data);
@@ -711,7 +712,7 @@ const Notifications = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/notifications/${id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/notifications/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
