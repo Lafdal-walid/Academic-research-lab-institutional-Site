@@ -6,6 +6,7 @@ import Publications from './Publications/Publications';
 import TeamsResearches from './TeamsResearches/TeamsResearches';
 import AboutUs from './AboutUs/AboutUs';
 import Support from './Support/Support';
+import NewsGallery from './NewsGallery/NewsGallery';
 import Login from '../Auth/Login';
 import Register from '../Auth/Register';
 import Forget from '../Auth/Forget';
@@ -24,6 +25,7 @@ const MainApp = () => {
       <Route path="publications" element={<Publications />} />
       <Route path="teams-researches" element={<TeamsResearches />} />
       <Route path="about-us" element={<AboutUs />} />
+      <Route path="news-gallery" element={<NewsGallery />} />
       <Route path="support" element={<Support />} />
       <Route path="login" element={<Login />} />
       <Route path="register" element={<Register />} />

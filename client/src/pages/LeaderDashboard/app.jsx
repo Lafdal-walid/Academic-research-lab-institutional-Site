@@ -4,6 +4,7 @@ import Users from './Users/Users';
 import ProjectHub from './ProjectHub/ProjectHub';
 import Notifications from './Notifications/Notifications';
 import ManageContent from './ManageContent/ManageContent';
+import ManageNewsGallery from './ManageNewsGallery/ManageNewsGallery';
 import TeamContact from './TeamContact/TeamContact';
 import AdminTools from './AdminTools/AdminTools';
 
@@ -14,7 +15,7 @@ const LeaderApp = () => {
         <Route path="/" element={<Users />} />
         <Route path="project-hub" element={<ProjectHub />} />
         <Route path="notifications" element={<Notifications />} />
-        <Route path="manage-content" element={<ManageContent />} />
+        <Route path="manage-content" element={<ManageNewsGallery />} />
         <Route path="team-contact" element={<TeamContact />} />
         <Route path="admin-tools" element={<AdminTools />} />
       </Routes>

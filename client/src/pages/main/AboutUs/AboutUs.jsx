@@ -25,6 +25,12 @@ export default function AboutUs() {
   const { language } = useLanguage();
   const isRTL = language === "ar";
   const [dynamicTimeline, setDynamicTimeline] = useState([]);
+  const [counts, setCounts] = useState({
+    researchers: 0,
+    papers: 0,
+    projects: 0,
+    awards: 15
+  });
 
   const text = {
     badge: isRTL ? 'التميز الأكاديمي' : 'Academic Excellence',
@@ -54,12 +60,18 @@ export default function AboutUs() {
   ];
 
   useEffect(() => {
-    const fetchTeams = async () => {
+    const fetchData = async () => {
       try {
         const baseUrl = API_BASE_URL;
-        const res = await fetch(`${baseUrl}/api/teams`);
-        if (res.ok) {
-          const teamsData = await res.json();
+        const [teamsRes, projectsRes, pubRes] = await Promise.all([
+          fetch(`${baseUrl}/api/teams`),
+          fetch(`${baseUrl}/api/projects`),
+          fetch(`${baseUrl}/api/publications`)
+        ]);
+
+        let teamsData = [];
+        if (teamsRes.ok) {
+          teamsData = await teamsRes.json();
           const teamMilestones = teamsData.map(team => ({
             year: team.createdAt ? new Date(team.createdAt).getFullYear().toString() : "2024",
             title: isRTL ? `تأسيس فريق ${team.name}` : `${team.name} Team Founded`,
@@ -71,24 +83,36 @@ export default function AboutUs() {
 
           const merged = [...staticTimeline, ...teamMilestones].sort((a, b) => parseInt(a.year) - parseInt(b.year));
           setDynamicTimeline(merged);
-        } else {
-          setDynamicTimeline(staticTimeline);
         }
+
+        const pubsData = pubRes.ok ? await pubRes.json() : [];
+        const pubCount = pubsData.length;
+        const totalViews = pubsData.reduce((acc, pub) => acc + (pub.views || 0), 0);
+        const projectCount = projectsRes.ok ? (await projectsRes.json()).length : 0;
+        const researcherCount = teamsData.reduce((acc, team) => acc + (team.members?.length || 0) + 1, 0);
+
+        setCounts({
+          researchers: researcherCount,
+          papers: pubCount,
+          projects: projectCount,
+          views: totalViews
+        });
+
       } catch (err) {
-        console.error("Failed to fetch teams for timeline", err);
+        console.error("Failed to fetch data for AboutUs", err);
         setDynamicTimeline(staticTimeline);
       }
     };
-    fetchTeams();
+    fetchData();
   }, [language, isRTL]);
 
   const timeline = dynamicTimeline.length > 0 ? dynamicTimeline : staticTimeline;
 
   const stats = [
-    { icon: Users, value: "30+", label: isRTL ? 'باحثين ومهندسين' : "Researchers & Engineers", color: "text-blue-500" },
-    { icon: BookOpen, value: "50+", label: isRTL ? 'أوراق علمية منشورة' : "Published Papers", color: "text-indigo-500" },
-    { icon: Cpu, value: "20+", label: isRTL ? 'مشاريع بحثية' : "Research Projects", color: "text-cyan-500" },
-    { icon: Trophy, value: "15+", label: isRTL ? 'جوائز وإنجازات' : "Awards & Achievements", color: "text-blue-400" }
+    { icon: Users, value: counts.researchers, label: isRTL ? 'باحثين ومهندسين' : "Researchers & Engineers", color: "text-blue-500" },
+    { icon: BookOpen, value: counts.papers, label: isRTL ? 'أوراق علمية منشورة' : "Published Papers", color: "text-indigo-500" },
+    { icon: Cpu, value: counts.projects, label: isRTL ? 'مشاريع بحثية' : "Research Projects", color: "text-cyan-500" },
+    { icon: Eye, value: counts.views, label: isRTL ? 'مشاهدات المنشورات' : "Publication Views", color: "text-blue-400" }
   ];
 
   const values = [

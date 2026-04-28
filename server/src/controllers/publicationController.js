@@ -133,3 +133,17 @@ exports.updatePublicationStatus = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+exports.incrementViews = async (req, res) => {
+    try {
+        const publication = await Publication.findByIdAndUpdate(
+            req.params.id,
+            { $inc: { views: 1 } },
+            { new: true }
+        );
+        if (!publication) return res.status(404).json({ message: 'Publication not found' });
+        res.json(publication);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

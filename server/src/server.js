@@ -28,6 +28,7 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/teams', teamRoutes);
 app.use('/api/news', require('./routes/newsRoutes'));
+app.use('/api/gallery', require('./routes/galleryRoutes'));
 app.use('/api/reports', reportRoutes);
 app.use('/api/publications', publicationRoutes);
 app.use('/api/messages', require('./routes/messageRoutes'));

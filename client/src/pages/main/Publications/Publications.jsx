@@ -1,64 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ChevronDown, ChevronLeft, ChevronRight, Link as LinkIcon, Users as UsersIcon, Calendar as CalendarIcon, ExternalLink, Quote, Copy, Check, Eye, Download } from 'lucide-react';
+import { Search, ChevronDown, ChevronLeft, ChevronRight, Users as UsersIcon, Calendar as CalendarIcon, Eye, Download, Briefcase, ArrowRight } from 'lucide-react';
 import AOS from "aos";
 import "aos/dist/aos.css";
+import { Link } from 'react-router-dom';
 import { useLanguage } from "@/contexts/LanguageContext";
 import API_BASE_URL from '@/config';
 
-const svgPathsTeams = {
-    p11b7c570: "M8.25 10.0833C10.275 10.0833 11.9167 8.44171 11.9167 6.41667C11.9167 4.39162 10.275 2.75 8.25 2.75C6.22496 2.75 4.58333 4.39162 4.58333 6.41667C4.58333 8.44171 6.22496 10.0833 8.25 10.0833Z",
-    p1de049e0: "M20.1667 19.25V17.4167C20.1661 16.6043 19.8957 15.815 19.3979 15.173C18.9002 14.5309 18.2033 14.0723 17.4167 13.8692",
-    p35b71ef0: "M14.6667 2.86917C15.4554 3.07111 16.1545 3.52981 16.6537 4.17295C17.1529 4.81609 17.4239 5.60709 17.4239 6.42125C17.4239 7.23541 17.1529 8.02641 16.6537 8.66955C16.1545 9.31269 15.4554 9.77139 14.6667 9.97333",
-    p80127a0: "M14.6667 19.25V17.4167C14.6667 16.4442 14.2804 15.5116 13.5927 14.8239C12.9051 14.1363 11.9725 13.75 11 13.75H5.5C4.52754 13.75 3.59491 14.1363 2.90728 14.8239C2.21964 15.5116 1.83333 16.4442 1.83333 17.4167V19.25",
-};
-
-const ResearchTeamCard = ({ title, leader, members, membersCount, gradient, isRTL }) => (
-    <div className="bg-white/5 border border-white/10 rounded-xl p-6 min-h-[240px] relative overflow-hidden group hover:border-[#3457DC]/40 transition-all">
-        <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-6" style={{ backgroundImage: gradient }}>
-            <svg className="w-5 h-5 text-white" viewBox="0 0 22 22" fill="none">
-                <path d={svgPathsTeams.p80127a0} stroke="currentColor" strokeWidth="1.83" strokeLinecap="round" strokeLinejoin="round" />
-                <path d={svgPathsTeams.p11b7c570} stroke="currentColor" strokeWidth="1.83" strokeLinecap="round" strokeLinejoin="round" />
-                <path d={svgPathsTeams.p1de049e0} stroke="currentColor" strokeWidth="1.83" strokeLinecap="round" strokeLinejoin="round" />
-                <path d={svgPathsTeams.p35b71ef0} stroke="currentColor" strokeWidth="1.83" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-        </div>
-        <h3 className="text-white font-bold text-[16px] mb-2 leading-tight">{title}</h3>
-        <p className="text-[#395ed5] text-[12px] font-medium mb-1">
-            {isRTL ? 'القائد:' : 'Leader:'} <span className="text-[#7b829d] font-normal">{leader}</span>
-        </p>
-        <p className="text-[#7b829d] text-[12px] mb-4">
-            {membersCount} {isRTL ? 'أعضاء' : 'Members'}
-        </p>
-        <div className="flex flex-wrap gap-2 mt-auto">
-            {members.map((m, i) => (
-                <div key={i} className="bg-[#3457DC]/10 px-3 py-1 rounded-full border border-white/5">
-                    <span className="text-[#7b829d] text-[10px] whitespace-nowrap">{m}</span>
-                </div>
-            ))}
-        </div>
-    </div>
-);
-
-const ResearchPaperCard = ({ title, authors, year, journal, description, tags, link, isRTL, activeFilds }) => {
-    const [isCiteOpen, setIsCiteOpen] = useState(false);
-    const [copied, setCopied] = useState(null);
-
-    const generateAPA = () => {
-        const authorList = authors;
-        return `${authorList} (${year}). ${title}. ${journal || 'Institutional Research Lab'}.`;
-    };
-
-    const generateBibTeX = () => {
-        const firstAuthor = authors.split(',')[0].split(' ').pop().toLowerCase();
-        const key = `${firstAuthor}${year}${title.split(' ')[0].toLowerCase()}`;
-        return `@article{${key},\n  author = {${authors.replace(/, /g, ' and ')}},\n  title = {${title}},\n  journal = {${journal || 'Institutional Research Lab'}},\n  year = {${year}}\n}`;
-    };
-
-    const handleCopy = (text, type) => {
-        navigator.clipboard.writeText(text);
-        setCopied(type);
-        setTimeout(() => setCopied(null), 2000);
+const ResearchPaperCard = ({ id, title, authors, year, journal, description, tags, link, isRTL, activeFilds, projectName, views, onView }) => {
+    const handleView = async () => {
+        if (!id) return;
+        if (onView) onView(id);
+        try {
+            await fetch(`${API_BASE_URL}/api/publications/${id}/view`, {
+                method: 'PATCH',
+            });
+        } catch (err) {
+            console.error("Failed to update view count", err);
+        }
     };
 
     return (
@@ -73,17 +32,14 @@ const ResearchPaperCard = ({ title, authors, year, journal, description, tags, l
                     {title}
                 </h3>
                 <div className="flex items-center gap-2">
-
-                    <a href={link} target="_blank" rel="noopener noreferrer" className="text-white/20 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/5" title="View Publication">
+                    <a href={link} target="_blank" rel="noopener noreferrer" onClick={handleView} className="text-white/20 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/5" title="View Publication">
                         <Eye size={18} />
                     </a>
-                    <a href={link} download className="text-white/20 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/5" title="Download Publication">
+                    <a href={link} download onClick={handleView} className="text-white/20 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/5" title="Download Publication">
                         <Download size={18} />
                     </a>
                 </div>
             </div>
-
-
 
             <div className={`flex flex-wrap items-center gap-x-6 gap-y-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                 <div className="flex items-center gap-2 text-white/40 text-sm">
@@ -94,6 +50,16 @@ const ResearchPaperCard = ({ title, authors, year, journal, description, tags, l
                     <CalendarIcon size={14} />
                     <span>{year}</span>
                 </div>
+                <div className="flex items-center gap-2 text-white/40 text-sm">
+                    <Eye size={14} className="text-[#3457DC]" />
+                    <span className="font-medium">{views || 0}</span>
+                </div>
+                {projectName && (
+                    <div className="flex items-center gap-2 text-white/40 text-sm">
+                        <Briefcase size={14} />
+                        <span>{projectName}</span>
+                    </div>
+                )}
             </div>
 
             {journal && (
@@ -131,7 +97,8 @@ const STATIC_PUBLICATIONS = [
         year: "2024",
         publisher: "IEEE Transactions on Neural Networks and Learning Systems",
         tags: ["Vision-Machine Intelligence", "Multi-Agent Systems"],
-        contribution: "Explored attention mechanisms to improve reasoning capabilities in hierarchical cognitive models."
+        contribution: "Explored attention mechanisms to improve reasoning capabilities in hierarchical cognitive models.",
+        projectName: "Cognitive Multi-Agent Systems"
     },
     {
         title: "Dynamic Resource Allocation in Distributed Cloud Networks using Deep Reinforcement Learning",
@@ -139,7 +106,8 @@ const STATIC_PUBLICATIONS = [
         year: "2023",
         publisher: "Journal of Network and Computer Applications",
         tags: ["Deep Learning", "Cloud Computing"],
-        contribution: "Proposed a DRL-based framework for optimizing resource distribution in cloud environments."
+        contribution: "Proposed a DRL-based framework for optimizing resource distribution in cloud environments.",
+        projectName: "NextGen Cloud Infrastructure"
     },
     {
         title: "Scalable Federated Learning for Privacy-Preserving Medical Imaging Analytics",
@@ -147,7 +115,8 @@ const STATIC_PUBLICATIONS = [
         year: "2025",
         publisher: "AI in Medicine Journal",
         tags: ["Federated Learning", "Privacy", "Healthcare AI"],
-        contribution: "Introduced a novel decentralized aggregation protocol that reduces communication overhead by 40% while maintaining differential privacy."
+        contribution: "Introduced a novel decentralized aggregation protocol that reduces communication overhead by 40% while maintaining differential privacy.",
+        projectName: "Privacy-Preserving AI in Health"
     },
     {
         title: "Autonomous Path Planning in Highly Dynamic Environments using Transformer networks",
@@ -155,7 +124,8 @@ const STATIC_PUBLICATIONS = [
         year: "2024",
         publisher: "Robotics and Autonomous Systems",
         tags: ["Robotics", "Autonomous Systems", "Transformers"],
-        contribution: "Developed a transformer-based spatial encoder that predicts obstacle trajectories with sub-centimeter precision."
+        contribution: "Developed a transformer-based spatial encoder that predicts obstacle trajectories with sub-centimeter precision.",
+        projectName: "Autonomous Navigation Systems"
     },
     {
         title: "Deep Learning, Machine Learning, AI Test",
@@ -163,7 +133,8 @@ const STATIC_PUBLICATIONS = [
         year: "2026",
         publisher: "Institutional Lab",
         tags: ["Deep Learning", "Machine Learning", "AI Test"],
-        contribution: "test lorem testtest lorem test"
+        contribution: "test lorem testtest lorem test",
+        projectName: "AI Testing Lab"
     }
 ];
 
@@ -180,14 +151,15 @@ export default function Publications() {
         sortByOldest: isRTL ? 'الأقدم' : 'sort by oldest',
         categoryLabel: isRTL ? 'الفئة' : 'Categorie',
         all: isRTL ? 'الكل' : 'All',
-        requestResearch: isRTL ? 'طلب إضافة بحث؟' : 'Request a Research?',
         tagLabel: isRTL ? 'الوسوم' : 'Tags',
         loading: isRTL ? 'جاري تحميل الأوراق البحثية...' : 'Loading research papers...',
         noPublications: isRTL ? 'لم يتم العثور على منشورات.' : 'No publications found.',
         of: isRTL ? 'من' : 'of',
-        researchTeams: isRTL ? 'الفرق البحثية' : 'Research Teams',
-        researchTeamsSubtitle: isRTL ? 'فرقنا البحثية المتخصصة في مختلف مجالات علوم الحاسوب والتكنولوجيا' : 'Our specialized research teams in various fields of computer science and technology',
-        teamsLoading: isRTL ? 'جاري تحميل الفرق...' : 'Loading teams...'
+        teamsSectionTitle: isRTL ? 'اكتشف فرقنا البحثية' : 'Discover Our Research Teams',
+        teamsSectionSubtitle: isRTL ? 'تعرف على الفرق التي تقف خلف هذه الأبحاث والمشاريع المبتكرة' : 'Meet the teams behind these innovative research papers and projects',
+        viewTeams: isRTL ? 'عرض جميع الفرق' : 'View All Teams',
+        teamLabel: isRTL ? 'الفريق' : 'Team',
+        projectLabel: isRTL ? 'المشروع' : 'Project'
     };
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -197,9 +169,18 @@ export default function Publications() {
     const [selectedTag, setSelectedTag] = useState(text.all);
     const [publications, setPublications] = useState(STATIC_PUBLICATIONS);
     const [teams, setTeams] = useState([]);
+    const [projects, setProjects] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [selectedTeam, setSelectedTeam] = useState(text.all);
+    const [selectedProject, setSelectedProject] = useState(text.all);
     const [currentPage, setCurrentPage] = useState(1);
     const totalPages = Math.ceil(publications.length / 10) || 1;
+
+    const handlePublicationView = (id) => {
+        setPublications(prev => prev.map(pub => 
+            pub._id === id ? { ...pub, views: (pub.views || 0) + 1 } : pub
+        ));
+    };
 
     const dropdownRef = useRef(null);
 
@@ -211,21 +192,22 @@ export default function Publications() {
             try {
                 const baseUrl = API_BASE_URL;
                 
-                const pubRes = await fetch(`${baseUrl}/api/publications`);
+                const [pubRes, teamRes, projRes] = await Promise.all([
+                    fetch(`${baseUrl}/api/publications`),
+                    fetch(`${baseUrl}/api/teams`),
+                    fetch(`${baseUrl}/api/projects`)
+                ]);
+
                 if (pubRes.ok) {
                     const pubData = await pubRes.json();
-                    if (pubData && pubData.length > 0) {
-                        setPublications(pubData);
-                    }
+                    if (pubData && pubData.length > 0) setPublications(pubData);
                 }
 
-                const teamRes = await fetch(`${baseUrl}/api/teams`);
-                if (teamRes.ok) {
-                    const teamData = await teamRes.json();
-                    setTeams(teamData);
-                }
+                if (teamRes.ok) setTeams(await teamRes.json());
+                if (projRes.ok) setProjects(await projRes.json());
+
             } catch (err) {
-                console.error("Failed to fetch data from backend", err);
+                console.error("Failed to fetch data", err);
             } finally {
                 setIsLoading(false);
             }
@@ -246,6 +228,8 @@ export default function Publications() {
         setSelectedSort(isRTL ? 'الأحدث' : 'sort by recent');
         setSelectedCategory(isRTL ? 'الكل' : 'All');
         setSelectedTag(isRTL ? 'الكل' : 'All');
+        setSelectedTeam(isRTL ? 'الكل' : 'All');
+        setSelectedProject(isRTL ? 'الكل' : 'All');
     }, [language, isRTL]);
 
     const allFields = [...new Set(teams.flatMap(t => t.activeFilds || []))];
@@ -263,14 +247,20 @@ export default function Publications() {
             const tagMatch = selectedTag === 'Tags' || selectedTag === 'All' || selectedTag === 'الوسوم' || selectedTag === 'الكل' ||
                 (pub.tags && pub.tags.some(tag => tag.toLowerCase() === selectedTag.toLowerCase()));
             
-            return matchesSearch && categoryMatch && tagMatch;
+            const teamMatch = selectedTeam === 'Team' || selectedTeam === 'All' || selectedTeam === 'الفريق' || selectedTeam === 'الكل' ||
+                (pub.team?._id === selectedTeam || pub.team === selectedTeam || (pub.team?.name && pub.team.name === selectedTeam));
+            
+            const projectMatch = selectedProject === 'Project' || selectedProject === 'All' || selectedProject === 'المشروع' || selectedProject === 'الكل' ||
+                (pub.project?._id === selectedProject || pub.project === selectedProject || (pub.project?.title && pub.project.title === selectedProject));
+            
+            return matchesSearch && categoryMatch && tagMatch && teamMatch && projectMatch;
         })
         .sort((a, b) => {
-            if (selectedSort === 'sort by recent' || selectedSort === 'الأحدث') {
-                return b.year - a.year;
-            } else if (selectedSort === 'sort by oldest' || selectedSort === 'الأقدم') {
-                return a.year - b.year;
-            }
+            const yearA = a.publishedDate ? new Date(a.publishedDate).getFullYear() : (a.year || 0);
+            const yearB = b.publishedDate ? new Date(b.publishedDate).getFullYear() : (b.year || 0);
+            
+            if (selectedSort === 'sort by recent' || selectedSort === 'الأحدث') return yearB - yearA;
+            if (selectedSort === 'sort by oldest' || selectedSort === 'الأقدم') return yearA - yearB;
             return 0;
         });
 
@@ -307,13 +297,14 @@ export default function Publications() {
                         <Search className="text-[#3457DC] shrink-0" size={20} />
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:flex-[3]">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 w-full lg:flex-[5]">
+                        {/* Sort Dropdown */}
                         <div className="relative w-full">
                             <button
                                 onClick={() => setActiveDropdown(activeDropdown === 'sort' ? null : 'sort')}
-                                className="bg-[#1e1e24] flex items-center justify-between px-6 py-3 rounded-2xl w-full border border-white/5 hover:bg-[#25252d] transition-all"
+                                className="bg-[#1e1e24] flex items-center justify-between px-6 py-3 rounded-2xl w-full border border-white/5 hover:bg-[#25252d] transition-all h-full"
                             >
-                                <span className="text-[#a5a5b2] text-[14px]">{selectedSort}</span>
+                                <span className="text-[#a5a5b2] text-[14px] truncate">{selectedSort}</span>
                                 <ChevronDown className={`text-[#3457DC] transition-transform duration-300 ${activeDropdown === 'sort' ? 'rotate-180' : ''}`} size={20} />
                             </button>
                             <AnimatePresence>
@@ -338,12 +329,13 @@ export default function Publications() {
                             </AnimatePresence>
                         </div>
 
+                        {/* Category Dropdown */}
                         <div className="relative w-full">
                             <button
                                 onClick={() => setActiveDropdown(activeDropdown === 'category' ? null : 'category')}
-                                className="bg-[#1e1e24] flex items-center justify-between px-6 py-3 rounded-2xl w-full border border-white/5 hover:bg-[#25252d] transition-all"
+                                className="bg-[#1e1e24] flex items-center justify-between px-6 py-3 rounded-2xl w-full border border-white/5 hover:bg-[#25252d] transition-all h-full"
                             >
-                                <span className="text-[#a5a5b2] text-[14px]">{selectedCategory}</span>
+                                <span className="text-[#a5a5b2] text-[14px] truncate">{selectedCategory}</span>
                                 <ChevronDown className={`text-[#3457DC] transition-transform duration-300 ${activeDropdown === 'category' ? 'rotate-180' : ''}`} size={20} />
                             </button>
                             <AnimatePresence>
@@ -368,12 +360,13 @@ export default function Publications() {
                             </AnimatePresence>
                         </div>
 
+                        {/* Tags Dropdown */}
                         <div className="relative w-full">
                             <button
                                 onClick={() => setActiveDropdown(activeDropdown === 'tags' ? null : 'tags')}
-                                className="bg-[#1e1e24] flex items-center justify-between px-6 py-3 rounded-2xl w-full border border-white/5 hover:bg-[#25252d] transition-all"
+                                className="bg-[#1e1e24] flex items-center justify-between px-6 py-3 rounded-2xl w-full border border-white/5 hover:bg-[#25252d] transition-all h-full"
                             >
-                                <span className="text-[#a5a5b2] text-[14px]">{selectedTag === text.all ? text.tagLabel : selectedTag}</span>
+                                <span className="text-[#a5a5b2] text-[14px] truncate">{selectedTag === text.all ? text.tagLabel : selectedTag}</span>
                                 <ChevronDown className={`text-[#3457DC] transition-transform duration-300 ${activeDropdown === 'tags' ? 'rotate-180' : ''}`} size={20} />
                             </button>
                             <AnimatePresence>
@@ -397,6 +390,80 @@ export default function Publications() {
                                 )}
                             </AnimatePresence>
                         </div>
+
+                        {/* Team Dropdown */}
+                        <div className="relative w-full">
+                            <button
+                                onClick={() => setActiveDropdown(activeDropdown === 'team' ? null : 'team')}
+                                className="bg-[#1e1e24] flex items-center justify-between px-6 py-3 rounded-2xl w-full border border-white/5 hover:bg-[#25252d] transition-all h-full"
+                            >
+                                <span className="text-[#a5a5b2] text-[14px] truncate">{selectedTeam === text.all ? text.teamLabel : (teams.find(t => t._id === selectedTeam)?.name || selectedTeam)}</span>
+                                <ChevronDown className={`text-[#3457DC] transition-transform duration-300 ${activeDropdown === 'team' ? 'rotate-180' : ''}`} size={20} />
+                            </button>
+                            <AnimatePresence>
+                                {activeDropdown === 'team' && (
+                                    <motion.div 
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 10 }}
+                                        className="absolute top-full left-0 right-0 mt-2 bg-[#1e1e24] border border-white/10 rounded-xl p-2 z-50 shadow-2xl max-h-[300px] overflow-y-auto"
+                                    >
+                                        <button
+                                            onClick={() => { setSelectedTeam(text.all); setActiveDropdown(null); }}
+                                            className={`w-full text-left px-4 py-2 rounded-lg text-sm transition-colors ${selectedTeam === text.all ? 'bg-[#3457DC] text-white' : 'text-[#a5a5b2] hover:bg-white/5'}`}
+                                        >
+                                            {text.all}
+                                        </button>
+                                        {teams.map(t => (
+                                            <button
+                                                key={t._id}
+                                                onClick={() => { setSelectedTeam(t._id); setActiveDropdown(null); }}
+                                                className={`w-full text-left px-4 py-2 rounded-lg text-sm transition-colors ${selectedTeam === t._id ? 'bg-[#3457DC] text-white' : 'text-[#a5a5b2] hover:bg-white/5'}`}
+                                            >
+                                                {t.name}
+                                            </button>
+                                        ))}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+
+                        {/* Project Dropdown */}
+                        <div className="relative w-full">
+                            <button
+                                onClick={() => setActiveDropdown(activeDropdown === 'project' ? null : 'project')}
+                                className="bg-[#1e1e24] flex items-center justify-between px-6 py-3 rounded-2xl w-full border border-white/5 hover:bg-[#25252d] transition-all h-full"
+                            >
+                                <span className="text-[#a5a5b2] text-[14px] truncate">{selectedProject === text.all ? text.projectLabel : (projects.find(p => p._id === selectedProject)?.title || selectedProject)}</span>
+                                <ChevronDown className={`text-[#3457DC] transition-transform duration-300 ${activeDropdown === 'project' ? 'rotate-180' : ''}`} size={20} />
+                            </button>
+                            <AnimatePresence>
+                                {activeDropdown === 'project' && (
+                                    <motion.div 
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 10 }}
+                                        className="absolute top-full left-0 right-0 mt-2 bg-[#1e1e24] border border-white/10 rounded-xl p-2 z-50 shadow-2xl max-h-[300px] overflow-y-auto"
+                                    >
+                                        <button
+                                            onClick={() => { setSelectedProject(text.all); setActiveDropdown(null); }}
+                                            className={`w-full text-left px-4 py-2 rounded-lg text-sm transition-colors ${selectedProject === text.all ? 'bg-[#3457DC] text-white' : 'text-[#a5a5b2] hover:bg-white/5'}`}
+                                        >
+                                            {text.all}
+                                        </button>
+                                        {projects.map(p => (
+                                            <button
+                                                key={p._id}
+                                                onClick={() => { setSelectedProject(p._id); setActiveDropdown(null); }}
+                                                className={`w-full text-left px-4 py-2 rounded-lg text-sm transition-colors ${selectedProject === p._id ? 'bg-[#3457DC] text-white' : 'text-[#a5a5b2] hover:bg-white/5'}`}
+                                            >
+                                                {p.title}
+                                            </button>
+                                        ))}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -411,6 +478,7 @@ export default function Publications() {
                         filteredPublications.map((pub, idx) => (
                             <ResearchPaperCard 
                                 key={pub._id || idx} 
+                                id={pub._id}
                                 title={pub.title}
                                 authors={Array.isArray(pub.authors) ? pub.authors.join(', ') : pub.authors}
                                 year={pub.publishedDate ? new Date(pub.publishedDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : (pub.year || '2024')}
@@ -420,6 +488,9 @@ export default function Publications() {
                                 activeFilds={pub.activeFilds}
                                 link={pub.documentUrl ? (pub.documentUrl.startsWith('http') ? pub.documentUrl : `${API_BASE_URL}${pub.documentUrl}`) : '#'}
                                 isRTL={isRTL}
+                                projectName={pub.project?.title || pub.projectName}
+                                views={pub.views}
+                                onView={handlePublicationView}
                             />
                         ))
                     )}
@@ -453,35 +524,30 @@ export default function Publications() {
                 </div>
             </div>
 
-            <div className="w-full bg-[#070710] py-32 relative overflow-hidden">
+            <div className="w-full bg-[#070710] py-32 relative overflow-hidden border-t border-white/5">
                 <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
                 
                 <div className="container mx-auto px-6 relative z-10">
-                    <div className="text-center mb-16">
-                        <h2 className="text-white font-gilroy font-extrabold text-[48px] mb-4">{text.researchTeams}</h2>
-                        <p className="text-[#7b829d] text-[18px] max-w-2xl mx-auto">{text.researchTeamsSubtitle}</p>
-                    </div>
-
-                    <div className="max-w-[1240px] mx-auto grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                        {teams.length > 0 ? (
-                            teams.map((team, idx) => (
-                                <ResearchTeamCard 
-                                    key={team._id || idx}
-                                    title={team.name}
-                                    leader={team.leader?.username || team.leader || 'N/A'}
-                                    members={team.members?.map(m => m.username || m) || []}
-                                    membersCount={team.members?.length || 0}
-                                    gradient={idx % 3 === 0 ? "linear-gradient(135deg, rgb(57, 94, 213) 0%, rgb(60, 87, 221) 100%)" : idx % 3 === 1 ? "linear-gradient(135deg, rgb(102, 51, 204) 0%, rgb(134, 57, 172) 100%)" : "linear-gradient(135deg, rgb(34, 142, 195) 0%, rgb(51, 102, 204) 100%)"}
-                                    isRTL={isRTL}
-                                />
-                            ))
-                        ) : (
-                            <div className="col-span-3 text-center py-10 opacity-40">{text.teamsLoading}</div>
-                        )}
+                    <div className="max-w-[800px] mx-auto text-center">
+                        <h2 className="text-white font-gilroy font-extrabold text-[40px] md:text-[56px] mb-6 leading-tight">
+                            {text.teamsSectionTitle}
+                        </h2>
+                        <p className="text-[#7b829d] text-lg mb-10 leading-relaxed">
+                            {text.teamsSectionSubtitle}
+                        </p>
+                        
+                        <Link to="/teams-researches">
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className="bg-[#3457DC] text-white px-10 py-4 rounded-full font-bold text-lg flex items-center gap-3 mx-auto shadow-[0_0_20px_rgba(52,87,220,0.4)] hover:shadow-[0_0_30px_rgba(52,87,220,0.6)] transition-all"
+                            >
+                                {text.viewTeams}
+                                <ArrowRight size={20} className={isRTL ? 'rotate-180' : ''} />
+                            </motion.button>
+                        </Link>
                     </div>
                 </div>
-                
-                <div className="h-20 w-full" />
             </div>
         </div>
     );

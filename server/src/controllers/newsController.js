@@ -20,7 +20,7 @@ exports.createNews = async (req, res) => {
         let imageUrl = '';
 
         if (req.file) {
-            imageUrl = `/uploads/${req.file.filename}`;
+            imageUrl = `/uploads/news/${req.file.filename}`;
         }
 
         const news = await News.create({
@@ -45,7 +45,7 @@ exports.updateNews = async (req, res) => {
         let updateData = { title, description, team };
 
         if (req.file) {
-            updateData.imageUrl = `/uploads/${req.file.filename}`;
+            updateData.imageUrl = `/uploads/news/${req.file.filename}`;
         }
 
         const news = await News.findByIdAndUpdate(req.params.id, updateData, { new: true })
@@ -64,6 +64,20 @@ exports.deleteNews = async (req, res) => {
         const news = await News.findByIdAndDelete(req.params.id);
         if (!news) return res.status(404).json({ message: 'News not found' });
         res.status(200).json({ message: 'News deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+exports.incrementViews = async (req, res) => {
+    try {
+        const news = await News.findByIdAndUpdate(
+            req.params.id,
+            { $inc: { views: 1 } },
+            { new: true }
+        );
+        if (!news) return res.status(404).json({ message: 'News not found' });
+        res.status(200).json(news);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

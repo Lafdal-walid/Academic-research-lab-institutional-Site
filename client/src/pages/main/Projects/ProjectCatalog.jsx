@@ -29,9 +29,9 @@ const generateStaticData = () => {
         const randCat = categoriesList[Math.floor(Math.random() * categoriesList.length)];
         const randTitle = baseTitles[Math.floor(Math.random() * baseTitles.length)] + ` Vol. ${Math.floor(Math.random() * 20 + 1)}`;
 
-        data.push({ 
-            title: randTitle, 
-            image: randImg, 
+        data.push({
+            title: randTitle,
+            image: randImg,
             category: randCat,
             description: `This research project explores the integration of ${randCat} methodologies within institutional frameworks to optimize performance and data-driven decision making. Focused on innovation and academic excellence.`,
             members: ["Dr. Jane Smith", "Prof. Alan Turing", "Maria Curie"],
@@ -49,7 +49,7 @@ const ProjectDetails = ({ project }) => {
     const isRTL = language === "ar";
     if (!project) return null;
     const { raw } = project;
-    
+
     const description = raw?.description || project.description || 'No description available for this research project.';
     const status = raw?.status || project.status || 'Ongoing';
     const startDate = raw?.startDate || project.startDate || raw?.createdAt;
@@ -86,7 +86,7 @@ const ProjectDetails = ({ project }) => {
                             {description}
                         </p>
                     </div>
-                    
+
                     {/* Research Fields / activeFilds badges */}
                     <div className="flex flex-wrap justify-center md:justify-start gap-2">
                         {(raw?.team?.activeFilds || raw?.team?.teamFields || raw?.team?.activeProjects || [1, 2, 3, 4]).map((field, idx) => (
@@ -131,15 +131,15 @@ const ProjectRoadmap = ({ projectName, projectId, milestones = [], createdAt, on
                     </h3>
                     <p className="text-sm text-[#a5a5b2]">Key Objectives & Milestones.</p>
                 </div>
-                
+
                 <div className="md:absolute md:left-1/2 md:-translate-x-1/2 flex flex-col items-center gap-1.5">
                     <span className="text-sm text-[#3457DC] font-medium whitespace-nowrap">
-                         {milestones.filter(m => m.completed).length + 1} of {milestones.length + 1} Completed
+                        {milestones.filter(m => m.completed).length + 1} of {milestones.length + 1} Completed
                     </span>
                     <div className="w-[60px] h-1 bg-[#1e1e24] rounded-full overflow-hidden">
-                        <div 
-                            className="h-full bg-[#3457DC] transition-all duration-500" 
-                            style={{ width: `${((milestones.filter(m => m.completed).length + 1) / (milestones.length + 1)) * 100}%` }} 
+                        <div
+                            className="h-full bg-[#3457DC] transition-all duration-500"
+                            style={{ width: `${((milestones.filter(m => m.completed).length + 1) / (milestones.length + 1)) * 100}%` }}
                         />
                     </div>
                 </div>
@@ -149,43 +149,47 @@ const ProjectRoadmap = ({ projectName, projectId, milestones = [], createdAt, on
 
             <div style={{ height: '1px', backgroundColor: '#2A2A30' }} />
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', maxHeight: '300px', overflowY: 'auto', paddingRight: '12px' }}>
-                <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '46px', position: 'relative' }}>
-                        <div style={{ backgroundColor: '#3457DC', padding: '14px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}>
-                            <img src={ComputerIcon} alt="phase" style={{ width: '16px', height: '16px' }} />
+            <div className="flex flex-col gap-8 max-h-[400px] overflow-y-auto pr-3 custom-scrollbar">
+                {/* Initial Phase */}
+                <div className="flex gap-6 items-start">
+                    <div className="flex flex-col items-center min-w-[46px] relative">
+                        <div className="bg-[#3457DC] p-3.5 rounded-full flex items-center justify-center z-10">
+                            <img src={ComputerIcon} alt="phase" className="w-4 h-4" />
                         </div>
                         {(milestones.length > 0) && (
-                            <div style={{ width: '2px', height: '100px', backgroundColor: '#3457DC', position: 'absolute', top: '22px', zIndex: 1 }} />
+                            <div className="w-[2px] h-full bg-[#3457DC] absolute top-6 z-0" />
                         )}
                     </div>
-                    <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                            <span style={{ fontSize: '14px', color: '#a5a5b2', fontWeight: 500 }}>
+                    <div className="flex-1 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div className="flex flex-col gap-1 text-left">
+                            <span className="text-[14px] text-[#a5a5b2] font-medium">
                                 {createdAt ? new Date(createdAt).toLocaleDateString() : 'Initial phase'}
                             </span>
-                            <span style={{ fontSize: '14px', color: 'white', fontWeight: 400 }}>Project Creation & Planning</span>
+                            <span className="text-[14px] text-white font-normal">Project Creation & Planning</span>
                         </div>
-                        <div style={{ backgroundColor: '#1e1e24', padding: '10px 24px', borderRadius: '16px', color: 'white', fontSize: '14px', fontWeight: 500 }}>Completed</div>
+                        <div className="bg-[#1e1e24] px-6 py-2.5 rounded-2xl text-white text-[14px] font-medium whitespace-nowrap">
+                            Completed
+                        </div>
                     </div>
                 </div>
 
+                {/* Milestones */}
                 {milestones.map((phase, index) => (
-                    <div key={index} style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '46px', position: 'relative' }}>
-                            <div style={{ backgroundColor: phase.completed ? '#3457DC' : '#1e1e24', padding: '14px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}>
-                                <img src={ComputerIcon} alt="phase" style={{ width: '16px', height: '16px', opacity: phase.completed ? 1 : 0.3 }} />
+                    <div key={index} className="flex gap-6 items-start">
+                        <div className="flex flex-col items-center min-w-[46px] relative">
+                            <div className={`${phase.completed ? 'bg-[#3457DC]' : 'bg-[#1e1e24]'} p-3.5 rounded-full flex items-center justify-center z-10`}>
+                                <img src={ComputerIcon} alt="phase" className="w-4 h-4" style={{ opacity: phase.completed ? 1 : 0.3 }} />
                             </div>
                             {index !== milestones.length - 1 && (
-                                <div style={{ width: '2px', height: '100px', backgroundColor: '#3457DC', position: 'absolute', top: '22px', zIndex: 1 }} />
+                                <div className="w-[2px] h-full bg-[#3457DC] absolute top-6 z-0" />
                             )}
                         </div>
-                        <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                <span style={{ fontSize: '14px', color: '#a5a5b2', fontWeight: 500 }}>{phase.date || 'TBD'}</span>
-                                <span style={{ fontSize: '14px', color: 'white', fontWeight: 400 }}>{phase.title}</span>
+                        <div className="flex-1 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div className="flex flex-col gap-1 text-left">
+                                <span className="text-[14px] text-[#a5a5b2] font-medium">{phase.date || 'TBD'}</span>
+                                <span className="text-[14px] text-white font-normal">{phase.title}</span>
                             </div>
-                            <div style={{ backgroundColor: phase.completed ? '#3457DC' : '#1e1e24', padding: '10px 24px', borderRadius: '16px', color: 'white', fontSize: '14px', fontWeight: 500 }}>
+                            <div className={`${phase.completed ? 'bg-[#3457DC]' : 'bg-[#1e1e24]'} px-6 py-2.5 rounded-2xl text-white text-[14px] font-medium whitespace-nowrap`}>
                                 {phase.completed ? 'Completed' : 'Upcoming'}
                             </div>
                         </div>
@@ -200,7 +204,7 @@ const ProjectCatalog = () => {
     const { language } = useLanguage();
     const { user } = useAuth();
     const isRTL = language === "ar";
-    
+
     const text = {
         title: isRTL ? 'كتالوج المشاريع' : 'Project Catalog',
         searchPlaceholder: isRTL ? "ابحث هنا..." : "Search e.g AI models",
@@ -248,7 +252,7 @@ const ProjectCatalog = () => {
                     const mappedData = data.map(project => ({
                         id: project._id,
                         title: project.title,
-                        image: project.imageUrl 
+                        image: project.imageUrl
                             ? (project.imageUrl.startsWith('http') ? project.imageUrl : `${baseUrl}${project.imageUrl.startsWith('/') ? '' : '/'}${project.imageUrl}`)
                             : imagePool[Math.floor(Math.random() * imagePool.length)],
                         category: project.team?.name || (isRTL ? "بحث عام" : "General Research"),
@@ -258,7 +262,7 @@ const ProjectCatalog = () => {
                         raw: project
                     }));
                     setProjectsData(mappedData);
-                    
+
                     const uniqueTeams = ["By Research Team", ...new Set(mappedData.map(p => p.category))];
                     setCategories(uniqueTeams);
                 }
@@ -536,7 +540,7 @@ const ProjectCatalog = () => {
                                             ))}
                                         </div>
                                     </div>
-                                    
+
                                     <div className="space-y-2">
                                         <p className="text-[10px] uppercase tracking-widest text-gray-500 font-bold px-1">{isRTL ? 'الحالة' : 'Status'}</p>
                                         <div className="flex flex-wrap gap-2">
@@ -606,9 +610,9 @@ const ProjectCatalog = () => {
                                 return (
                                     <>
                                         <ProjectDetails project={project} />
-                                        <ProjectRoadmap 
-                                            projectName={project.title} 
-                                            projectId={project.id} 
+                                        <ProjectRoadmap
+                                            projectName={project.title}
+                                            projectId={project.id}
                                             milestones={project.milestones}
                                             createdAt={project.createdAt}
                                             onRefresh={fetchProjects}

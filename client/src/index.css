@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background-main: #151519;
+  --color-background-main: #05030D;
   --color-dashboard-card: #151519;
   --color-card-border: #222127;
   --color-neutral-grey: #8A878E;

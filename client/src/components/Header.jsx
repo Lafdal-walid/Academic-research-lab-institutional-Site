@@ -120,6 +120,13 @@ const Header = () => {
               {language === 'ar' ? 'الأبحاث والفرق' : 'Teams Researches'}
             </Link>
             <Link
+              to="/news-gallery"
+              className="font-poppins font-medium leading-[normal] not-italic relative shrink-0 text-white whitespace-nowrap hover:text-accent transition-colors"
+              style={{ fontSize: '0.97vw' }}
+            >
+              {language === 'ar' ? 'الأخبار والمعرض' : 'News & Gallery'}
+            </Link>
+            <Link
               to="/about-us"
               className="font-poppins font-medium leading-[normal] not-italic relative shrink-0 text-white whitespace-nowrap hover:text-accent transition-colors"
               style={{ fontSize: '0.97vw' }}
@@ -127,41 +134,13 @@ const Header = () => {
               {language === 'ar' ? 'عنا' : 'About Us'}
             </Link>
 
-            {/* Support with Dropdown */}
-            <div className="group relative flex items-center shrink-0" style={{ gap: '0.56vw' }}>
-              <Link
-                to="/support"
-                className="font-poppins font-medium leading-[normal] not-italic relative shrink-0 text-white whitespace-nowrap group-hover:text-accent transition-colors"
-                style={{ fontSize: '0.97vw' }}
-              >
-                {language === 'ar' ? 'الدعم' : 'Support'}
-              </Link>
-              {/* Angle Down Icon */}
-              <div
-                className="relative shrink-0"
-                style={{
-                  width: '1.39vw',
-                  height: '2vh'
-                }}
-              >
-                <svg className="absolute block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 20 20">
-                  <path d={svgPaths.p2d73fe00} fill="currentColor" className="text-white group-hover:text-accent transition-colors" />
-                </svg>
-              </div>
-
-              {/* Dropdown Menu */}
-              <div className={`absolute top-full left-0 mt-2 w-48 bg-dashboard-card border border-card-border rounded-xl p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all shadow-2xl z-[60] ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                <Link to="/support" className="block px-4 py-2 text-[13px] text-neutral-grey hover:bg-white/5 hover:text-white rounded-lg transition-colors">
-                  {language === 'ar' ? 'الأسئلة الشائعة' : 'FAQ'}
-                </Link>
-                <a href="#" className="block px-4 py-2 text-[13px] text-neutral-grey hover:bg-white/5 hover:text-white rounded-lg transition-colors">
-                  {language === 'ar' ? 'ديسكورد' : 'Discord'}
-                </a>
-                <a href="#" className="block px-4 py-2 text-[13px] text-neutral-grey hover:bg-white/5 hover:text-white rounded-lg transition-colors">
-                  {language === 'ar' ? 'اتصل بنا' : 'Contact'}
-                </a>
-              </div>
-            </div>
+            <Link
+              to="/support"
+              className="font-poppins font-medium leading-[normal] not-italic relative shrink-0 text-white whitespace-nowrap hover:text-accent transition-colors"
+              style={{ fontSize: '0.97vw' }}
+            >
+              {language === 'ar' ? 'الدعم' : 'Support'}
+            </Link>
           </nav>
         </div>
 
@@ -339,6 +318,7 @@ const Header = () => {
               <Link to="/projects" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-medium text-white">{language === 'ar' ? 'المشاريع' : 'Projects'}</Link>
               <Link to="/publications" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-medium text-white">{language === 'ar' ? 'المنشورات' : 'Publications'}</Link>
               <Link to="/teams-researches" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-medium text-white">{language === 'ar' ? 'الأبحاث والفرق' : 'Teams Researches'}</Link>
+              <Link to="/news-gallery" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-medium text-white">{language === 'ar' ? 'الأخبار والمعرض' : 'News & Gallery'}</Link>
               <Link to="/about-us" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-medium text-white">{language === 'ar' ? 'عنا' : 'About Us'}</Link>
               <Link to="/support" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-medium text-white">{language === 'ar' ? 'الدعم' : 'Support'}</Link>
             </nav>

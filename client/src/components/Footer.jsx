@@ -37,6 +37,12 @@ const Footer = () => {
   const isPublicationsPage = location.pathname.includes('/publications');
   const isTeamsResearchesPage = location.pathname.includes('/teams-researches');
   const isAboutUsPage = location.pathname.includes('/about-us');
+  const isNewsGalleryPage = location.pathname.includes('/news-gallery');
+
+  const getFooterWrapperBg = () => {
+    if (isProjectsMenu || isPublicationsPage || isTeamsResearchesPage || isAboutUsPage || isNewsGalleryPage || isSupportPage) return "bg-background-main";
+    return "bg-transparent";
+  };
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -60,7 +66,7 @@ const Footer = () => {
   };
 
   return (
-    <div className={isProjectsMenu || isPublicationsPage || isTeamsResearchesPage || isAboutUsPage ? "bg-[#070710]" : isSupportPage ? "bg-[#05030D]" : "bg-transparent"}>
+    <div className={getFooterWrapperBg()}>
     <footer
       className={`relative pt-[90px] md:pt-[130px] pb-[28px] px-6 md:px-20 overflow-x-hidden ${language === 'ar' ? 'font-tajawal' : 'font-poppins'} bg-[#121014] text-white`}
       style={{

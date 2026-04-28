@@ -9,6 +9,7 @@ const MainLayout = ({ children }) => {
                              location.pathname.includes('/support') || 
                              location.pathname.includes('/publications') ||
                              location.pathname.includes('/teams-researches') ||
+                             location.pathname.includes('/news-gallery') ||
                              location.pathname.includes('/about-us');
 
   return (

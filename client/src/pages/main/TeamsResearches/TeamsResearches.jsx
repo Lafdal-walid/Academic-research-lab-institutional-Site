@@ -1,129 +1,86 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ExternalLink, Users as UsersIcon, Calendar as CalendarIcon, Trophy, Award, BookOpen, Cpu, Shield, BarChart3, Cloud, ChevronLeft, ChevronRight, Eye, Download } from 'lucide-react';
+import { Users as UsersIcon, Calendar as CalendarIcon, Eye, Download, Briefcase, Search } from 'lucide-react';
 import { useLanguage } from "@/contexts/LanguageContext";
 import API_BASE_URL from '@/config';
 
-const svgPaths = {
-  p11263c80: "M10.5 7.58333V11.0833C10.5 11.3928 10.3771 11.6895 10.1583 11.9083C9.9395 12.1271 9.64275 12.25 9.33333 12.25H2.91667C2.60725 12.25 2.3105 12.1271 2.09171 11.9083C1.87292 11.6895 1.75 11.3928 1.75 11.0833V4.66667C1.75 4.35725 1.87292 4.0605 2.09171 3.84171C2.3105 3.62292 2.60725 3.5 2.91667 3.5H6.41667",
-  p164f7540: "M12.8975 10.7417L14.16 17.8467C14.1741 17.9303 14.1624 18.0163 14.1264 18.0931C14.0903 18.1699 14.0317 18.2339 13.9583 18.2765C13.8849 18.3191 13.8002 18.3382 13.7157 18.3314C13.6311 18.3246 13.5506 18.2921 13.485 18.2383L10.5017 15.9992C10.3576 15.8916 10.1827 15.8334 10.0029 15.8334C9.82314 15.8334 9.64819 15.8916 9.50417 15.9992L6.51583 18.2375C6.45027 18.2912 6.36988 18.3236 6.28541 18.3305C6.20094 18.3373 6.11639 18.3182 6.04305 18.2757C5.96971 18.2333 5.91106 18.1694 5.87493 18.0928C5.8388 18.0161 5.82691 17.9303 5.84083 17.8467L7.1025 10.7417",
-  p18544000: "M5 7.5H3.75C3.19747 7.5 2.66756 7.28051 2.27686 6.88981C1.88616 6.49911 1.66667 5.9692 1.66667 5.41667C1.66667 4.86413 1.88616 4.33423 2.27686 3.94353C2.66756 3.55283 3.19747 3.33333 3.75 3.33333H5",
-  p1ae07a80: "M8.33333 12.2167V14.1667C8.33333 14.625 7.94167 14.9833 7.525 15.175C6.54167 15.625 5.83333 16.8667 5.83333 18.3333",
-  p1ba6af80: "M11.6667 12.2167V14.1667C11.6667 14.625 12.0583 14.9833 12.475 15.175C13.4583 15.625 14.1667 16.8667 14.1667 18.3333",
-  p25713000: "M2.5 15C2.27899 15 2.06702 14.9122 1.91074 14.7559C1.75446 14.5996 1.66667 14.3877 1.66667 14.1667V3.33333C1.66667 3.11232 1.75446 2.90036 1.91074 2.74408C2.06702 2.5878 2.27899 2.5 2.5 2.5H6.66667C7.55072 2.5 8.39857 2.85119 9.02369 3.47631C9.64881 4.10143 10 4.94928 10 5.83333C10 4.94928 10.3512 4.10143 10.9763 3.47631C11.6014 2.85119 12.4493 2.5 13.3333 2.5H17.5C17.721 2.5 17.933 2.5878 18.0893 2.74408C18.2455 2.90036 18.3333 3.11232 18.3333 3.33333V14.1667C18.3333 14.3877 18.2455 14.5996 18.0893 14.7559C17.933 14.9122 17.721 15 17.5 15H12.5C11.837 15 11.2011 15.2634 10.7322 15.7322C10.2634 16.2011 10 16.837 10 17.5C10 16.837 9.73661 16.2011 9.26777 15.7322C8.79893 15.2634 8.16304 15 7.5 15H2.5Z",
-  p25b05a00: "M8.75 12.8333V10.5C8.83115 9.76925 8.62163 9.03591 8.16667 8.45833C9.91667 8.45833 11.6667 7.29167 11.6667 5.25C11.7133 4.52083 11.5092 3.80333 11.0833 3.20833C11.2467 2.5375 11.2467 1.8375 11.0833 1.16667C11.0833 1.16667 10.5 1.16667 9.33333 2.04167C7.79333 1.75 6.20667 1.75 4.66667 2.04167C3.5 1.16667 2.91667 1.16667 2.91667 1.16667C2.74167 1.8375 2.74167 2.5375 2.91667 3.20833C2.49193 3.80093 2.28578 4.52246 2.33333 5.25C2.33333 7.29167 4.08333 8.45833 5.83333 8.45833C5.60583 8.74417 5.43667 9.07083 5.3375 9.42083C5.23833 9.77083 5.20917 10.1383 5.25 10.5V12.8333",
-  p2900b400: "M5.00022 0.833556L0.833556 14.1669",
-  p2b6e5880: "M4.16667 0.833333L0.833333 4.16667L4.16667 7.5",
-  p312978e0: "M15 7.5H16.25C16.8025 7.5 17.3324 7.28051 17.7231 6.88981C18.1138 6.49911 18.3333 5.9692 18.3333 5.41667C18.3333 4.86413 18.1138 4.33423 17.7231 3.94353C17.3324 3.55283 16.8025 3.33333 16.25 3.33333H15",
-  p31ca8d80: "M15 1.66667H5V7.5C5 8.82608 5.52678 10.0979 6.46447 11.0355C7.40215 11.9732 8.67392 12.5 10 12.5C11.3261 12.5 12.5979 11.9732 13.5355 11.0355C14.4732 10.0979 15 8.82608 15 7.5V1.66667Z",
-  p33908740: "M9.13083 10.295C9.09203 10.2563 9.06124 10.2103 9.04024 10.1597C9.01923 10.1091 9.00842 10.0548 9.00842 10C9.00842 9.94519 9.01923 9.89093 9.04024 9.84031C9.06124 9.78968 9.09203 9.7437 9.13083 9.705L12.9525 5.88417C13.187 5.64978 13.3188 5.33184 13.3189 5.00029C13.3189 4.66875 13.1873 4.35075 12.9529 4.11625C12.7185 3.88175 12.4006 3.74997 12.069 3.74989C11.7375 3.74982 11.4195 3.88145 11.185 4.11583L7.36333 7.9375C6.81731 8.48503 6.51068 9.22674 6.51068 10C6.51068 10.7733 6.81731 11.515 7.36333 12.0625L11.185 15.8842C11.4195 16.1186 11.7375 16.2502 12.069 16.2501C12.4006 16.25 12.7185 16.1182 12.9529 15.8837C13.1873 15.6493 13.3189 15.3313 13.3189 14.9997C13.3188 14.6682 13.187 14.3502 12.9525 14.1158L9.13083 10.295Z",
-  p3623b300: "M5.25 10.5C2.61917 11.6667 2.33333 9.33333 1.16667 9.33333",
-  p78c1970: "M0.833333 7.5L4.16667 4.16667L0.833333 0.833333",
-};
+const ResearchPaperCard = ({ id, title, authors, year, journal, description, tags, link, isRTL, activeFilds, projectName, views, onView }) => {
+    const handleView = async () => {
+        if (!id) return;
+        if (onView) onView(id);
+        try {
+            await fetch(`${API_BASE_URL}/api/publications/${id}/view`, {
+                method: 'PATCH',
+            });
+        } catch (err) {
+            console.error("Failed to update view count", err);
+        }
+    };
 
-const placeholderImage = "https://ui-avatars.com/api/?background=3457DC&color=fff&size=200&name=User";
-
-function TagBadge({ label }) {
-  return (
-    <div className="bg-[rgba(57,94,213,0.05)] border border-[rgba(57,94,213,0.3)] border-solid h-[42px] rounded-[9999px] px-6 flex items-center justify-center hover:bg-[rgba(57,94,213,0.1)] transition-colors cursor-default">
-      <p className="font-['Inter:Regular',sans-serif] font-normal text-[#b6bace] text-[14px] leading-[20px] whitespace-nowrap">
-        {label}
-      </p>
-    </div>
-  );
-}
-
-function TeamMemberCard({ name, title, role, image, showTwitter = true, isRTL }) {
-  return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      className={`bg-[rgba(255,255,255,0.05)] border border-[#2e2e38] border-solid rounded-[22px] p-6 flex flex-col items-center hover:border-blue-500/40 transition-all group ${isRTL ? 'text-right' : 'text-left'}`}
-    >
-      <div className="rounded-[9999px] shadow-[0px_0px_0px_2px_rgba(57,94,213,0.3)] size-[112px] overflow-hidden mb-6 group-hover:shadow-[0px_0px_0px_4px_rgba(57,94,213,0.5)] transition-all">
-        <img alt={name} className="size-full object-cover" src={image || placeholderImage} />
-      </div>
-
-      <h3 className="font-['Inter:Bold',sans-serif] font-bold text-[#f5f5f5] text-[18px] text-center mb-2 leading-[28px]">
-        {name}
-      </h3>
-
-      <p className="font-['Inter:Regular','Noto_Sans_Arabic:Regular',sans-serif] font-normal text-[#7b829d] text-[14px] text-center mb-4 leading-[20px]" dir="auto">
-        {title}
-      </p>
-
-      <div className="bg-[rgba(57,94,213,0.1)] h-[24px] rounded-[9999px] px-4 flex items-center justify-center mb-6">
-        <p className="font-['Inter:Regular',sans-serif] font-normal text-[#3c61dd] text-[12px] leading-[16px]">
-          {role}
-        </p>
-      </div>
-
-      <div className="flex gap-[30px] items-center">
-        <div className="h-[18px] w-[18px] opacity-40 hover:opacity-100 transition-opacity cursor-pointer">
-           <ExternalLink size={18} className="text-[#7B829D]" />
-        </div>
-        <div className="h-[18px] w-[18px] opacity-40 hover:opacity-100 transition-opacity cursor-pointer">
-           <UsersIcon size={18} className="text-[#7B829D]" />
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-const ResearchPaperCard = ({ title, authors, year, journal, description, tags, link, isRTL, activeFilds }) => {
     return (
         <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className={`bg-[#151519] border border-white/5 rounded-2xl p-6 flex flex-col gap-4 group hover:border-[#3457DC]/30 transition-all duration-300 ${isRTL ? 'text-right' : 'text-left'}`}
+            className={`bg-white/[0.02] border border-white/[0.05] rounded-[24px] p-8 flex flex-col gap-5 group hover:border-[#3457DC]/40 transition-all duration-300 relative overflow-hidden ${isRTL ? 'text-right' : 'text-left'}`}
         >
-            <div className={`flex justify-between items-start gap-4 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                <h3 className="text-xl font-bold text-white font-gilroy leading-tight group-hover:text-[#3457DC] transition-colors">
+            <div className="absolute top-0 left-0 w-1 h-full bg-[#3457DC]/0 group-hover:bg-[#3457DC] transition-all" />
+            
+            <div className={`flex justify-between items-start gap-4 relative z-10 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                <h3 className="text-xl font-bold text-white/90 font-gilroy leading-tight group-hover:text-white transition-colors">
                     {title}
                 </h3>
                 <div className="flex items-center gap-2">
-                    <a href={link} target="_blank" rel="noopener noreferrer" className="text-white/20 hover:text-white transition-colors p-1" title="View Publication">
-                        <Eye size={20} />
+                    <a href={link} target="_blank" rel="noopener noreferrer" onClick={handleView} className="text-white/20 hover:text-[#3457DC] transition-colors p-2 rounded-xl hover:bg-[#3457DC]/5" title="View Publication">
+                        <Eye size={18} />
                     </a>
-                    <a href={link} download className="text-white/20 hover:text-white transition-colors p-1" title="Download Publication">
-                        <Download size={20} />
+                    <a href={link} download onClick={handleView} className="text-white/20 hover:text-[#3457DC] transition-colors p-2 rounded-xl hover:bg-[#3457DC]/5" title="Download Publication">
+                        <Download size={18} />
                     </a>
                 </div>
             </div>
 
-            <div className={`flex flex-wrap items-center gap-x-6 gap-y-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+            <div className={`flex flex-wrap items-center gap-x-6 gap-y-3 relative z-10 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                 <div className="flex items-center gap-2 text-white/40 text-sm">
-                    <UsersIcon size={16} />
-                    <span>{authors}</span>
+                    <UsersIcon size={16} className="text-[#3457DC]/60" />
+                    <span className="font-medium">{authors}</span>
                 </div>
                 <div className="flex items-center gap-2 text-white/40 text-sm">
-                    <CalendarIcon size={14} />
-                    <span>{year}</span>
+                    <CalendarIcon size={14} className="text-[#3457DC]/60" />
+                    <span className="font-medium">{year}</span>
                 </div>
+                <div className="flex items-center gap-2 text-white/40 text-sm">
+                    <Eye size={14} className="text-[#3457DC]/60" />
+                    <span className="font-medium">{views || 0}</span>
+                </div>
+                {projectName && (
+                    <div className="flex items-center gap-2 text-white/40 text-sm">
+                        <Briefcase size={14} className="text-[#3457DC]/60" />
+                        <span className="font-medium">{projectName}</span>
+                    </div>
+                )}
             </div>
 
             {journal && (
-                <div className="text-sm font-medium text-blue-500/80 uppercase tracking-wide">
+                <div className={`text-[12px] font-bold text-[#3457DC] uppercase tracking-[0.1em] relative z-10 ${isRTL ? 'text-right' : 'text-left'}`}>
                     {journal}
                 </div>
             )}
 
             {description && (
-                <p className="text-white/60 text-sm leading-relaxed line-clamp-3">
+                <p className={`text-white/50 text-[14px] leading-relaxed line-clamp-3 relative z-10 ${isRTL ? 'text-right' : 'text-left'}`}>
                     {description}
                 </p>
             )}
 
-            <div className={`flex flex-wrap gap-2 mt-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+            <div className={`flex flex-wrap gap-2 mt-2 relative z-10 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                 {activeFilds && activeFilds.map((field, idx) => (
-                    <span key={idx} className="bg-[#3457DC] px-3 py-1 rounded-full text-white text-[11px] font-semibold uppercase tracking-wider">
+                    <span key={idx} className="bg-[#3457DC] px-4 py-1 rounded-full text-white text-[10px] font-bold uppercase tracking-widest">
                         {field}
                     </span>
                 ))}
                 {tags && tags.map((tag, idx) => (
-                    <span key={idx} className="bg-[#3457DC]/10 px-3 py-1 rounded-full text-[#3457DC] text-[11px] font-semibold uppercase tracking-wider">
+                    <span key={idx} className="bg-white/[0.03] border border-white/[0.05] px-4 py-1 rounded-full text-white/40 text-[10px] font-bold uppercase tracking-widest hover:text-white/70 transition-colors">
                         {tag}
                     </span>
                 ))}
@@ -132,325 +89,299 @@ const ResearchPaperCard = ({ title, authors, year, journal, description, tags, l
     );
 };
 
-function ProjectCard({ title, description, hRTL, hasDemo = false }) {
-  return (
-    <motion.div 
-      initial={{ opacity: 0, scale: 0.95 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true }}
-      className={`bg-[rgba(255,255,255,0.05)] border border-[#2e2e38] border-solid rounded-[16px] p-6 hover:bg-[rgba(255,255,255,0.08)] transition-all h-full flex flex-col ${hRTL ? 'text-right' : 'text-left'}`}
-    >
-      <div className={`flex items-center gap-4 mb-4 ${hRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-        <div className="size-[20px] flex-shrink-0">
-          <Cpu className="text-[#395ED5]" size={20} />
-        </div>
-        <h3 className="font-['Inter:Bold',sans-serif] font-bold text-[#f5f5f5] text-[16px] leading-[24px]">
-          {title}
-        </h3>
-      </div>
-      <p className="font-['Inter:Regular','Noto_Sans_Arabic:Regular',sans-serif] font-normal text-[#7b829d] text-[14px] leading-[22.75px] mb-6 flex-1" dir="auto">
-        {description}
-      </p>
-      <div className={`flex gap-4 mt-auto ${hRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-        <a href="#" className="flex items-center gap-2 text-[#395ed5] text-[12px] leading-[16px] font-['Inter:Regular',sans-serif] hover:underline">
-          GitHub
-        </a>
-        {hasDemo && (
-          <a href="#" className="flex items-center gap-2 text-[#395ed5] text-[12px] leading-[16px] font-['Inter:Regular',sans-serif] hover:underline">
-            Demo
-          </a>
-        )}
-      </div>
-    </motion.div>
-  );
-}
-
-function AchievementCard({ icon, title, isRTL }) {
-  const renderIcon = () => {
-    switch (icon) {
-      case "trophy":
-        return <Trophy size={20} />;
-      case "award":
-        return <Award size={20} />;
-      case "book":
-        return <BookOpen size={20} />;
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      className={`bg-[rgba(255,255,255,0.05)] border border-[#2e2e38] border-solid rounded-[12px] p-5 flex items-center gap-4 hover:border-blue-500/20 transition-all group shrink-0 ${isRTL ? 'flex-row-reverse text-right' : 'flex-row text-left'}`}
-    >
-      <div className="bg-[rgba(57,94,213,0.1)] rounded-[9999px] size-[40px] flex items-center justify-center flex-shrink-0 group-hover:bg-[#3457DC] transition-all group-hover:text-white text-[#3457DC]">
-        {renderIcon()}
-      </div>
-      <p className="font-['Inter:Regular','Noto_Sans_Arabic:Regular',sans-serif] font-normal text-[#f5f5f5] text-[14px] leading-[20px]" dir="auto">
-        {title}
-      </p>
-    </motion.div>
-  );
-}
-
 export default function TeamsResearches() {
-  const { language } = useLanguage();
-  const isRTL = language === "ar";
-
-  const text = {
-      badge: isRTL ? 'فرقنا' : 'TEAMS',
-      interestsTitle: isRTL ? 'اهتمامات البحث' : 'Research Interests',
-      publicationsTitle: isRTL ? 'منشورات مختارة' : 'Selected Publications',
-      projectsTitle: isRTL ? 'مشاريع مميزة' : 'Featured Projects',
-      achievementsTitle: isRTL ? 'الإنجازات والجوائز' : 'Achievements & Awards',
-      achievementsSubtitle: isRTL ? 'التكريمات والتقدير الذي حصلنا عليه' : "Honors and recognition we've received",
-      of: isRTL ? 'من' : 'of',
-      noPubs: isRTL ? 'لا توجد منشورات لهذا الفريق.' : 'No team publications found.',
-      noProjs: isRTL ? 'لا توجد مشاريع لهذا الفريق.' : 'No team projects found.',
-      defaultTeamName: isRTL ? 'فريق أبحاث علوم البيانات' : 'Data Science Research Team',
-      defaultTeamFocus: isRTL ? 'تطوير الأبحاث في الذكاء الاصطناعي والأمن السيبراني' : 'Advancing research in AI and Cybersecurity'
-  };
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const [teams, setTeams] = useState([]);
-  const [activeTeam, setActiveTeam] = useState(null);
-  const [teamPublications, setTeamPublications] = useState([]);
-  const [teamProjects, setTeamProjects] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchTeams = async () => {
-      setIsLoading(true);
-      try {
-        const baseUrl = API_BASE_URL;
-        const res = await fetch(`${baseUrl}/api/teams`);
-        if (res.ok) {
-          const data = await res.json();
-          setTeams(data);
-          if (data.length > 0) {
-            setActiveTeam(data[currentPage - 1] || data[0]);
-          }
-        }
-      } catch (err) {
-        console.error("Failed to fetch teams", err);
-      } finally {
-        setIsLoading(false);
-      }
+    const { language } = useLanguage();
+    const isRTL = language === "ar";
+    
+    const text = {
+        badge: isRTL ? 'الفرق البحثية' : 'RESEARCH TEAMS',
+        title: isRTL ? 'فرق البحث والابتكار' : 'Research & Innovation Teams',
+        subtitle: isRTL ? 'استكشف فرقنا البحثية ومنشوراتها' : 'Explore our research teams and their publications',
+        leader: isRTL ? 'القائد:' : 'Leader:',
+        members: isRTL ? 'أعضاء' : 'Members',
+        projectsLabel: isRTL ? 'المشاريع البحثية' : 'RESEARCH PROJECTS',
+        publicationsLabel: isRTL ? 'المنشورات البحثية' : 'TEAM PUBLICATIONS',
+        status: isRTL ? 'الحالة' : 'Status',
+        teamMembers: isRTL ? 'أعضاء الفريق' : 'Team Members',
+        startDate: isRTL ? 'تاريخ البدء' : 'Start Date',
+        endDate: isRTL ? 'تاريخ الانتهاء' : 'End Date',
+        description: isRTL ? 'الوصف' : 'Description',
+        researchMembers: isRTL ? 'أعضاء البحث' : 'Research Members',
+        ongoing: isRTL ? 'مستمر' : 'Ongoing',
+        loading: isRTL ? 'جاري التحميل...' : 'Loading teams data...',
+        noTeams: isRTL ? 'لم يتم العثور على فرق بحثية.' : 'No research teams found.'
     };
-    fetchTeams();
-  }, []);
 
-  useEffect(() => {
-    if (teams.length > 0) {
-      const team = teams[currentPage - 1] || teams[0];
-      setActiveTeam(team);
-    }
-  }, [currentPage, teams]);
+    const [teams, setTeams] = useState([]);
+    const [projects, setProjects] = useState([]);
+    const [publications, setPublications] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    if (activeTeam) {
-      const fetchTeamContent = async () => {
-        try {
-          const baseUrl = API_BASE_URL;
-          
-          const pubRes = await fetch(`${baseUrl}/api/publications?team=${activeTeam._id}`);
-          if (pubRes.ok) {
-            const pubData = await pubRes.json();
-            setTeamPublications(pubData);
-          }
+    const handlePublicationView = (id) => {
+        setPublications(prev => prev.map(pub => 
+            pub._id === id ? { ...pub, views: (pub.views || 0) + 1 } : pub
+        ));
+    };
 
-          const projRes = await fetch(`${baseUrl}/api/projects?team=${activeTeam._id}`);
-          if (projRes.ok) {
-            const projData = await projRes.json();
-            setTeamProjects(projData);
-          }
-        } catch (err) {
-          console.error("Failed to fetch team content", err);
-        }
-      };
-      fetchTeamContent();
-    }
-  }, [activeTeam]);
+    useEffect(() => {
+        const fetchData = async () => {
+            setIsLoading(true);
+            try {
+                const baseUrl = API_BASE_URL;
+                
+                const [teamRes, projRes, pubRes] = await Promise.all([
+                    fetch(`${baseUrl}/api/teams`),
+                    fetch(`${baseUrl}/api/projects`),
+                    fetch(`${baseUrl}/api/publications`)
+                ]);
 
-  const totalPages = teams.length || 1;
+                if (teamRes.ok) setTeams(await teamRes.json());
+                if (projRes.ok) setProjects(await projRes.json());
+                if (pubRes.ok) setPublications(await pubRes.json());
 
-  const getActiveTeamMembers = () => {
-    if (!activeTeam) return [];
-    
-    const members = [];
-    if (activeTeam.leader) {
-      members.push({
-        name: isRTL ? (activeTeam.leader.nameAr || activeTeam.leader.username) : activeTeam.leader.username,
-        title: isRTL ? (activeTeam.leader.roleAr || "قائد الفريق") : (activeTeam.leader.role || "Team Leader"),
-        role: isRTL ? "قائد" : "Leader",
-        image: `https://ui-avatars.com/api/?background=3457DC&color=fff&name=${encodeURIComponent(activeTeam.leader.username)}`,
-        showTwitter: true
-      });
-    }
-    
-    if (activeTeam.members) {
-      activeTeam.members.forEach(m => {
-        members.push({
-          name: isRTL ? (m.nameAr || m.username) : m.username,
-          title: isRTL ? (m.roleAr || "باحث") : (m.role || "Researcher"),
-          role: isRTL ? "عضو" : "Member",
-          image: `https://ui-avatars.com/api/?background=3457DC&color=fff&name=${encodeURIComponent(m.username)}`,
-          showTwitter: false
-        });
-      });
-    }
-    
-    return members;
-  };
+            } catch (err) {
+                console.error("Failed to fetch data", err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchData();
+    }, []);
 
-  const getActiveInterests = () => {
-    if (!activeTeam || !activeTeam.focus) return [];
-    return activeTeam.focus.split(',').map(i => i.trim());
-  };
+    return (
+        <div className={`w-full min-h-screen bg-[#05030D] text-white relative overflow-x-hidden ${isRTL ? 'font-tajawal' : 'font-poppins'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className="h-20 w-full" />
 
-  const achievements = [
-    { icon: "trophy", title: isRTL ? "المركز الأول - ICPC الإقليمي 2024" : "1st Place - ICPC Regional 2024" },
-    { icon: "award", title: isRTL ? "أفضل ورقة بحثية - مؤتمر IEEE 2023" : "Best Research Paper - IEEE Conference 2023" },
-    { icon: "book", title: isRTL ? "منحة بحثية من وزارة التعليم العالي" : "Research Grant from the Ministry of Higher Education" },
-    { icon: "trophy", title: isRTL ? "جائزة أفضل مشروع - هكاثون الجزائر 2024" : "Best Project Award - Hackathon Algeria 2024" }
-  ];
-
-  return (
-    <div className={`w-full min-h-screen bg-[#05030D] text-white relative overflow-x-hidden ${isRTL ? 'font-tajawal' : 'font-poppins'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-      <div className="h-20 w-full" />
-
-      <div className="flex flex-col items-center w-full">
-        <div className="w-full py-20 px-8 relative overflow-hidden">
-          <div className="absolute bg-[rgba(57,94,213,0.2)] blur-[60px] w-[400px] h-[400px] opacity-20 rounded-full top-[-100px] left-1/2 -translate-x-1/2" />
-          
-          <div className="container mx-auto relative z-10 text-center mb-20">
-              <div className="flex flex-col items-center mb-8">
-                <span className="text-[#3457DC] text-[13px] uppercase font-bold tracking-[0.2em] mb-2">{text.badge}</span>
-                <h1 className="font-gilroy font-extrabold text-[60px] md:text-[80px] leading-tight mb-4 bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(156.197deg, rgb(60, 97, 221) 0%, rgb(117, 146, 240) 100%)" }}>
-                   {activeTeam?.name || text.defaultTeamName}
-                </h1>
-             </div>
-            <p className="font-normal text-[#7b829d] text-[20px] leading-[28px] max-w-2xl mx-auto">
-              {activeTeam?.focus ? (isRTL ? `نطور الأبحاث في ${activeTeam.focus}` : `Advancing research in ${activeTeam.focus}`) : text.defaultTeamFocus} 
-            </p>
-          </div>
-
-          <div className="container mx-auto relative z-10 grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 mb-32">
-            {getActiveTeamMembers().map((member, index) => (
-              <TeamMemberCard key={index} {...member} isRTL={isRTL} />
-            ))}
-          </div>
-        </div>
-
-        <div className="container mx-auto px-6 w-full space-y-32">
-          <section className="relative z-10">
-            <div className="bg-[rgba(255,255,255,0.03)] border border-white/5 rounded-[24px] p-12">
-              <h2 className="font-gilroy font-bold text-[36px] text-center mb-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-blue-300">
-                {text.interestsTitle}
-              </h2>
-              <div className="flex flex-wrap gap-3 justify-center">
-                {getActiveInterests().map((interest, index) => <TagBadge key={index} label={interest} />)}
-              </div>
+            <div className="container mx-auto px-6 pt-16 pb-24 text-center relative z-10">
+                <motion.div 
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-col items-center"
+                >
+                    <span className="text-[#3457DC] text-[13px] uppercase font-bold tracking-[0.2em] mb-0">{text.badge}</span>
+                    <h1 className="font-gilroy font-extrabold text-[64px] md:text-[96px] leading-tight mb-4">
+                        {text.title}
+                    </h1>
+                    <p className="text-white/60 text-lg max-w-2xl mx-auto">{text.subtitle}</p>
+                </motion.div>
             </div>
-          </section>
 
-          <section className="relative z-10">
-            <h2 className="font-gilroy font-bold text-[36px] text-center mb-16 text-white">
-              {text.publicationsTitle}
-            </h2>
-            <div className="space-y-6 max-w-[1100px] mx-auto">
-              {teamPublications.length > 0 ? (
-                teamPublications.map((pub, index) => (
-                  <ResearchPaperCard 
-                    key={pub._id || index} 
-                    title={pub.title}
-                    authors={Array.isArray(pub.authors) ? pub.authors.join(', ') : pub.authors}
-                    year={pub.publishedDate ? new Date(pub.publishedDate).getFullYear() : (pub.year || '2024')}
-                    journal={pub.team?.name || pub.publisher}
-                    description={pub.description || pub.contribution || pub.abstract}
-                    tags={pub.tags}
-                    activeFilds={pub.activeFilds}
-                    link={pub.documentUrl ? (pub.documentUrl.startsWith('http') ? pub.documentUrl : `${API_BASE_URL}${pub.documentUrl}`) : '#'}
-                    isRTL={isRTL}
-                  />
-                ))
-              ) : (
-                <div className="text-center py-20 opacity-40">{text.noPubs}</div>
-              )}
+            <div className="w-full h-px bg-[#373735]/30 relative mb-16">
+                <div className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-[#3457DC]/50 to-transparent" />
             </div>
-          </section>
 
-          <section className="relative z-10">
-            <div className="bg-[rgba(255,255,255,0.03)] border border-white/5 rounded-[24px] p-12">
-              <h2 className="font-gilroy font-bold text-[36px] text-center mb-12 text-white">
-                {text.projectsTitle}
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {teamProjects.length > 0 ? (
-                  teamProjects.map((project, index) => (
-                    <ProjectCard 
-                        key={project._id || index} 
-                        title={project.title}
-                        description={project.description}
-                        hasDemo={!!project.imageUrl}
-                        hRTL={isRTL}
-                    />
-                  ))
+            <div className="container mx-auto px-6 pb-32">
+                {isLoading ? (
+                    <div className="text-center py-20 opacity-40">{text.loading}</div>
+                ) : teams.length === 0 ? (
+                    <div className="text-center py-20 opacity-40">{text.noTeams}</div>
                 ) : (
-                  <div className="col-span-full text-center py-10 opacity-40">{text.noProjs}</div>
-                )}
-              </div>
-            </div>
-          </section>
-        </div>
+                    <div className="max-w-[1240px] mx-auto flex flex-col gap-16">
+                        {teams.map((team, idx) => {
+                            const teamProjects = projects.filter(p => p.team?._id === team._id || p.team === team._id);
+                            const teamPublications = publications.filter(p => p.team?._id === team._id || p.team === team._id);
+                            
+                            return (
+                                <motion.div 
+                                    key={team._id || idx}
+                                    initial={{ opacity: 0, y: 30 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    className="bg-[#0A0A12] border border-[#1E1E2E] rounded-[32px] p-8 md:p-12 transition-all hover:border-[#3457DC]/30 relative overflow-hidden group shadow-2xl"
+                                >
+                                    {/* Decorative background element */}
+                                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#3457DC]/5 blur-[120px] rounded-full -mr-64 -mt-64 group-hover:bg-[#3457DC]/8 transition-colors pointer-events-none" />
+                                    <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-blue-600/5 blur-[100px] rounded-full -ml-32 -mb-32 pointer-events-none" />
+                                    
+                                    <div className="flex flex-col md:flex-row justify-between items-start gap-8 mb-16 pb-12 border-b border-white/[0.05] relative z-10">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-4 mb-6">
+                                                <div className="w-2 h-10 bg-gradient-to-b from-[#3457DC] to-blue-600 rounded-full shadow-[0_0_15px_rgba(52,87,220,0.4)]" />
+                                                <h2 className="text-white font-gilroy font-extrabold text-4xl md:text-5xl tracking-tight">{team.name}</h2>
+                                            </div>
+                                            <div className="flex flex-col gap-3">
+                                                <div className="bg-white/[0.03] border border-white/[0.05] rounded-2xl p-4 inline-flex flex-col gap-1 max-w-fit">
+                                                    <span className="text-[10px] uppercase tracking-[0.2em] text-[#3457DC] font-black">{text.leader}</span>
+                                                    <span className="text-white text-[16px] font-medium">{team.leader?.email || team.leader?.username || team.leader || 'N/A'}</span>
+                                                </div>
+                                                <p className="text-[#80808a] text-[15px] flex items-center gap-2 px-4">
+                                                    <UsersIcon size={16} className="text-[#3457DC]/80" />
+                                                    <span className="text-white/40 font-medium">{team.members?.length || 0} {text.members}</span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
 
-        <div className="w-full bg-[#070710] py-32 mt-32 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
-          
-          <div className="container mx-auto px-6 relative z-10">
-            <div className="text-center mb-16">
-              <h2 className="text-white font-gilroy font-extrabold text-[48px] mb-4">{text.achievementsTitle}</h2>
-              <p className="text-[#7b829d] text-[18px]">{text.achievementsSubtitle}</p>
-            </div>
+                                    {teamProjects.length > 0 && (
+                                        <div className="mb-20 relative z-10">
+                                            <div className="flex items-center gap-6 mb-10">
+                                                <h3 className="text-white/30 text-[11px] uppercase tracking-[0.3em] font-bold whitespace-nowrap">{text.projectsLabel}</h3>
+                                                <div className="h-px bg-white/[0.05] flex-1" />
+                                            </div>
+                                            <div className="grid grid-cols-1 gap-10">
+                                                {teamProjects.map((project, pIdx) => (
+                                                    <div key={project._id || pIdx} className="bg-[#12121A] border border-white/[0.03] rounded-[24px] p-8 md:p-10 hover:border-[#3457DC]/20 transition-all shadow-lg relative overflow-hidden">
+                                                        <div className="absolute top-0 right-0 w-32 h-32 bg-[#3457DC]/5 blur-3xl pointer-events-none" />
+                                                        
+                                                        <div className="flex flex-col gap-10">
+                                                            <div className="flex flex-col gap-4">
+                                                                <h4 className="text-2xl md:text-3xl font-bold text-white group-hover:text-[#3457DC] transition-colors">{project.title}</h4>
+                                                                <div className="h-1 w-20 bg-gradient-to-r from-[#3457DC] to-transparent rounded-full" />
+                                                            </div>
 
-            <div className="max-w-[1100px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 mb-20">
-              {achievements.map((achievement, index) => (
-                <AchievementCard key={index} {...achievement} isRTL={isRTL} />
-              ))}
-            </div>
+                                                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 bg-white/[0.02] p-6 rounded-2xl border border-white/[0.03]">
+                                                                <div className="flex flex-col gap-2">
+                                                                    <span className="text-[10px] uppercase tracking-widest text-[#80808a] font-extrabold">{text.status}</span>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <div className={`w-2 h-2 rounded-full ${project.status === 'Ongoing' ? 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]' : project.status === 'Completed' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]'}`} />
+                                                                        <span className="text-sm font-bold text-white/90">{project.status}</span>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="flex flex-col gap-2">
+                                                                    <span className="text-[10px] uppercase tracking-widest text-[#80808a] font-extrabold">{text.teamMembers}</span>
+                                                                    <span className="text-sm text-white/90 font-bold">{project.members?.length || 0}</span>
+                                                                </div>
+                                                                <div className="flex flex-col gap-2">
+                                                                    <span className="text-[10px] uppercase tracking-widest text-[#80808a] font-extrabold">{text.startDate}</span>
+                                                                    <span className="text-sm text-white/90 font-bold">{project.startDate ? new Date(project.startDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short' }) : 'N/A'}</span>
+                                                                </div>
+                                                                <div className="flex flex-col gap-2">
+                                                                    <span className="text-[10px] uppercase tracking-widest text-[#80808a] font-extrabold">{text.endDate}</span>
+                                                                    <span className="text-sm text-white/90 font-bold">{project.endDate ? new Date(project.endDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short' }) : text.ongoing}</span>
+                                                                </div>
+                                                            </div>
 
-            <div className={`max-w-[1240px] mx-auto flex items-center justify-between pt-8 border-t border-white/5 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                <button
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                    className={`w-12 h-12 flex items-center justify-center rounded-full transition-all ${currentPage === 1 ? 'bg-white/5 opacity-30 cursor-not-allowed' : 'bg-[#3457DC] hover:scale-110 active:scale-95'}`}
-                >
-                    {isRTL ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-                </button>
+                                                            <div className="flex flex-col gap-8 pt-4">
+                                                                <div className="flex flex-col gap-3">
+                                                                    <span className="text-[10px] uppercase tracking-widest text-[#3457DC] font-extrabold">{text.description}</span>
+                                                                    <p className="text-white/60 text-[16px] leading-relaxed max-w-4xl">{project.description}</p>
+                                                                </div>
+                                                                
+                                                                <div className="flex flex-wrap gap-2">
+                                                                    {project.tags?.map((tag, tIdx) => (
+                                                                        <span key={tIdx} className="bg-[#3457DC]/5 border border-[#3457DC]/10 px-4 py-1.5 rounded-lg text-[11px] text-[#3457DC] font-bold uppercase tracking-wider">
+                                                                            {tag}
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
 
-                <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                    <div className="bg-[#1e1e24] border border-white/5 rounded-xl px-4 py-2 font-bold min-w-[50px] text-center">
-                        {currentPage}
+                                                                <div className="flex flex-col gap-5 pt-6 border-t border-white/[0.03]">
+                                                                    <span className="text-[10px] uppercase tracking-widest text-[#80808a] font-extrabold">{text.researchMembers} ({project.members?.length || 0})</span>
+                                                                    <div className="flex flex-wrap gap-3">
+                                                                        {project.members?.map((member, mIdx) => (
+                                                                            <div key={mIdx} className="bg-white/[0.02] border border-white/[0.03] px-5 py-3 rounded-2xl flex items-center gap-3 hover:bg-white/[0.04] transition-colors group/member">
+                                                                                <div className="w-8 h-8 rounded-full bg-[#3457DC]/10 flex items-center justify-center text-[#3457DC] text-[10px] font-bold border border-[#3457DC]/20">
+                                                                                    {member.username?.[0]?.toUpperCase() || member.email?.[0]?.toUpperCase() || 'U'}
+                                                                                </div>
+                                                                                <span className="text-xs text-white/50 group-hover/member:text-white/80 transition-colors">{member.email || member.username || member}</span>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {teamPublications.length > 0 && (
+                                        <div className="relative z-10">
+                                            <div className="flex items-center gap-6 mb-10">
+                                                <h3 className="text-white/30 text-[11px] uppercase tracking-[0.3em] font-bold whitespace-nowrap">{text.publicationsLabel}</h3>
+                                                <div className="h-px bg-white/[0.05] flex-1" />
+                                            </div>
+                                            <div className="grid grid-cols-1 gap-6">
+                                                {teamPublications.map((pub, pIdx) => (
+                                                    <ResearchPaperCard 
+                                                        key={pub._id || pIdx} 
+                                                        id={pub._id}
+                                                        title={pub.title}
+                                                        authors={Array.isArray(pub.authors) ? pub.authors.join(', ') : pub.authors}
+                                                        year={pub.publishedDate ? new Date(pub.publishedDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short' }) : (pub.year || '2024')}
+                                                        journal={pub.team?.name || pub.publisher}
+                                                        description={pub.description || pub.contribution || pub.abstract}
+                                                        tags={pub.tags}
+                                                        activeFilds={pub.activeFilds}
+                                                        link={pub.documentUrl ? (pub.documentUrl.startsWith('http') ? pub.documentUrl : `${API_BASE_URL}${pub.documentUrl}`) : '#'}
+                                                        isRTL={isRTL}
+                                                        projectName={pub.project?.title || pub.projectName}
+                                                        views={pub.views}
+                                                        onView={handlePublicationView}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </motion.div>
+                            );
+                        })}
                     </div>
-                    <span className="text-[#a5a5b2] text-sm">{text.of} {totalPages}</span>
-                </div>
-
-                <button
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                    className={`w-12 h-12 flex items-center justify-center rounded-full transition-all ${currentPage === totalPages ? 'bg-white/5 opacity-30 cursor-not-allowed' : 'bg-[#3457DC] hover:scale-110 active:scale-95'}`}
-                >
-                    {isRTL ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
-                </button>
+                )}
             </div>
-          </div>
-          
-          <div className="h-20 w-full" />
+
+            {/* Team Community Section */}
+            {!isLoading && teams.length > 0 && (
+                <div className="bg-[#05030D] border-t border-white/[0.05] py-24 relative overflow-hidden">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-[#3457DC]/20 to-transparent" />
+                    
+                    <div className="container mx-auto px-6 relative z-10">
+                        <div className="text-center mb-16">
+                            <h2 className="text-white font-gilroy font-extrabold text-3xl md:text-4xl mb-4">
+                                {isRTL ? 'مجتمعنا البحثي' : 'Our Research Community'}
+                            </h2>
+                            <div className="h-1 w-20 bg-[#3457DC] mx-auto rounded-full" />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-[1240px] mx-auto">
+                            {teams.map((team, idx) => (
+                                <motion.div 
+                                    key={team._id || idx}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    className="bg-white/[0.02] border border-white/[0.05] rounded-[24px] p-8 flex flex-col items-center group hover:bg-white/[0.04] transition-all"
+                                >
+                                    <h3 className="text-white font-bold text-xl mb-6 group-hover:text-[#3457DC] transition-colors">{team.name}</h3>
+                                    
+                                    <div className="flex -space-x-3 hover:space-x-1 transition-all duration-300">
+                                        {/* Leader Avatar */}
+                                        <div 
+                                            className="w-14 h-14 rounded-full border-2 border-[#3457DC] bg-[#3457DC]/20 flex items-center justify-center text-white font-bold text-lg relative z-20 shadow-lg"
+                                            title={team.leader?.username || team.leader?.email || 'Leader'}
+                                        >
+                                            {(team.leader?.username || team.leader?.email || 'L')[0].toUpperCase()}
+                                        </div>
+                                        
+                                        {/* Members Avatars */}
+                                        {team.members?.slice(0, 5).map((member, mIdx) => (
+                                            <div 
+                                                key={mIdx}
+                                                className="w-14 h-14 rounded-full border-2 border-[#1E1E2E] bg-[#1a1a24] flex items-center justify-center text-white/60 font-semibold text-sm relative z-10 shadow-lg hover:z-30 hover:scale-110 transition-all cursor-help"
+                                                title={member.username || member.email || 'Member'}
+                                            >
+                                                {(member.username || member.email || 'M')[0].toUpperCase()}
+                                            </div>
+                                        ))}
+                                        
+                                        {team.members?.length > 5 && (
+                                            <div className="w-14 h-14 rounded-full border-2 border-[#1E1E2E] bg-[#12121A] flex items-center justify-center text-white/40 font-bold text-xs relative z-0 shadow-lg">
+                                                +{team.members.length - 5}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="mt-8 flex flex-col items-center gap-1">
+                                        <span className="text-[#80808a] text-xs font-bold uppercase tracking-widest">{text.members}</span>
+                                        <span className="text-white font-black text-2xl">{team.members?.length + 1}</span>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
-      </div>
-    </div>
-  );
+    );
 }
