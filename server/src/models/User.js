@@ -47,7 +47,12 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Team',
         default: null
-    }
+    },
+    graduationPhases: [{
+        phase: String,
+        year: String,
+        completed: Boolean
+    }]
 }, { timestamps: true });
 
 // Hash password before saving

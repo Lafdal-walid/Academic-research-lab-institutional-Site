@@ -42,8 +42,8 @@ exports.createTeam = async (req, res) => {
 exports.getAllTeams = async (req, res) => {
     try {
         const teams = await Team.find()
-            .populate('leader', 'username email')
-            .populate('members', 'username email role');
+            .populate('leader', 'username email firstName lastName phoneNumber degree role graduationPhases')
+            .populate('members', 'username email firstName lastName phoneNumber degree role graduationPhases');
         res.json(teams);
     } catch (error) {
         res.status(500).json({ message: error.message });

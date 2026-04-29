@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Users as UsersIcon, Calendar as CalendarIcon, Eye, Download, Briefcase, Search } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Users as UsersIcon, Calendar as CalendarIcon, Eye, Download, Briefcase, Search, ArrowLeft, Mail, Phone, GraduationCap, MapPin, Laptop } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from "@/contexts/LanguageContext";
 import API_BASE_URL from '@/config';
 
@@ -92,6 +93,9 @@ const ResearchPaperCard = ({ id, title, authors, year, journal, description, tag
 export default function TeamsResearches() {
     const { language } = useLanguage();
     const isRTL = language === "ar";
+    const { memberId } = useParams();
+    const navigate = useNavigate();
+    
     
     const text = {
         badge: isRTL ? 'الفرق البحثية' : 'RESEARCH TEAMS',
@@ -115,6 +119,7 @@ export default function TeamsResearches() {
     const [teams, setTeams] = useState([]);
     const [projects, setProjects] = useState([]);
     const [publications, setPublications] = useState([]);
+    const [selectedTeamId, setSelectedTeamId] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
     const handlePublicationView = (id) => {
@@ -135,7 +140,17 @@ export default function TeamsResearches() {
                     fetch(`${baseUrl}/api/publications`)
                 ]);
 
-                if (teamRes.ok) setTeams(await teamRes.json());
+                if (teamRes.ok) {
+                    const teamsData = await teamRes.json();
+                    // Sort teams by member count (ascending) as requested
+                    const sortedTeams = [...teamsData].sort((a, b) => (a.members?.length || 0) - (b.members?.length || 0));
+                    setTeams(sortedTeams);
+                    
+                    // Set default selected team if none is selected
+                    if (sortedTeams.length > 0 && !selectedTeamId) {
+                        setSelectedTeamId(sortedTeams[0]._id);
+                    }
+                }
                 if (projRes.ok) setProjects(await projRes.json());
                 if (pubRes.ok) setPublications(await pubRes.json());
 
@@ -147,6 +162,54 @@ export default function TeamsResearches() {
         };
         fetchData();
     }, []);
+
+    const handleTeamSelect = (id) => {
+        setSelectedTeamId(id);
+        // Optional: scroll to the team details section
+        const element = document.getElementById('team-details-section');
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
+    const findMember = () => {
+        if (!memberId) return null;
+        for (const team of teams) {
+            if (team.leader?._id === memberId) return team.leader;
+            const member = team.members?.find(m => m._id === memberId);
+            if (member) return member;
+        }
+        return null;
+    };
+
+    const selectedMember = findMember();
+
+    const [memberReports, setMemberReports] = useState([]);
+    const [isLoadingReports, setIsLoadingReports] = useState(false);
+
+    useEffect(() => {
+        const fetchMemberReports = async () => {
+            if (!memberId) return;
+            setIsLoadingReports(true);
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/reports?user=${memberId}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setMemberReports(data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch member reports", err);
+            } finally {
+                setIsLoadingReports(false);
+            }
+        };
+
+        fetchMemberReports();
+    }, [memberId]);
+
+    const handleMemberClick = (mId) => {
+        navigate(`/teams-researches/member/${mId}`);
+    };
 
     return (
         <div className={`w-full min-h-screen bg-[#05030D] text-white relative overflow-x-hidden ${isRTL ? 'font-tajawal' : 'font-poppins'}`} dir={isRTL ? 'rtl' : 'ltr'}>
@@ -170,14 +233,88 @@ export default function TeamsResearches() {
                 <div className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-[#3457DC]/50 to-transparent" />
             </div>
 
-            <div className="container mx-auto px-6 pb-32">
+            {/* Team Community Section */}
+            {!isLoading && teams.length > 0 && (
+                <div className="bg-[#05030D] border-t border-white/[0.05] py-24 relative overflow-hidden">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-[#3457DC]/20 to-transparent" />
+                    
+                    <div className="container mx-auto px-6 relative z-10">
+                        <div className="text-center mb-16">
+                            <h2 className="text-white font-gilroy font-extrabold text-3xl md:text-4xl mb-4">
+                                {isRTL ? 'مجتمعنا البحثي' : 'Our Research Community'}
+                            </h2>
+                            <div className="h-1 w-20 bg-[#3457DC] mx-auto rounded-full" />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-[1240px] mx-auto">
+                            {teams.map((team, idx) => {
+                                const isSelected = selectedTeamId === team._id;
+                                return (
+                                    <motion.div 
+                                        key={team._id || idx}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        onClick={() => handleTeamSelect(team._id)}
+                                        className={`bg-white/[0.02] border ${isSelected ? 'border-[#3457DC] shadow-[0_0_20px_rgba(52,87,220,0.1)]' : 'border-white/[0.05]'} rounded-[24px] p-8 flex flex-col items-center group hover:bg-white/[0.04] transition-all cursor-pointer relative overflow-hidden`}
+                                    >
+                                        {isSelected && (
+                                            <div className="absolute top-0 right-0 p-2">
+                                                <div className="w-2 h-2 bg-[#3457DC] rounded-full animate-pulse" />
+                                            </div>
+                                        )}
+
+                                        <h3 className={`text-white font-bold text-xl mb-6 ${isSelected ? 'text-[#3457DC]' : 'group-hover:text-[#3457DC]'} transition-colors text-center`}>{team.name}</h3>
+                                        
+                                        <div className="flex -space-x-3 hover:space-x-1 transition-all duration-300">
+                                            {/* Leader Avatar */}
+                                            <div 
+                                                onClick={(e) => { e.stopPropagation(); handleMemberClick(team.leader?._id || team.leader); }}
+                                                className="w-14 h-14 rounded-full border-2 border-[#3457DC] bg-[#3457DC]/20 flex items-center justify-center text-white font-bold text-lg relative z-20 shadow-lg cursor-pointer"
+                                                title={team.leader?.username || team.leader?.email || 'Leader'}
+                                            >
+                                                {(team.leader?.username || team.leader?.email || 'L')[0].toUpperCase()}
+                                            </div>
+                                            
+                                            {/* Members Avatars */}
+                                            {team.members?.slice(0, 5).map((member, mIdx) => (
+                                                <div 
+                                                    key={mIdx}
+                                                    onClick={(e) => { e.stopPropagation(); handleMemberClick(member._id || member); }}
+                                                    className="w-14 h-14 rounded-full border-2 border-[#1E1E2E] bg-[#1a1a24] flex items-center justify-center text-white/60 font-semibold text-sm relative z-10 shadow-lg hover:z-30 hover:scale-110 transition-all cursor-pointer"
+                                                    title={member.username || member.email || 'Member'}
+                                                >
+                                                    {(member.username || member.email || 'M')[0].toUpperCase()}
+                                                </div>
+                                            ))}
+                                            
+                                            {team.members?.length > 5 && (
+                                                <div className="w-14 h-14 rounded-full border-2 border-[#1E1E2E] bg-[#12121A] flex items-center justify-center text-white/40 font-bold text-xs relative z-0 shadow-lg">
+                                                    +{team.members.length - 5}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="mt-8 flex flex-col items-center gap-1">
+                                            <span className="text-[#80808a] text-xs font-bold uppercase tracking-widest">{text.members}</span>
+                                            <span className="text-white font-black text-2xl">{team.members?.length + 1}</span>
+                                        </div>
+                                    </motion.div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div id="team-details-section" className="container mx-auto px-6 pb-32 pt-16">
                 {isLoading ? (
                     <div className="text-center py-20 opacity-40">{text.loading}</div>
                 ) : teams.length === 0 ? (
                     <div className="text-center py-20 opacity-40">{text.noTeams}</div>
                 ) : (
                     <div className="max-w-[1240px] mx-auto flex flex-col gap-16">
-                        {teams.map((team, idx) => {
+                        {teams.filter(t => t._id === selectedTeamId).map((team, idx) => {
                             const teamProjects = projects.filter(p => p.team?._id === team._id || p.team === team._id);
                             const teamPublications = publications.filter(p => p.team?._id === team._id || p.team === team._id);
                             
@@ -185,8 +322,7 @@ export default function TeamsResearches() {
                                 <motion.div 
                                     key={team._id || idx}
                                     initial={{ opacity: 0, y: 30 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true }}
+                                    animate={{ opacity: 1, y: 0 }}
                                     className="bg-[#0A0A12] border border-[#1E1E2E] rounded-[32px] p-8 md:p-12 transition-all hover:border-[#3457DC]/30 relative overflow-hidden group shadow-2xl"
                                 >
                                     {/* Decorative background element */}
@@ -200,7 +336,10 @@ export default function TeamsResearches() {
                                                 <h2 className="text-white font-gilroy font-extrabold text-4xl md:text-5xl tracking-tight">{team.name}</h2>
                                             </div>
                                             <div className="flex flex-col gap-3">
-                                                <div className="bg-white/[0.03] border border-white/[0.05] rounded-2xl p-4 inline-flex flex-col gap-1 max-w-full">
+                                                <div 
+                                                    className="bg-white/[0.03] border border-white/[0.05] rounded-2xl p-4 inline-flex flex-col gap-1 max-w-full cursor-pointer hover:bg-white/[0.08] transition-all"
+                                                    onClick={() => handleMemberClick(team.leader?._id || team.leader)}
+                                                >
                                                     <span className="text-[10px] uppercase tracking-[0.2em] text-[#3457DC] font-black">{text.leader}</span>
                                                     <span className="text-white text-[15px] md:text-[16px] font-medium break-all">{team.leader?.email || team.leader?.username || team.leader || 'N/A'}</span>
                                                 </div>
@@ -269,7 +408,11 @@ export default function TeamsResearches() {
                                                                     <span className="text-[10px] uppercase tracking-widest text-[#80808a] font-extrabold">{text.researchMembers} ({project.members?.length || 0})</span>
                                                                     <div className="flex flex-wrap gap-3">
                                                                         {project.members?.map((member, mIdx) => (
-                                                                            <div key={mIdx} className="bg-white/[0.02] border border-white/[0.03] px-4 md:px-5 py-2.5 md:py-3 rounded-2xl flex items-center gap-3 hover:bg-white/[0.04] transition-colors group/member max-w-full overflow-hidden">
+                                                                            <div 
+                                                                                key={mIdx} 
+                                                                                onClick={() => handleMemberClick(member._id || member)}
+                                                                                className="bg-white/[0.02] border border-white/[0.03] px-4 md:px-5 py-2.5 md:py-3 rounded-2xl flex items-center gap-3 hover:bg-white/[0.04] transition-colors group/member max-w-full overflow-hidden cursor-pointer"
+                                                                            >
                                                                                 <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#3457DC]/10 flex items-center justify-center text-[#3457DC] text-[9px] md:text-[10px] font-bold border border-[#3457DC]/20 shrink-0">
                                                                                     {member.username?.[0]?.toUpperCase() || member.email?.[0]?.toUpperCase() || 'U'}
                                                                                 </div>
@@ -321,67 +464,195 @@ export default function TeamsResearches() {
                 )}
             </div>
 
-            {/* Team Community Section */}
-            {!isLoading && teams.length > 0 && (
-                <div className="bg-[#05030D] border-t border-white/[0.05] py-24 relative overflow-hidden">
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-[#3457DC]/20 to-transparent" />
-                    
-                    <div className="container mx-auto px-6 relative z-10">
-                        <div className="text-center mb-16">
-                            <h2 className="text-white font-gilroy font-extrabold text-3xl md:text-4xl mb-4">
-                                {isRTL ? 'مجتمعنا البحثي' : 'Our Research Community'}
-                            </h2>
-                            <div className="h-1 w-20 bg-[#3457DC] mx-auto rounded-full" />
-                        </div>
+            {/* Member Profile View */}
+            <AnimatePresence>
+                {memberId && (
+                    <motion.div 
+                        initial={{ opacity: 0, x: isRTL ? -100 : 100 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: isRTL ? -100 : 100 }}
+                        className="fixed inset-0 z-[100] bg-[#05030D] overflow-y-auto"
+                    >
+                        <div className="container mx-auto px-6 py-32 max-w-[1000px]">
+                            <button 
+                                onClick={() => navigate('/teams-researches')}
+                                className="flex items-center gap-2 text-[#80808a] hover:text-white transition-colors mb-12 group"
+                            >
+                                <ArrowLeft size={20} className={`${isRTL ? 'rotate-180' : ''} group-hover:-translate-x-1 transition-transform`} />
+                                <span className="font-bold uppercase tracking-widest text-sm">{isRTL ? 'العودة' : 'Back to Teams'}</span>
+                            </button>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-[1240px] mx-auto">
-                            {teams.map((team, idx) => (
-                                <motion.div 
-                                    key={team._id || idx}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true }}
-                                    className="bg-white/[0.02] border border-white/[0.05] rounded-[24px] p-8 flex flex-col items-center group hover:bg-white/[0.04] transition-all"
-                                >
-                                    <h3 className="text-white font-bold text-xl mb-6 group-hover:text-[#3457DC] transition-colors">{team.name}</h3>
-                                    
-                                    <div className="flex -space-x-3 hover:space-x-1 transition-all duration-300">
-                                        {/* Leader Avatar */}
-                                        <div 
-                                            className="w-14 h-14 rounded-full border-2 border-[#3457DC] bg-[#3457DC]/20 flex items-center justify-center text-white font-bold text-lg relative z-20 shadow-lg"
-                                            title={team.leader?.username || team.leader?.email || 'Leader'}
-                                        >
-                                            {(team.leader?.username || team.leader?.email || 'L')[0].toUpperCase()}
+                            {selectedMember ? (
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+                                    <div className="md:col-span-1 flex flex-col items-center text-center">
+                                        <div className="w-48 h-48 rounded-[40px] bg-gradient-to-br from-[#3457DC] to-blue-600 flex items-center justify-center text-white text-7xl font-black shadow-2xl mb-8 border-4 border-white/10">
+                                            {(selectedMember.firstName || selectedMember.username || 'U')[0].toUpperCase()}
                                         </div>
-                                        
-                                        {/* Members Avatars */}
-                                        {team.members?.slice(0, 5).map((member, mIdx) => (
-                                            <div 
-                                                key={mIdx}
-                                                className="w-14 h-14 rounded-full border-2 border-[#1E1E2E] bg-[#1a1a24] flex items-center justify-center text-white/60 font-semibold text-sm relative z-10 shadow-lg hover:z-30 hover:scale-110 transition-all cursor-help"
-                                                title={member.username || member.email || 'Member'}
-                                            >
-                                                {(member.username || member.email || 'M')[0].toUpperCase()}
-                                            </div>
-                                        ))}
-                                        
-                                        {team.members?.length > 5 && (
-                                            <div className="w-14 h-14 rounded-full border-2 border-[#1E1E2E] bg-[#12121A] flex items-center justify-center text-white/40 font-bold text-xs relative z-0 shadow-lg">
-                                                +{team.members.length - 5}
-                                            </div>
-                                        )}
+                                        <h2 className="text-3xl font-gilroy font-black text-white mb-2">
+                                            {selectedMember.firstName && selectedMember.lastName 
+                                                ? `${selectedMember.firstName} ${selectedMember.lastName}` 
+                                                : selectedMember.username}
+                                        </h2>
+                                        <span className="bg-[#3457DC]/10 border border-[#3457DC]/20 text-[#3457DC] px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-8">
+                                            {selectedMember.role}
+                                        </span>
                                     </div>
 
-                                    <div className="mt-8 flex flex-col items-center gap-1">
-                                        <span className="text-[#80808a] text-xs font-bold uppercase tracking-widest">{text.members}</span>
-                                        <span className="text-white font-black text-2xl">{team.members?.length + 1}</span>
+                                    <div className="md:col-span-2 space-y-8">
+                                        <div className="bg-white/[0.02] border border-white/[0.05] rounded-[32px] p-8 md:p-10">
+                                            <h3 className="text-white font-bold text-xl mb-8 flex items-center gap-3">
+                                                <div className="w-1.5 h-6 bg-[#3457DC] rounded-full" />
+                                                {isRTL ? 'معلومات الاتصال' : 'Contact Information'}
+                                            </h3>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                                <div className="flex items-center gap-4 bg-white/[0.02] p-4 rounded-2xl border border-white/[0.03]">
+                                                    <Mail className="text-[#3457DC]" size={20} />
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[10px] text-[#80808a] font-bold uppercase tracking-widest">{isRTL ? 'البريد الإلكتروني' : 'Email Address'}</span>
+                                                        <span className="text-white font-medium text-sm break-all">{selectedMember.email}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-4 bg-white/[0.02] p-4 rounded-2xl border border-white/[0.03]">
+                                                    <Phone className="text-[#3457DC]" size={20} />
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[10px] text-[#80808a] font-bold uppercase tracking-widest">{isRTL ? 'رقم الهاتف' : 'Phone Number'}</span>
+                                                        <span className="text-white font-medium text-sm">{selectedMember.phoneNumber || 'N/A'}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-white/[0.02] border border-white/[0.05] rounded-[32px] p-8 md:p-10">
+                                            <h3 className="text-white font-bold text-xl mb-8 flex items-center gap-3">
+                                                <div className="w-1.5 h-6 bg-[#3457DC] rounded-full" />
+                                                {isRTL ? 'المستوى الأكاديمي' : 'Academic Profile'}
+                                            </h3>
+                                            <div className="space-y-6">
+                                                <div className="flex items-start gap-4 bg-white/[0.02] p-5 rounded-2xl border border-white/[0.03]">
+                                                    <GraduationCap className="text-[#3457DC] mt-1" size={24} />
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[10px] text-[#80808a] font-bold uppercase tracking-widest">{isRTL ? 'المؤهل العلمي' : 'Degree / Qualification'}</span>
+                                                        <span className="text-white font-bold text-lg mt-1">{selectedMember.degree || 'Academic Researcher'}</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="flex items-start gap-4 bg-white/[0.02] p-5 rounded-2xl border border-white/[0.03]">
+                                                    <MapPin className="text-[#3457DC] mt-1" size={24} />
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[10px] text-[#80808a] font-bold uppercase tracking-widest">{isRTL ? 'الموقع' : 'Location / Affiliation'}</span>
+                                                        <span className="text-white font-bold text-lg mt-1">{selectedMember.country || 'University of Blida 1'}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Graduation Phases Placeholder */}
+                                        {/* Academic Phases Section (Matches UsersTrackTimeline Design) */}
+                                        <div className="bg-white/[0.02] border border-white/[0.05] rounded-[32px] p-8 md:p-10 flex flex-col gap-8 w-full">
+                                            {/* Header */}
+                                            <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative w-full">
+                                                <div className="flex flex-col gap-2 text-center md:text-left">
+                                                    <h3 className="text-white font-gilroy font-extrabold text-xl">
+                                                        {isRTL ? 'المراحل الأكاديمية' : 'Academic Phases'}
+                                                    </h3>
+                                                    <p className="text-sm text-[#a5a5b2]">{isRTL ? 'الأهداف والنتائج الرئيسية.' : 'Key Objectives & Milestones.'}</p>
+                                                </div>
+
+                                                {/* Status message aligned to the right on large screens */}
+                                                <div className="flex flex-col items-center md:items-end gap-1.5">
+                                                    <span className="text-sm text-[#3457DC] font-semibold underline underline-offset-4 text-center md:text-right">
+                                                        {selectedMember.username} is {selectedMember.degree || (isRTL ? 'باحث' : 'Researcher')}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div className="h-px bg-white/[0.05]" />
+
+                                            {/* Timeline Area */}
+                                            <div className="flex flex-col gap-8 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+                                                {isLoadingReports ? (
+                                                    <div className="text-center py-10 opacity-40 text-sm italic">
+                                                        {isRTL ? 'جاري التحميل...' : 'Loading phases...'}
+                                                    </div>
+                                                ) : (
+                                                    (() => {
+                                                        const acceptedReports = memberReports.filter(r => r.status === 'Accepted');
+                                                        const phases = [
+                                                            {
+                                                                date: selectedMember.createdAt ? new Date(selectedMember.createdAt).toLocaleString('en-US', { month: 'long', year: 'numeric' }).toLowerCase() : '',
+                                                                title: isRTL ? 'الانضمام إلى الفريق' : 'Joining the team',
+                                                                completed: true,
+                                                                isJoining: true
+                                                            },
+                                                            ...acceptedReports.map(r => ({
+                                                                date: r.dateTimeString ? r.dateTimeString.split(' – ')[0].toLowerCase() : (r.createdAt ? new Date(r.createdAt).toLocaleDateString() : 'TBD'),
+                                                                title: r.document,
+                                                                completed: true,
+                                                                fileUrl: r.fileUrl
+                                                            }))
+                                                        ];
+
+                                                        return phases.map((phase, index) => (
+                                                            <div key={index} className="flex gap-6 items-start group">
+                                                                {/* Indicator */}
+                                                                <div className="flex flex-col items-center min-w-[46px] relative">
+                                                                    <div className="bg-[#3457DC] p-3.5 rounded-full flex items-center justify-center z-10 transition-all group-hover:scale-110 shadow-[0_0_15px_rgba(52,87,220,0.3)]">
+                                                                        <Laptop size={18} className="text-white" />
+                                                                    </div>
+                                                                    {index !== phases.length - 1 && (
+                                                                        <div className="w-[2px] h-[60px] absolute top-6 z-0 bg-[#3457DC]" />
+                                                                    )}
+                                                                </div>
+
+                                                                {/* Content */}
+                                                                <div className="flex-1 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                                                    <div className="flex flex-col gap-1 text-left">
+                                                                        <span className="text-[14px] text-[#a5a5b2] font-medium">
+                                                                            {phase.date}
+                                                                        </span>
+                                                                        <span className="text-[16px] text-white font-bold tracking-tight">{phase.title}</span>
+                                                                    </div>
+                                                                    
+                                                                    {!phase.isJoining && phase.fileUrl && (
+                                                                        <a 
+                                                                            href={phase.fileUrl.startsWith('http') ? phase.fileUrl : `${API_BASE_URL}${phase.fileUrl}`}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="bg-white/[0.03] border border-white/[0.05] px-5 py-2 rounded-xl text-[12px] font-bold text-white hover:bg-white/[0.08] transition-all"
+                                                                        >
+                                                                            {isRTL ? 'عرض التفاصيل' : 'View Details'}
+                                                                        </a>
+                                                                    )}
+
+                                                                    {phase.isJoining && (
+                                                                        <div className="bg-[#3457DC]/20 text-[#3457DC] border-[#3457DC]/30 px-5 py-2 rounded-xl text-[12px] font-bold uppercase tracking-widest border">
+                                                                            {isRTL ? 'مكتمل' : 'Completed'}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        ));
+                                                    })()
+                                                )}
+
+                                                {!isLoadingReports && memberReports.filter(r => r.status === 'Accepted').length === 0 && (
+                                                    <div className="text-center py-6 opacity-40 italic text-sm">
+                                                        {isRTL ? 'لا توجد مراحل أكاديمية مكتملة' : 'No completed academic phases yet'}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
-                                </motion.div>
-                            ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-20 opacity-40">
+                                    {isRTL ? 'لم يتم العثور على العضو' : 'Member not found'}
+                                </div>
+                            )}
                         </div>
-                    </div>
-                </div>
-            )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

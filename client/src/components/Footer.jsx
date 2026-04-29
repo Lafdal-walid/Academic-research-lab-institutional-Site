@@ -40,7 +40,8 @@ const Footer = () => {
   const isNewsGalleryPage = location.pathname.includes('/news-gallery');
 
   const getFooterWrapperBg = () => {
-    if (isProjectsMenu || isPublicationsPage || isTeamsResearchesPage || isAboutUsPage || isNewsGalleryPage || isSupportPage) return "bg-background-main";
+    if (isProjectsMenu || isPublicationsPage || isAboutUsPage) return "bg-[#070710]";
+    if (isTeamsResearchesPage || isNewsGalleryPage || isSupportPage) return "bg-background-main";
     return "bg-transparent";
   };
 

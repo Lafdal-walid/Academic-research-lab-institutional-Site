@@ -23,7 +23,9 @@ const MainApp = () => {
       <Route path="/" element={<Home />} />
       <Route path="projects" element={<Projects />} />
       <Route path="publications" element={<Publications />} />
-      <Route path="teams-researches" element={<TeamsResearches />} />
+      <Route path="teams-researches" element={<TeamsResearches />}>
+        <Route path="member/:memberId" element={<TeamsResearches />} />
+      </Route>
       <Route path="about-us" element={<AboutUs />} />
       <Route path="news-gallery" element={<NewsGallery />} />
       <Route path="support" element={<Support />} />

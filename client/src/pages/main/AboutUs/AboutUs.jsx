@@ -217,18 +217,20 @@ export default function AboutUs() {
             <p className="text-[#7b829d] mt-8 text-xl">{text.journeySubtitle}</p>
           </div>
           <div className="relative">
-            <div className={`absolute ${isRTL ? 'right-[20px] md:right-1/2 translate-x-1/2' : 'left-[20px] md:left-1/2 -translate-x-1/2'} top-0 bottom-0 w-[1px] bg-gradient-to-b from-blue-600 via-blue-500/20 to-transparent`} />
-            <div className="space-y-24">
+            <div className={`absolute ${isRTL ? 'right-[32px] md:right-1/2 translate-x-1/2' : 'left-[32px] md:left-1/2 -translate-x-1/2'} top-0 bottom-0 w-[1px] bg-gradient-to-b from-blue-600 via-blue-500/20 to-transparent`} />
+            <div className="space-y-16 md:space-y-24">
               {timeline.map((item, i) => (
                 <FadeIn key={i} direction={i % 2 === 0 ? (isRTL ? "left" : "right") : (isRTL ? "right" : "left")}>
-                  <div className={`relative flex flex-col md:flex-row items-center ${i % 2 === 0 ? 'md:flex-row-reverse' : ''}`}>
-                    <div className={`absolute ${isRTL ? 'right-[20px] md:right-1/2 translate-x-1/2' : 'left-[20px] md:left-1/2 -translate-x-1/2'} size-[12px] bg-blue-600 rounded-full shadow-[0_0_20px_#395ED5] z-10`} />
-                    <div className={`w-full md:w-1/2 flex ${i % 2 === 0 ? (isRTL ? 'md:justify-end md:pr-20' : 'md:justify-start md:pl-20') : (isRTL ? 'md:justify-start md:pl-20' : 'md:justify-end md:pr-20')}`}>
-                      <div className="text-3xl font-black font-gilroy text-[#395ED5]/80">{item.year}</div>
+                  <div className={`relative flex flex-col md:flex-row items-center ${i % 2 === 0 ? 'md:flex-row-reverse' : ''} ${isRTL ? 'pr-16 md:pr-0' : 'pl-16 md:pl-0'}`}>
+                    <div className={`absolute ${isRTL ? 'right-[32px] md:right-1/2 translate-x-1/2' : 'left-[32px] md:left-1/2 -translate-x-1/2'} size-[12px] bg-blue-600 rounded-full shadow-[0_0_20px_#395ED5] z-10`} />
+                    
+                    <div className={`w-full md:w-1/2 flex ${i % 2 === 0 ? (isRTL ? 'md:justify-end md:pr-20' : 'md:justify-start md:pl-20') : (isRTL ? 'md:justify-start md:pl-20' : 'md:justify-end md:pr-20')} justify-start mb-2 md:mb-0`}>
+                      <div className="text-2xl md:text-3xl font-black font-gilroy text-[#395ED5]/80">{item.year}</div>
                     </div>
-                    <div className={`w-full md:w-1/2 mt-4 md:mt-0 ${i % 2 === 0 ? (isRTL ? 'md:pl-20' : 'md:pr-20') : (isRTL ? 'md:pr-20' : 'md:pl-20')}`}>
+
+                    <div className={`w-full md:w-1/2 ${i % 2 === 0 ? (isRTL ? 'md:pl-20' : 'md:pr-20') : (isRTL ? 'md:pr-20' : 'md:pl-20')}`}>
                       <GlassCard className={`!p-6 group-hover:scale-[1.02] ${item.isDynamic ? 'border-blue-500/40 bg-blue-500/5' : ''}`}>
-                        <h4 className="text-xl font-bold text-white mb-2">{item.title}</h4>
+                        <h4 className="text-lg md:text-xl font-bold text-white mb-2">{item.title}</h4>
                         <p className="text-[#7b829d] text-sm leading-relaxed">{item.desc}</p>
                       </GlassCard>
                     </div>
@@ -252,10 +254,15 @@ export default function AboutUs() {
               <Mail className="text-blue-500" />
               <span className="text-white font-medium uppercase tracking-widest text-sm">lab@university.dz</span>
             </div>
-            <div className="flex items-center gap-4 bg-white/[0.03] px-8 py-4 rounded-2xl border border-white/[0.05]">
-              <MapPin className="text-blue-500" />
+            <a 
+              href="https://maps.app.goo.gl/cJ3Hw5agoswsKGXJ8" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="flex items-center gap-4 bg-white/[0.03] px-8 py-4 rounded-2xl border border-white/[0.05] hover:bg-white/[0.08] hover:border-blue-500/30 transition-all group"
+            >
+              <MapPin className="text-blue-500 group-hover:scale-110 transition-transform" />
               <span className="text-white font-medium text-sm">{text.universityName}</span>
-            </div>
+            </a>
           </div>
           <div className="flex flex-wrap justify-center gap-6">
             <motion.button

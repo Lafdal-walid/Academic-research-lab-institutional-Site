@@ -159,7 +159,8 @@ export default function Publications() {
         teamsSectionSubtitle: isRTL ? 'تعرف على الفرق التي تقف خلف هذه الأبحاث والمشاريع المبتكرة' : 'Meet the teams behind these innovative research papers and projects',
         viewTeams: isRTL ? 'عرض جميع الفرق' : 'View All Teams',
         teamLabel: isRTL ? 'الفريق' : 'Team',
-        projectLabel: isRTL ? 'المشروع' : 'Project'
+        projectLabel: isRTL ? 'المشروع' : 'Project',
+        yearLabel: isRTL ? 'السنة' : 'Year'
     };
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -167,6 +168,7 @@ export default function Publications() {
     const [selectedSort, setSelectedSort] = useState(text.sortByRecent);
     const [selectedCategory, setSelectedCategory] = useState(text.all);
     const [selectedTag, setSelectedTag] = useState(text.all);
+    const [selectedYear, setSelectedYear] = useState(text.all);
     const [publications, setPublications] = useState(STATIC_PUBLICATIONS);
     const [teams, setTeams] = useState([]);
     const [projects, setProjects] = useState([]);
@@ -232,10 +234,16 @@ export default function Publications() {
         setSelectedTag(isRTL ? 'الكل' : 'All');
         setSelectedTeam(isRTL ? 'الكل' : 'All');
         setSelectedProject(isRTL ? 'الكل' : 'All');
+        setSelectedYear(isRTL ? 'الكل' : 'All');
     }, [language, isRTL]);
 
     const allFields = [...new Set(teams.flatMap(t => t.activeFilds || []))];
     const allTags = [...new Set(publications.flatMap(p => p.tags || []))];
+    const allYears = [...new Set(publications.map(p => {
+        if (p.year) return p.year.toString();
+        if (p.publishedDate) return new Date(p.publishedDate).getFullYear().toString();
+        return null;
+    }).filter(Boolean))].sort((a, b) => b - a);
 
     const filteredPublications = publications
         .filter(pub => {
@@ -254,8 +262,12 @@ export default function Publications() {
             
             const projectMatch = selectedProject === 'Project' || selectedProject === 'All' || selectedProject === 'المشروع' || selectedProject === 'الكل' ||
                 (pub.project?._id === selectedProject || pub.project === selectedProject || (pub.project?.title && pub.project.title === selectedProject));
+
+            const pubYear = pub.year ? pub.year.toString() : (pub.publishedDate ? new Date(pub.publishedDate).getFullYear().toString() : '');
+            const yearMatch = selectedYear === 'Year' || selectedYear === 'All' || selectedYear === 'السنة' || selectedYear === 'الكل' ||
+                pubYear === selectedYear;
             
-            return matchesSearch && categoryMatch && tagMatch && teamMatch && projectMatch;
+            return matchesSearch && categoryMatch && tagMatch && teamMatch && projectMatch && yearMatch;
         })
         .sort((a, b) => {
             const yearA = a.publishedDate ? new Date(a.publishedDate).getFullYear() : (a.year || 0);
@@ -301,7 +313,37 @@ export default function Publications() {
                             <Search className="text-[#3457DC] shrink-0" size={20} />
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 w-full lg:flex-[5]">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 w-full lg:flex-[6]">
+                            {/* Year Dropdown */}
+                            <div className="relative w-full">
+                                <button
+                                    onClick={() => setActiveDropdown(activeDropdown === 'year' ? null : 'year')}
+                                    className="bg-[#1e1e24] flex items-center justify-between px-6 py-3 rounded-2xl w-full border border-white/5 hover:bg-[#25252d] transition-all h-full"
+                                >
+                                    <span className="text-[#a5a5b2] text-[14px] truncate">{selectedYear === text.all ? text.yearLabel : selectedYear}</span>
+                                    <ChevronDown className={`text-[#3457DC] transition-transform duration-300 ${activeDropdown === 'year' ? 'rotate-180' : ''}`} size={20} />
+                                </button>
+                                <AnimatePresence>
+                                    {activeDropdown === 'year' && (
+                                        <motion.div 
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            className="absolute top-full left-0 right-0 mt-2 bg-[#1e1e24] border border-white/10 rounded-xl p-2 z-50 shadow-2xl max-h-[300px] overflow-y-auto"
+                                        >
+                                            {[text.all, ...allYears].map(opt => (
+                                                <button
+                                                    key={opt}
+                                                    onClick={() => { setSelectedYear(opt); setActiveDropdown(null); }}
+                                                    className={`w-full text-left px-4 py-2 rounded-lg text-sm transition-colors ${selectedYear === opt ? 'bg-[#3457DC] text-white' : 'text-[#a5a5b2] hover:bg-white/5'}`}
+                                                >
+                                                    {opt}
+                                                </button>
+                                            ))}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
                             {/* Sort Dropdown */}
                             <div className="relative w-full">
                                 <button
@@ -536,6 +578,11 @@ export default function Publications() {
                                     <div className="flex flex-col gap-3 bg-[#1e1e24] border border-white/5 rounded-2xl p-4 shadow-2xl">
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                             {[
+                                                {
+                                                    label: selectedYear === text.all ? text.yearLabel : selectedYear,
+                                                    value: selectedYear,
+                                                    type: 'year'
+                                                },
                                                 { label: text.sortRecent, value: selectedSort, type: 'sort' },
                                                 { label: selectedCategory, value: selectedCategory, type: 'category' },
                                                 { label: selectedTag === text.all ? text.tagLabel : selectedTag, value: selectedTag, type: 'tags' },
@@ -559,6 +606,10 @@ export default function Publications() {
                                                                 exit={{ opacity: 0, scale: 0.95 }}
                                                                 className="absolute top-full left-0 right-0 mt-2 bg-[#1e1e24] border border-white/10 rounded-xl p-2 z-[60] shadow-2xl max-h-[250px] overflow-y-auto"
                                                             >
+                                                                {/* Year Options */}
+                                                                {item.type === 'year' && [text.all, ...allYears].map(opt => (
+                                                                    <button key={opt} onClick={(e) => { e.stopPropagation(); setSelectedYear(opt); setActiveDropdown(null); }} className="w-full text-left px-4 py-2.5 rounded-lg text-sm text-[#a5a5b2] hover:bg-white/5">{opt}</button>
+                                                                ))}
                                                                 {/* Sort Options */}
                                                                 {item.type === 'sort' && [text.sortByRecent, text.sortByOldest].map(opt => (
                                                                     <button key={opt} onClick={(e) => { e.stopPropagation(); setSelectedSort(opt); setActiveDropdown(null); }} className="w-full text-left px-4 py-2.5 rounded-lg text-sm text-[#a5a5b2] hover:bg-white/5">{opt}</button>
