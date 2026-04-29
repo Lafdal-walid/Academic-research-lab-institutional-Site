@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from "@/hooks/useTranslation";
+import { useLanguage } from "@/contexts/LanguageContext";
 import API_BASE_URL from '@/config';
 
 const svgPaths = {
@@ -9,8 +11,8 @@ const svgPaths = {
 const ToggleSwitch = ({ active, onToggle }) => (
   <div 
     onClick={onToggle}
-    className="relative shrink-0 cursor-pointer transition-all duration-300" 
-    style={{ width: '2.7vw', height: '1.62vw' }}
+    className="toggle-switch-container" 
+    style={{ position: 'relative', flexShrink: 0, cursor: 'pointer', transition: 'all 0.3s', width: '2.7vw', height: '1.62vw' }}
   >
     <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 48 28">
       <rect fill={active ? '#01CBB1' : '#1E1E24'} height="27" rx="13.5" width="47" x="0.5" y="0.5" />
@@ -27,19 +29,19 @@ const ToggleSwitch = ({ active, onToggle }) => (
 );
 
 const NotificationItem = ({ title, message, time, unread, isLast }) => (
-  <div className="flex flex-col w-full" style={{ gap: '2vh' }}>
-    <div className="flex items-center justify-between w-full">
-      <div className="flex flex-col items-start" style={{ gap: '0.4vh', maxWidth: '85%' }}>
-        <div className="flex items-center" style={{ gap: '0.6vw' }}>
-          <p className="font-bold text-white m-0" style={{ fontSize: '1.05vw', fontFamily: 'Gilroy, Poppins, sans-serif' }}>{title}</p>
-          <p className="text-white m-0 opacity-80" style={{ fontSize: '0.85vw', fontFamily: 'Poppins, sans-serif' }}>{message}</p>
+  <div className="notification-item-row" style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '2vh' }}>
+    <div className="notification-item-main" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+      <div className="notification-text-box" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.4vh', maxWidth: '85%' }}>
+        <div className="notification-content-line" style={{ display: 'flex', alignItems: 'center', gap: '0.6vw' }}>
+          <p className="notification-title" style={{ fontWeight: 'bold', color: 'white', margin: 0, fontSize: '1.05vw', fontFamily: 'Gilroy, Poppins, sans-serif' }}>{title}</p>
+          <p className="notification-msg" style={{ color: 'white', margin: 0, opacity: 0.8, fontSize: '0.85vw', fontFamily: 'Poppins, sans-serif' }}>{message}</p>
         </div>
-        <p className="text-[#a5a5b2] m-0" style={{ fontSize: '0.85vw', fontFamily: 'Poppins, sans-serif' }}>{time}</p>
+        <p className="notification-time" style={{ color: '#a5a5b2', margin: 0, fontSize: '0.85vw', fontFamily: 'Poppins, sans-serif' }}>{time}</p>
       </div>
       
-      <div className="shrink-0" style={{ width: '0.5vw', height: '0.5vw' }}>
+      <div className="notification-unread-dot" style={{ flexShrink: 0, width: '0.5vw', height: '0.5vw' }}>
         {unread && (
-          <svg className="block size-full" fill="none" viewBox="0 0 10 10">
+          <svg style={{ display: 'block', width: '100%', height: '100%' }} fill="none" viewBox="0 0 10 10">
             <circle cx="5" cy="5" fill="#3457DC" r="5" />
           </svg>
         )}
@@ -47,12 +49,15 @@ const NotificationItem = ({ title, message, time, unread, isLast }) => (
     </div>
     
     {!isLast && (
-      <div className="w-full" style={{ height: '0.1vh', backgroundColor: '#1E1D22', margin: '1vh 0' }} />
+      <div className="divider-line" style={{ width: '100%', height: '0.1vh', backgroundColor: '#1E1D22', margin: '1vh 0' }} />
     )}
   </div>
 );
 
 const Notifications = () => {
+  const { t } = useTranslation('notifications');
+  const { language } = useLanguage();
+  const { t: tc } = useTranslation('progress');
   const [unreadOnly, setUnreadOnly] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -71,7 +76,7 @@ const Notifications = () => {
             id: n._id,
             title: n.title,
             message: n.message,
-            time: new Date(n.createdAt).toLocaleString(),
+            time: new Date(n.createdAt).toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US'),
             unread: false // For now, we don't have unread status in DB
           }));
           setNotifications(formatted);
@@ -83,7 +88,7 @@ const Notifications = () => {
       }
     };
     fetchMyNotifications();
-  }, []);
+  }, [language]);
 
   const displayedNotifications = unreadOnly 
     ? notifications.filter(n => n.unread) 
@@ -91,31 +96,50 @@ const Notifications = () => {
 
   return (
     <div className="w-full text-white font-poppins pb-[6vh] animate-in fade-in duration-500">
+      <style dangerouslySetInnerHTML={{ __html: notificationsStyles }} />
       {/* Header Bar */}
-      <div className="flex items-center justify-between w-full" style={{ paddingBottom: '3vh' }}>
-        <h1 className="font-bold text-white m-0" style={{ fontSize: '1.3vw', fontFamily: 'Gilroy, Poppins, sans-serif' }}>Notifications</h1>
+      <div className="notifications-header-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', paddingBottom: '3vh', direction: language === 'ar' ? 'rtl' : 'ltr' }}>
+        <h1 className="notifications-main-title" style={{ fontWeight: 'bold', color: 'white', margin: 0, fontSize: '1.3vw', fontFamily: 'Gilroy, Poppins, sans-serif' }}>{t('notificationsTitle')}</h1>
         
-        <div className="flex items-center" style={{ gap: '1.5vw' }}>
+        <div className="notifications-filters-row" style={{ display: 'flex', alignItems: 'center', gap: '1.5vw' }}>
           {/* Unread Filter */}
-          <div className="flex items-center cursor-pointer select-none" style={{ gap: '0.6vw' }} onClick={() => setUnreadOnly(!unreadOnly)}>
-            <p className="text-white m-0" style={{ fontSize: '0.9vw' }}>Unread only</p>
+          <div className="unread-filter-item" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', userSelect: 'none', gap: '0.6vw' }} onClick={() => setUnreadOnly(!unreadOnly)}>
+            <p className="unread-filter-text" style={{ color: 'white', margin: 0, fontSize: '0.9vw' }}>{t('unreadOnly')}</p>
             <ToggleSwitch active={unreadOnly} onToggle={() => {}} />
           </div>
 
           {/* Type Filter */}
-          <div className="bg-[#1e1e24] flex items-center justify-between border border-white/5 transition-all hover:bg-[#2a2a30] cursor-pointer"
-               style={{ gap: '1.6vw', padding: '1.1vh 1.4vw', borderRadius: '0.8vw' }}>
-            <p className="text-[#a5a5b2] m-0" style={{ fontSize: '0.9vw' }}>Type</p>
-            <svg style={{ width: '1vw', height: '1vw' }} fill="none" viewBox="0 0 20 20">
+          <div className="filter-select-box"
+               style={{ 
+                 backgroundColor: '#1e1e24',
+                 display: 'flex',
+                 alignItems: 'center',
+                 justifyContent: 'space-between',
+                 border: '1px solid rgba(255,255,255,0.05)',
+                 transition: 'all 0.3s',
+                 cursor: 'pointer',
+                 gap: '1.6vw', padding: '1.1vh 1.4vw', borderRadius: '0.8vw' 
+               }}>
+            <p className="filter-label" style={{ color: '#a5a5b2', margin: 0, fontSize: '0.9vw' }}>{t('type')}</p>
+            <svg className="filter-arrow-icon" style={{ width: '1vw', height: '1vw' }} fill="none" viewBox="0 0 20 20">
               <path d={svgPaths.angleSmallDown} fill="#3457DC" />
             </svg>
           </div>
 
           {/* Date Range Filter */}
-          <div className="bg-[#1e1e24] flex items-center justify-between border border-white/5 transition-all hover:bg-[#2a2a30] cursor-pointer"
-               style={{ gap: '1.6vw', padding: '1.1vh 1.4vw', borderRadius: '0.8vw' }}>
-            <p className="text-[#a5a5b2] m-0" style={{ fontSize: '0.9vw' }}>Date Range</p>
-            <svg style={{ width: '1vw', height: '1vw' }} fill="none" viewBox="0 0 20 20">
+          <div className="filter-select-box"
+               style={{ 
+                 backgroundColor: '#1e1e24',
+                 display: 'flex',
+                 alignItems: 'center',
+                 justifyContent: 'space-between',
+                 border: '1px solid rgba(255,255,255,0.05)',
+                 transition: 'all 0.3s',
+                 cursor: 'pointer',
+                 gap: '1.6vw', padding: '1.1vh 1.4vw', borderRadius: '0.8vw' 
+               }}>
+            <p className="filter-label" style={{ color: '#a5a5b2', margin: 0, fontSize: '0.9vw' }}>{tc('dateRange')}</p>
+            <svg className="filter-calendar-icon" style={{ width: '1vw', height: '1vw' }} fill="none" viewBox="0 0 20 20">
               <path d={svgPaths.calendarClock} fill="#3457DC" />
             </svg>
           </div>
@@ -123,13 +147,21 @@ const Notifications = () => {
       </div>
 
       {/* Notifications List Card */}
-      <div className="bg-[#151519] flex flex-col relative w-full shadow-2xl overflow-hidden" 
+      <div className="notifications-list-card" 
            style={{ 
+             backgroundColor: '#151519',
+             display: 'flex',
+             flexDirection: 'column',
+             position: 'relative',
+             width: '100%',
+             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+             overflow: 'hidden',
              padding: '2vw', 
              borderRadius: '1vw', 
-             border: '1px solid rgba(255,255,255,0.05)' 
+             border: '1px solid rgba(255,255,255,0.05)',
+             direction: language === 'ar' ? 'rtl' : 'ltr'
            }}>
-        <div className="flex flex-col w-full" style={{ gap: '2vh' }}>
+        <div className="notifications-stack" style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '2vh' }}>
           {displayedNotifications.length > 0 ? displayedNotifications.map((notification, index) => (
             <NotificationItem 
               key={notification.id}
@@ -137,8 +169,8 @@ const Notifications = () => {
               isLast={index === displayedNotifications.length - 1}
             />
           )) : (
-            <div className="flex items-center justify-center w-full" style={{ padding: '5vh 0' }}>
-               <p className="text-[#a5a5b2]" style={{ fontSize: '1vw' }}>No notifications found.</p>
+            <div className="no-notifications-box" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', padding: '5vh 0' }}>
+               <p style={{ color: '#a5a5b2', fontSize: '1vw' }}>{t('noNotifications')}</p>
             </div>
           )}
         </div>
@@ -146,5 +178,98 @@ const Notifications = () => {
     </div>
   );
 };
+
+const notificationsStyles = `
+@media screen and (max-width: 1024px) {
+    .notifications-header-bar {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 20px !important;
+        padding-bottom: 25px !important;
+    }
+    .notifications-main-title {
+        font-size: 20px !important;
+    }
+    .notifications-filters-row {
+        width: 100% !important;
+        flex-wrap: wrap !important;
+        gap: 15px !important;
+    }
+    .unread-filter-item {
+        width: 100% !important;
+        justify-content: space-between !important;
+        padding: 10px 15px !important;
+        background: rgba(255, 255, 255, 0.02) !important;
+        border-radius: 10px !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+    .unread-filter-text {
+        font-size: 14px !important;
+    }
+    .toggle-switch-container {
+        width: 44px !important;
+        height: 24px !important;
+    }
+    .filter-select-box {
+        flex: 1 !important;
+        min-width: 140px !important;
+        padding: 12px 16px !important;
+        border-radius: 12px !important;
+        gap: 12px !important;
+    }
+    .filter-label {
+        font-size: 14px !important;
+    }
+    .filter-arrow-icon, .filter-calendar-icon {
+        width: 16px !important;
+        height: 16px !important;
+    }
+
+    /* Notifications List Card */
+    .notifications-list-card {
+        padding: 20px 16px !important;
+        border-radius: 16px !important;
+    }
+    .notifications-stack {
+        gap: 20px !important;
+    }
+    .notification-item-row {
+        gap: 15px !important;
+    }
+    .notification-item-main {
+        align-items: flex-start !important;
+    }
+    .notification-text-box {
+        max-width: 90% !important;
+    }
+    .notification-content-line {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 4px !important;
+    }
+    .notification-title {
+        font-size: 15px !important;
+    }
+    .notification-msg {
+        font-size: 13px !important;
+        line-height: 1.4 !important;
+    }
+    .notification-time {
+        font-size: 12px !important;
+        margin-top: 4px !important;
+    }
+    .notification-unread-dot {
+        width: 8px !important;
+        height: 8px !important;
+        margin-top: 6px !important;
+    }
+    .divider-line {
+        margin: 5px 0 !important;
+    }
+    .no-notifications-box p {
+        font-size: 14px !important;
+    }
+}
+`;
 
 export default Notifications;

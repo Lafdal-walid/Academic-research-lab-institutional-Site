@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from "@/hooks/useTranslation";
+import { useLanguage } from "@/contexts/LanguageContext";
 import API_BASE_URL from '@/config';
 
 const svgPaths = {
@@ -16,6 +18,8 @@ const svgPaths = {
 };
 
 const NewChatModal = ({ isOpen, onClose, onSend }) => {
+  const { t } = useTranslation('teamContact');
+  const { language } = useLanguage();
   const [recipients, setRecipients] = useState([]);
   const [selectedRecipient, setSelectedRecipient] = useState(null);
   const [message, setMessage] = useState('');
@@ -24,35 +28,39 @@ const NewChatModal = ({ isOpen, onClose, onSend }) => {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchData = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch(`${API_BASE_URL}/api/teams`, { // Reusing teams to find members or maybe a generic users endpoint
+        
+        // 1. Fetch current user profile to know their team and ID
+        const profileRes = await fetch(`${API_BASE_URL}/api/auth/profile`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        if (res.ok) {
-          const teams = await res.json();
-          // Extract unique members from all teams
-          const allUsers = [];
-          const userIds = new Set();
-          teams.forEach(t => {
-            if (t.leader && !userIds.has(t.leader._id)) {
-                allUsers.push(t.leader);
-                userIds.add(t.leader._id);
-            }
-            t.members.forEach(m => {
-                if (!userIds.has(m._id)) {
-                    allUsers.push(m);
-                    userIds.add(m._id);
-                }
-            });
+        if (!profileRes.ok) return;
+        const currentUser = await profileRes.json();
+
+        // 2. Fetch all members
+        const membersRes = await fetch(`${API_BASE_URL}/api/auth/members`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (membersRes.ok) {
+          const allUsers = await membersRes.json();
+          
+          // 3. Filter: same team OR superadmin, excluding self
+          const filtered = allUsers.filter(u => {
+            if (u._id === currentUser._id) return false;
+            const isSuperAdmin = u.role === 'superadmin';
+            const isSameTeam = currentUser.team && u.team === (currentUser.team._id || currentUser.team);
+            return isSuperAdmin || isSameTeam;
           });
-          setRecipients(allUsers);
-          if (allUsers.length > 0) setSelectedRecipient(allUsers[0]);
+
+          setRecipients(filtered);
+          if (filtered.length > 0) setSelectedRecipient(filtered[0]);
         }
       } catch (err) { console.error(err); }
     };
-    if (isOpen) fetchUsers();
+    if (isOpen) fetchData();
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -91,34 +99,51 @@ const NewChatModal = ({ isOpen, onClose, onSend }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300 px-4">
+      <style dangerouslySetInnerHTML={{ __html: newChatModalStyles }} />
       <div 
-        className="bg-[#151519] border border-[#1e1d22] relative animate-in zoom-in-95 duration-300 overflow-visible" 
+        className="modal-content-card" 
         style={{ 
+          backgroundColor: '#151519',
+          border: '1px solid #1e1d22',
+          position: 'relative',
+          animation: 'animate-in zoom-in-95 duration-300',
+          overflow: 'visible',
           width: 'clamp(300px, 40vw, 600px)', 
           borderRadius: '1.2vw', 
-          padding: '2.5vw' 
+          padding: '2.5vw',
+          direction: language === 'ar' ? 'rtl' : 'ltr'
         }}
       >
         <div className="flex flex-col w-full" style={{ gap: '2.5vh' }}>
           
           {/* Section: Choose One? */}
-          <div className="flex flex-col w-full relative" style={{ gap: '1.2vh' }}>
-            <label className="text-[#EDEDF0] font-poppins font-medium" style={{ fontSize: '0.85vw' }}>Choose one?</label>
+          <div className="modal-input-section" style={{ display: 'flex', flexDirection: 'column', width: '100%', position: 'relative', gap: '1.2vh' }}>
+            <label className="modal-field-label" style={{ color: '#EDEDF0', fontFamily: 'Poppins, sans-serif', fontWeight: 500, fontSize: '0.85vw' }}>{t('chooseOne')}</label>
             
             {/* Custom Dropdown Trigger */}
             <div 
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className={`bg-[#1e1e24]/50 border flex items-center justify-between cursor-pointer transition-all ${isDropdownOpen ? 'border-[#3457dc] shadow-[0_0_15px_rgba(52,87,220,0.2)]' : 'border-[#2a2a30] hover:border-[#3457dc]'}`}
-                style={{ borderRadius: '0.6vw', padding: '1.5vh 1vw' }}
+                className={`modal-dropdown-trigger ${isDropdownOpen ? 'active' : ''}`}
+                style={{ 
+                    backgroundColor: 'rgba(30, 30, 36, 0.5)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s',
+                    border: isDropdownOpen ? '1px solid #3457dc' : '1px solid #2a2a30',
+                    boxShadow: isDropdownOpen ? '0 0 15px rgba(52,87,220,0.2)' : 'none',
+                    borderRadius: '0.6vw', padding: '1.5vh 1vw' 
+                }}
             >
-              <div className="flex items-center" style={{ gap: '0.8vw' }}>
-                 <div className="bg-[#3457dc]/20 flex items-center justify-center rounded-full border border-[#3457dc]/30" 
-                      style={{ width: '1.8vw', height: '1.8vw', fontSize: '0.7vw', fontWeight: 'bold', color: '#3457dc' }}>
-                   {selectedRecipient?.username?.charAt(0) || '?'}
-                 </div>
-                 <span className="text-white font-poppins" style={{ fontSize: '0.85vw' }}>{selectedRecipient?.username || 'Select Recipient'}</span>
-              </div>
-              <svg viewBox="0 0 20 20" style={{ width: '1.1vw', height: '1.1vw', transition: 'transform 0.3s', transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }} className="pointer-events-none">
+               <div className="selected-recipient-box" style={{ display: 'flex', alignItems: 'center', gap: '0.8vw' }}>
+                  <div className="recipient-avatar-circle" 
+                       style={{ backgroundColor: 'rgba(52, 87, 220, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', border: '1px solid rgba(52, 87, 220, 0.3)', width: '1.8vw', height: '1.8vw', fontSize: '0.7vw', fontWeight: 'bold', color: '#3457dc' }}>
+                    {selectedRecipient?.username?.charAt(0) || '?'}
+                  </div>
+                  <span className="selected-recipient-name" style={{ color: 'white', fontFamily: 'Poppins, sans-serif', fontSize: '0.85vw' }}>{selectedRecipient?.username || t('selectRecipient')}</span>
+               </div>
+              <svg className="dropdown-chevron-icon" viewBox="0 0 20 20" style={{ width: '1.1vw', height: '1.1vw', transition: 'transform 0.3s', transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }}>
                  <path d={svgPaths.angleDown} fill="#3457DC" />
               </svg>
             </div>
@@ -126,29 +151,48 @@ const NewChatModal = ({ isOpen, onClose, onSend }) => {
             {/* Custom Dropdown List */}
             {isDropdownOpen && (
               <div 
-                className="absolute left-0 right-0 z-[60] bg-[#1e1e24] border border-[#2a2a30] shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden"
-                style={{ top: 'calc(100% + 0.5vh)', borderRadius: '0.8vw', maxHeight: '25vh' }}
+                className="modal-dropdown-list-box"
+                style={{ 
+                    position: 'absolute',
+                    left: 0,
+                    right: 0,
+                    zIndex: 60,
+                    backgroundColor: '#1e1e24',
+                    border: '1px solid #2a2a30',
+                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                    animation: 'animate-in fade-in slide-in-from-top-2 duration-200',
+                    overflow: 'hidden',
+                    top: 'calc(100% + 0.5vh)', borderRadius: '0.8vw', maxHeight: '25vh' 
+                }}
               >
-                <div className="flex flex-col overflow-y-auto custom-scrollbar h-full">
+                <div className="dropdown-items-stack custom-scrollbar" style={{ display: 'flex', flexDirection: 'column', overflowY: 'auto', height: '100%' }}>
                   {recipients.map((person) => (
                     <div 
                       key={person._id}
                       onClick={() => handleSelectRecipient(person)}
-                      className="flex items-center justify-between hover:bg-[#3457dc]/10 cursor-pointer transition-colors border-b border-white/5 last:border-none"
-                      style={{ padding: '1.5vh 1vw', gap: '1vw' }}
+                      className="dropdown-item-row"
+                      style={{ 
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.3s',
+                          borderBottom: '1px solid rgba(255,255,255,0.05)',
+                          padding: '1.5vh 1vw', gap: '1vw' 
+                      }}
                     >
-                      <div className="flex items-center" style={{ gap: '0.8vw' }}>
-                        <div className="bg-[#2a2a30] flex items-center justify-center rounded-full border border-white/5" 
-                             style={{ width: '1.6vw', height: '1.6vw', fontSize: '0.65vw', color: '#a5a5b2' }}>
+                      <div className="recipient-info-box" style={{ display: 'flex', alignItems: 'center', gap: '0.8vw' }}>
+                        <div className="recipient-avatar-small" 
+                             style={{ backgroundColor: '#2a2a30', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', border: '1px solid rgba(255,255,255,0.05)', width: '1.6vw', height: '1.6vw', fontSize: '0.65vw', color: '#a5a5b2' }}>
                           {person.username?.charAt(0)}
                         </div>
-                        <div className="flex flex-col">
-                           <span className="text-white font-medium" style={{ fontSize: '0.8vw' }}>{person.username}</span>
-                           <span className="text-[#80808a]" style={{ fontSize: '0.65vw' }}>{person.role}</span>
+                        <div className="recipient-text-stack" style={{ display: 'flex', flexDirection: 'column' }}>
+                           <span className="recipient-name-text" style={{ color: 'white', fontWeight: 500, fontSize: '0.8vw' }}>{person.username}</span>
+                           <span className="recipient-role-text" style={{ color: '#80808a', fontSize: '0.65vw' }}>{person.role}</span>
                         </div>
                       </div>
                       {selectedRecipient?._id === person._id && (
-                        <div className="bg-[#3457dc]" style={{ width: '0.4vw', height: '0.4vw', borderRadius: '50%' }} />
+                        <div className="selection-active-dot" style={{ backgroundColor: '#3457dc', width: '0.4vw', height: '0.4vw', borderRadius: '50%' }} />
                       )}
                     </div>
                   ))}
@@ -158,20 +202,20 @@ const NewChatModal = ({ isOpen, onClose, onSend }) => {
           </div>
 
           {/* Section: Your message */}
-          <div className="flex flex-col w-full" style={{ gap: '1.2vh' }}>
-            <label className="text-[#EDEDF0] font-poppins font-medium" style={{ fontSize: '0.85vw' }}>Your message</label>
+          <div className="modal-input-section" style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '1.2vh' }}>
+            <label className="modal-field-label" style={{ color: '#EDEDF0', fontFamily: 'Poppins, sans-serif', fontWeight: 500, fontSize: '0.85vw' }}>{t('yourMessage')}</label>
             <div 
-                className="bg-[#1e1e24]/50 border border-[#1e1d22] relative"
-                style={{ borderRadius: '0.6vw', minHeight: '18vh', padding: '1.5vh 1vw' }}
+                className="modal-textarea-wrapper"
+                style={{ backgroundColor: 'rgba(30, 30, 36, 0.5)', border: '1px solid #1e1d22', position: 'relative', borderRadius: '0.6vw', minHeight: '18vh', padding: '1.5vh 1vw' }}
             >
               <textarea 
-                placeholder="Describe the issue, steps to reproduce, or anything that might help."
+                placeholder={t('describeIssue')}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                className="bg-transparent border-none outline-none text-white w-full h-full resize-none font-poppins leading-relaxed placeholder-[#70707a]"
-                style={{ fontSize: '0.85vw' }}
+                className="modal-textarea"
+                style={{ background: 'transparent', border: 'none', outline: 'none', color: 'white', width: '100%', height: '100%', resize: 'none', fontFamily: 'Poppins, sans-serif', lineHeight: 1.6, fontSize: '0.85vw' }}
               />
-              <div className="absolute right-[0.6vw] bottom-[0.6vw]">
+              <div className="textarea-resize-icon" style={{ position: 'absolute', right: '0.6vw', bottom: '0.6vw' }}>
                  <svg viewBox="0 0 12 12" style={{ width: '0.8vw', height: '0.8vw' }}>
                     <path d={svgPaths.cornerResize} fill="#A5A5B2" />
                  </svg>
@@ -180,8 +224,8 @@ const NewChatModal = ({ isOpen, onClose, onSend }) => {
           </div>
 
           {/* Section: Send a file */}
-          <div className="flex flex-col w-full" style={{ gap: '1.2vh' }}>
-            <label className="text-[#EDEDF0] font-poppins font-medium" style={{ fontSize: '0.85vw' }}>Send a file</label>
+          <div className="modal-input-section" style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '1.2vh' }}>
+            <label className="modal-field-label" style={{ color: '#EDEDF0', fontFamily: 'Poppins, sans-serif', fontWeight: 500, fontSize: '0.85vw' }}>{t('sendFile')}</label>
             <input 
                type="file" 
                className="hidden" 
@@ -190,17 +234,26 @@ const NewChatModal = ({ isOpen, onClose, onSend }) => {
             />
             <div 
                 onClick={triggerFileInput}
-                className={`bg-[#1e1e24]/50 border flex items-center justify-between transition-all cursor-pointer ${selectedFile ? 'border-[#3457dc] bg-[#1e1e24]/70' : 'border-[#2a2a30] hover:bg-[#1e1e24]/70'}`}
-                style={{ borderRadius: '0.6vw', padding: '1.2vh 1vw' }}
+                className={`modal-file-select-box ${selectedFile ? 'has-file' : ''}`}
+                style={{ 
+                    backgroundColor: 'rgba(30, 30, 36, 0.5)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    transition: 'all 0.3s',
+                    cursor: 'pointer',
+                    border: selectedFile ? '1px solid #3457dc' : '1px solid #2a2a30',
+                    borderRadius: '0.6vw', padding: '1.2vh 1vw' 
+                }}
             >
-              <span className={`font-poppins font-medium truncate w-[70%] ${selectedFile ? 'text-white' : 'text-[#a5a5b2]'}`} style={{ fontSize: '0.85vw' }}>
-                {selectedFile ? selectedFile.name : 'Click to select a file...'}
+              <span className="file-name-text" style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '70%', fontSize: '0.85vw', color: selectedFile ? 'white' : '#a5a5b2' }}>
+                {selectedFile ? selectedFile.name : t('clickToSelect')}
               </span>
               
-              <div className="flex items-center" style={{ gap: '0.8vw' }}>
+              <div className="file-actions-group" style={{ display: 'flex', alignItems: 'center', gap: '0.8vw' }}>
                 {selectedFile && (
-                  <div className="cursor-pointer hover:opacity-80 transition-opacity" onClick={removeFile}>
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ width: '1.1vw', height: '1.1vw' }}>
+                  <div className="remove-file-btn" style={{ cursor: 'pointer', transition: 'opacity 0.2s' }} onClick={removeFile}>
+                    <svg viewBox="0 0 20 20" fill="none" style={{ width: '1.1vw', height: '1.1vw' }}>
                       {svgPaths.trashPaths.map((p, i) => (
                         <path key={i} d={p} fill="#C5432D" />
                       ))}
@@ -208,8 +261,8 @@ const NewChatModal = ({ isOpen, onClose, onSend }) => {
                   </div>
                 )}
                 
-                <div className="cursor-pointer hover:opacity-80 transition-opacity">
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ width: '1.1vw', height: '1.1vw' }}>
+                <div className="edit-file-icon" style={{ cursor: 'pointer', transition: 'opacity 0.2s' }}>
+                  <svg viewBox="0 0 20 20" fill="none" style={{ width: '1.1vw', height: '1.1vw' }}>
                     {svgPaths.editPaths.map((p, i) => (
                       <path key={i} d={p} fill="#3457DC" />
                     ))}
@@ -223,10 +276,24 @@ const NewChatModal = ({ isOpen, onClose, onSend }) => {
           <button 
             onClick={handleSend}
             disabled={!message.trim() && !selectedFile}
-            className={`w-full text-white font-medium transition-all flex items-center justify-center mt-[1vh] ${(!message.trim() && !selectedFile) ? 'bg-gray-600 cursor-not-allowed opacity-50' : 'bg-[#3457dc] hover:bg-[#4a6dec] active:scale-95'}`}
-            style={{ borderRadius: '1vw', padding: '1.8vh', fontSize: '0.85vw' }}
+            className={`modal-submit-btn ${(!message.trim() && !selectedFile) ? 'disabled' : ''}`}
+            style={{ 
+                width: '100%',
+                color: 'white',
+                fontWeight: 500,
+                transition: 'all 0.3s',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginTop: '1vh',
+                border: 'none',
+                cursor: (!message.trim() && !selectedFile) ? 'not-allowed' : 'pointer',
+                opacity: (!message.trim() && !selectedFile) ? 0.5 : 1,
+                backgroundColor: (!message.trim() && !selectedFile) ? '#4b5563' : '#3457dc',
+                borderRadius: '1vw', padding: '1.8vh', fontSize: '0.85vw' 
+            }}
           >
-            Send Message
+            {t('sendMessage')}
           </button>
         </div>
       </div>
@@ -242,5 +309,90 @@ const NewChatModal = ({ isOpen, onClose, onSend }) => {
     </div>
   );
 };
+
+const newChatModalStyles = `
+@media screen and (max-width: 1024px) {
+    .modal-content-card {
+        width: 95% !important;
+        max-width: 450px !important;
+        padding: 24px 20px !important;
+        border-radius: 20px !important;
+    }
+    .modal-field-label {
+        font-size: 14px !important;
+    }
+    .modal-dropdown-trigger {
+        padding: 12px 15px !important;
+        border-radius: 12px !important;
+    }
+    .recipient-avatar-circle {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 14px !important;
+    }
+    .selected-recipient-name {
+        font-size: 14px !important;
+    }
+    .dropdown-chevron-icon {
+        width: 18px !important;
+        height: 18px !important;
+    }
+
+    .modal-dropdown-list-box {
+        border-radius: 12px !important;
+        max-height: 200px !important;
+    }
+    .dropdown-item-row {
+        padding: 12px 15px !important;
+    }
+    .recipient-avatar-small {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 12px !important;
+    }
+    .recipient-name-text {
+        font-size: 14px !important;
+    }
+    .recipient-role-text {
+        font-size: 11px !important;
+    }
+    .selection-active-dot {
+        width: 6px !important;
+        height: 6px !important;
+    }
+
+    .modal-textarea-wrapper {
+        min-height: 120px !important;
+        border-radius: 12px !important;
+        padding: 12px 15px !important;
+    }
+    .modal-textarea {
+        font-size: 14px !important;
+    }
+    .textarea-resize-icon svg {
+        width: 14px !important;
+        height: 14px !important;
+    }
+
+    .modal-file-select-box {
+        padding: 12px 15px !important;
+        border-radius: 12px !important;
+    }
+    .file-name-text {
+        font-size: 14px !important;
+    }
+    .remove-file-btn svg, .edit-file-icon svg {
+        width: 18px !important;
+        height: 18px !important;
+    }
+
+    .modal-submit-btn {
+        padding: 16px !important;
+        font-size: 15px !important;
+        border-radius: 14px !important;
+        margin-top: 15px !important;
+    }
+}
+`;
 
 export default NewChatModal;

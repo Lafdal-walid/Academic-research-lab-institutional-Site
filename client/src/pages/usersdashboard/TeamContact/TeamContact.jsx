@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from "@/hooks/useTranslation";
+import { useLanguage } from "@/contexts/LanguageContext";
 import NewChatModal from './NewChatModal';
 import API_BASE_URL from '@/config';
 
@@ -20,8 +22,8 @@ const svgPaths = {
 const ToggleSwitch = ({ active, onToggle }) => (
   <div 
     onClick={onToggle}
-    className="relative shrink-0 cursor-pointer transition-all duration-300" 
-    style={{ width: '2.5vw', height: '1.5vw' }}
+    className="toggle-switch-container" 
+    style={{ position: 'relative', flexShrink: 0, cursor: 'pointer', transition: 'all 0.3s', width: '2.5vw', height: '1.5vw' }}
   >
     <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 48 28">
       <rect fill={active ? '#01CBB1' : '#1E1E24'} height="27" rx="13.5" width="47" x="0.5" y="0.5" />
@@ -70,6 +72,8 @@ const ChatItem = ({ name, message, time, active, unread, onClick }) => (
 );
 
 const TeamContact = () => {
+    const { t } = useTranslation('teamContact');
+    const { language } = useLanguage();
     const [unreadOnly, setUnreadOnly] = useState(false);
     const [selectedChatId, setSelectedChatId] = useState(null);
     const [newMessage, setNewMessage] = useState('');
@@ -78,7 +82,20 @@ const TeamContact = () => {
     const [conversations, setConversations] = useState({});
     const [isLoadingChats, setIsLoadingChats] = useState(true);
     const [isLoadingMsgs, setIsLoadingMsgs] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+    const [showMobileChat, setShowMobileChat] = useState(false);
     const messagesEndRef = useRef(null);
+
+    useEffect(() => {
+        const handleResize = () => {
+            const mobile = window.innerWidth <= 1024;
+            setIsMobile(mobile);
+            if (!mobile) setShowMobileChat(false);
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const fetchChats = async () => {
         try {
@@ -211,145 +228,180 @@ const TeamContact = () => {
       .filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
     return (
-      <div className="w-full text-white font-poppins animate-in fade-in duration-500 flex flex-col h-[calc(100vh-11.4vh-80px)]" style={{ gap: '3vh' }}>
+      <div className="team-contact-container" style={{ display: 'flex', flexDirection: 'column', width: '100%', textWhite: 'white', fontFamily: 'Poppins, sans-serif', animation: 'animate-in fade-in duration-500', height: 'calc(100vh - 11.4vh - 80px)', gap: '3vh', direction: language === 'ar' ? 'rtl' : 'ltr' }}>
+        <style dangerouslySetInnerHTML={{ __html: teamContactStyles }} />
+        
         {/* Header Bar */}
-        <div className="flex items-center justify-between w-full">
-            <div className="flex items-center" style={{ gap: '0.8vw' }}>
-              <h1 className="font-bold text-white m-0" style={{ fontSize: '1.2vw', fontFamily: 'Gilroy, Poppins, sans-serif' }}>Your Team chats</h1>
-              <div className="bg-accent flex items-center justify-center text-white font-bold" 
-                   style={{ width: '1.4vw', height: '1.4vw', borderRadius: '50%', fontSize: '0.8vw' }}>
-                3
+        <div className="team-contact-header" style={{ display: (isMobile && showMobileChat) ? 'none' : 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <div className="header-title-box" style={{ display: 'flex', alignItems: 'center', gap: '0.8vw' }}>
+              <h1 className="header-main-title" style={{ fontWeight: 'bold', color: 'white', margin: 0, fontSize: '1.2vw', fontFamily: 'Gilroy, Poppins, sans-serif' }}>{t('teamChatsTitle')}</h1>
+              <div className="chats-count-badge" 
+                   style={{ backgroundColor: '#3457DC', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', width: '1.4vw', height: '1.4vw', borderRadius: '50%', fontSize: '0.8vw' }}>
+                {chats.length}
               </div>
            </div>
            
            <button 
               onClick={() => setIsModalOpen(true)}
-              className="bg-[#3457dc] flex items-center justify-center text-white transition-all hover:bg-[#4a6dec]"
-              style={{ gap: '0.6vw', padding: '1.2vh 1.8vw', borderRadius: '1vw' }}
+              className="new-chat-btn"
+              style={{ backgroundColor: '#3457dc', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', transition: 'all 0.3s', border: 'none', cursor: 'pointer', gap: '0.6vw', padding: '1.2vh 1.8vw', borderRadius: '1vw' }}
            >
-              <span style={{ fontSize: '0.85vw' }}>New Chat</span>
-              <svg viewBox="0 0 16 16" fill="white" style={{ width: '1vw', height: '1vw' }}>
+              <span className="btn-text" style={{ fontSize: '0.85vw' }}>{t('newChat')}</span>
+              <svg className="btn-icon" viewBox="0 0 16 16" fill="white" style={{ width: '1vw', height: '1vw' }}>
                  <path d={svgPaths.mailPlus} />
               </svg>
            </button>
         </div>
 
-        <div className="flex flex-1" style={{ gap: '2vw', minHeight: 0 }}>
+        <div className="chat-layout-main" style={{ display: 'flex', flex: 1, gap: '2vw', minHeight: 0 }}>
            {/* Sidebar Panel */}
-           <div className="bg-[#151519] flex flex-col h-full border border-white/5" 
-                style={{ width: '26vw', borderRadius: '1vw', padding: '2vh 1.5vw', gap: '2.5vh' }}>
+           <div className={`sidebar-panel ${isMobile && showMobileChat ? 'hidden-mobile' : ''}`} 
+                style={{ 
+                    backgroundColor: '#151519',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: '100%',
+                    border: '1px solid rgba(255,255,255,0.05)',
+                    width: isMobile ? '100%' : '26vw', 
+                    borderRadius: '1vw', 
+                    padding: '2vh 1.5vw', 
+                    gap: '2.5vh' 
+                }}>
               
-              <div className="bg-[#1e1e24] flex items-center justify-between border border-transparent focus-within:border-[#3457dc] transition-all"
-                   style={{ borderRadius: '0.8vw', padding: '1vh 1vw', width: '100%' }}>
+              <div className="search-bar-wrapper"
+                   style={{ backgroundColor: '#1e1e24', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid transparent', transition: 'all 0.3s', borderRadius: '0.8vw', padding: '1vh 1vw', width: '100%' }}>
                 <input 
                     type="text" 
-                    placeholder="Search /" 
+                    placeholder={t('searchPlaceholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="bg-transparent border-none outline-none text-white placeholder-[#9a9a9a]"
-                    style={{ fontSize: '0.85vw', width: '100%' }}
+                    style={{ background: 'transparent', border: 'none', outline: 'none', color: 'white', fontSize: '0.85vw', width: '100%' }}
                 />
-                <svg viewBox="0 0 20 20" style={{ width: '1.2vw', height: '1.2vw' }} fill="none" stroke="#3457DC" strokeWidth="1.5">
+                <svg className="search-icon" viewBox="0 0 20 20" style={{ width: '1.2vw', height: '1.2vw' }} fill="none" stroke="#3457DC" strokeWidth="1.5">
                    <path d={svgPaths.searchNormal} />
                    <path d={svgPaths.searchNormal2} />
                 </svg>
               </div>
 
-              <div className="flex flex-col" style={{ gap: '1.5vh' }}>
-                 <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center" style={{ gap: '1vw' }}>
-                       <svg viewBox="0 0 20 20" fill="white" style={{ width: '1.1vw', height: '1.1vw' }}>
+              <div className="sidebar-filters" style={{ display: 'flex', flexDirection: 'column', gap: '1.5vh' }}>
+                 <div className="filters-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                    <div className="icons-group" style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
+                       <svg className="filter-icon" viewBox="0 0 20 20" fill="white" style={{ width: '1.1vw', height: '1.1vw' }}>
                           <path d={svgPaths.barsSort} />
                        </svg>
-                       <svg viewBox="0 0 20 20" fill="white" style={{ width: '1.1vw', height: '1.1vw' }}>
+                       <svg className="filter-icon" viewBox="0 0 20 20" fill="white" style={{ width: '1.1vw', height: '1.1vw' }}>
                           <path d={svgPaths.filterList} />
                        </svg>
-                       <svg viewBox="0 0 20 20" fill="white" style={{ width: '1.1vw', height: '1.1vw' }}>
+                       <svg className="filter-icon" viewBox="0 0 20 20" fill="white" style={{ width: '1.1vw', height: '1.1vw' }}>
                           <path d={svgPaths.calendarClock} />
                        </svg>
-                       <div className="bg-[#1e1e24] rounded-[0.4vw] flex items-center justify-center" 
-                            style={{ padding: '0.4vh 0.6vw', fontSize: '0.8vw' }}>0</div>
+                       <div className="count-tag" 
+                            style={{ backgroundColor: '#1e1e24', borderRadius: '0.4vw', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.4vh 0.6vw', fontSize: '0.8vw' }}>0</div>
                     </div>
-                    <div className="flex items-center" style={{ gap: '0.6vw' }}>
-                       <span style={{ fontSize: '0.8vw' }}>Unread only</span>
+                    <div className="unread-toggle-box" style={{ display: 'flex', alignItems: 'center', gap: '0.6vw' }}>
+                       <span className="toggle-label" style={{ fontSize: '0.8vw' }}>{t('unreadOnly')}</span>
                        <ToggleSwitch active={unreadOnly} onToggle={() => setUnreadOnly(!unreadOnly)} />
                     </div>
                  </div>
-                 <div style={{ height: '0.1vh', backgroundColor: '#1E1D22', width: '100%' }} />
+                 <div className="divider-line" style={{ height: '0.1vh', backgroundColor: '#1E1D22', width: '100%' }} />
               </div>
 
-                  <div className="flex-1 overflow-y-auto pr-[0.4vw] custom-scrollbar">
-                     {filteredChats.map(chat => (
-                       <ChatItem 
-                          key={chat.id}
-                          name={chat.name?.split('@')[0] || chat.name}
-                          message={chat.lastMessage}
-                          time={new Date(chat.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
-                          active={selectedChatId === chat.id}
-                          unread={chat.unread}
-                          onClick={() => {
-                            setSelectedChatId(chat.id);
-                            setChats(prev => prev.map(c => c.id === chat.id ? { ...c, unread: false } : c));
-                          }}
-                       />
-                     ))}
-                 {filteredChats.length === 0 && (
-                   <div className="text-center text-[#a5a5b2] py-[4vh]" style={{ fontSize: '0.8vw' }}>
-                      No chats found.
-                   </div>
-                 )}
+              <div className="chats-list-container custom-scrollbar" style={{ flex: 1, overflowY: 'auto', paddingRight: '0.4vw' }}>
+                  {filteredChats.map(chat => (
+                    <ChatItem 
+                        key={chat.id}
+                        name={chat.name?.split('@')[0] || chat.name}
+                        message={chat.lastMessage}
+                        time={new Date(chat.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                        active={selectedChatId === chat.id}
+                        unread={chat.unread}
+                        onClick={() => {
+                          setSelectedChatId(chat.id);
+                          setChats(prev => prev.map(c => c.id === chat.id ? { ...c, unread: false } : c));
+                          if (isMobile) setShowMobileChat(true);
+                        }}
+                    />
+                  ))}
+                  {filteredChats.length === 0 && (
+                    <div className="no-chats-msg" style={{ textAlign: 'center', color: '#a5a5b2', padding: '4vh 0', fontSize: '0.8vw' }}>
+                        {t('noChatsFound')}
+                    </div>
+                  )}
               </div>
            </div>
 
            {/* Conversation Area */}
-           <div className="bg-[#151519] flex-1 flex flex-col h-full border border-white/5 relative" 
-                style={{ borderRadius: '1vw', padding: '2.5vh 2vw', gap: '3vh' }}>
+           <div className={`conversation-area ${isMobile && !showMobileChat ? 'hidden-mobile' : ''}`} 
+                style={{ 
+                    backgroundColor: '#151519',
+                    flex: 1,
+                    display: (isMobile && !showMobileChat) ? 'none' : 'flex',
+                    flexDirection: 'column',
+                    height: '100%',
+                    border: '1px solid rgba(255,255,255,0.05)',
+                    position: 'relative',
+                    borderRadius: '1vw', 
+                    padding: '2.5vh 2vw', 
+                    gap: '3vh' 
+                }}>
               
-              <div className="flex items-center justify-between w-full">
-                 <div className="flex flex-col" style={{ gap: '0.4vh' }}>
-                    <h2 className="font-bold text-white m-0" style={{ fontSize: '1vw', fontFamily: 'Gilroy, Poppins, sans-serif' }}>
-                      {activeChat?.name?.split('@')[0] || activeChat?.name}
-                    </h2>
-                    <div className="flex items-center" style={{ gap: '0.6vw' }}>
-                       <div style={{ width: '0.2vh', height: '1.5vh', backgroundColor: '#3457DC' }} />
-                       <span className="text-[#a5a5b2]" style={{ fontSize: '0.75vw' }}>{activeChat?.role}</span>
+              <div className="conversation-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                 <div className="header-info-box" style={{ display: 'flex', alignItems: 'center', gap: '1.2vw' }}>
+                    {isMobile && (
+                        <button 
+                            onClick={() => setShowMobileChat(false)}
+                            style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                        >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                                <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </button>
+                    )}
+                    <div className="title-stack" style={{ display: 'flex', flexDirection: 'column', gap: '0.4vh' }}>
+                        <h2 className="chat-title" style={{ fontWeight: 'bold', color: 'white', margin: 0, fontSize: '1vw', fontFamily: 'Gilroy, Poppins, sans-serif' }}>
+                          {activeChat?.name?.split('@')[0] || activeChat?.name}
+                        </h2>
+                        <div className="role-badge-box" style={{ display: 'flex', alignItems: 'center', gap: '0.6vw' }}>
+                           <div className="role-indicator" style={{ width: '0.2vh', height: '1.5vh', backgroundColor: '#3457DC' }} />
+                           <span className="role-text" style={{ color: '#a5a5b2', fontSize: '0.75vw' }}>{activeChat?.role}</span>
+                        </div>
                     </div>
                  </div>
-                 <svg viewBox="0 0 20 20" fill="#3457DC" className="cursor-pointer" style={{ width: '1.2vw', height: '1.2vw' }}>
+                 <svg className="menu-icon" viewBox="0 0 20 20" fill="#3457DC" style={{ cursor: 'pointer', width: '1.2vw', height: '1.2vw' }}>
                     <path d={svgPaths.menuDots} />
                  </svg>
               </div>
 
-              <div style={{ height: '0.1vh', backgroundColor: '#1E1D22', width: '100%' }} />
+              <div className="divider-line" style={{ height: '0.1vh', backgroundColor: '#1E1D22', width: '100%' }} />
 
               {/* Messages Area */}
-              <div className="flex-1 overflow-y-auto pr-[0.5vw] custom-scrollbar" style={{ gap: '4vh', display: 'flex', flexDirection: 'column' }}>
-                 <div className="text-center text-[#a5a5b2] mb-[2vh]" style={{ fontSize: '0.7vw' }}>Conversation history with {activeChat?.name?.split('@')[0] || activeChat?.name}</div>
+              <div className="messages-container custom-scrollbar" style={{ flex: 1, overflowY: 'auto', paddingRight: '0.5vw', display: 'flex', flexDirection: 'column', gap: '4vh' }}>
+                 <div className="history-info" style={{ textAlign: 'center', color: '#a5a5b2', marginBottom: '2vh', fontSize: '0.7vw' }}>{t('historyWith')} {activeChat?.name?.split('@')[0] || activeChat?.name}</div>
                  
                  {(conversations[selectedChatId] || []).map((msg, idx) => (
-                    <div key={msg.id} className={`flex flex-col w-full ${msg.self ? 'items-end' : 'items-start'}`} style={{ gap: '1vh', marginBottom: '2vh' }}>
+                    <div key={msg.id} className={`message-bubble-row ${msg.self ? 'self-end' : 'self-start'}`} style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: msg.self ? 'flex-end' : 'flex-start', gap: '1vh', marginBottom: '2vh' }}>
                        
                        {msg.type === 'doc' ? (
-                          <div className="bg-[#222127] flex items-center cursor-pointer hover:bg-[#2A2A30] transition-colors" 
-                               style={{ gap: '0.8vw', padding: '1.2vh 1.2vw', borderRadius: '0.8vw', maxWidth: '22vw' }}>
-                             <svg viewBox="0 0 23 23" fill="white" style={{ width: '1.4vw', height: '1.4vw' }}>
+                          <div className="doc-message-bubble" 
+                               style={{ backgroundColor: '#222127', display: 'flex', alignItems: 'center', cursor: 'pointer', transition: 'all 0.3s', gap: '0.8vw', padding: '1.2vh 1.2vw', borderRadius: '0.8vw', maxWidth: '22vw' }}>
+                             <svg className="doc-icon" viewBox="0 0 23 23" fill="white" style={{ width: '1.4vw', height: '1.4vw' }}>
                                 <path d={svgPaths.document} />
                              </svg>
-                             <div className="flex flex-col">
-                                <span className="text-[0.8vw] truncate">{msg.text}</span>
-                                <span className="text-[#a5a5b2] text-[0.7vw]">{msg.subtext}</span>
+                             <div className="doc-info" style={{ display: 'flex', flexDirection: 'column' }}>
+                                <span className="doc-name" style={{ fontSize: '0.8vw', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{msg.text}</span>
+                                <span className="doc-size" style={{ color: '#a5a5b2', fontSize: '0.7vw' }}>{msg.subtext}</span>
                              </div>
                           </div>
                        ) : (
-                          <div className={`${msg.self ? 'bg-[#3457dc]' : 'bg-[#222127]'}`} 
-                               style={{ padding: '1.5vh 1.5vw', borderRadius: '0.8vw', width: 'Fit-content', maxWidth: '22vw' }}>
-                             <p className="m-0 leading-relaxed font-poppins" style={{ fontSize: '0.85vw' }}>
+                          <div className={`text-message-bubble ${msg.self ? 'bg-primary' : 'bg-dark'}`} 
+                               style={{ backgroundColor: msg.self ? '#3457dc' : '#222127', padding: '1.5vh 1.5vw', borderRadius: '0.8vw', width: 'fit-content', maxWidth: '22vw' }}>
+                             <p className="bubble-text" style={{ margin: 0, lineHeight: 1.6, fontFamily: 'Poppins, sans-serif', fontSize: '0.85vw' }}>
                                 {msg.text}
                              </p>
                           </div>
                        )}
-                       <div className="flex justify-between w-[22vw]" style={{ fontSize: '0.7vw', color: '#9a9a9a' }}>
-                          <span className="font-medium">{msg.self ? 'You' : (activeChat?.name?.split('@')[0] || 'Member')}</span>
+                       <div className="message-meta" style={{ display: 'flex', justifyContent: 'space-between', width: '22vw', fontSize: '0.7vw', color: '#9a9a9a' }}>
+                          <span style={{ fontWeight: 500 }}>{msg.self ? 'You' : (activeChat?.name?.split('@')[0] || 'Member')}</span>
                           <span>{msg.time}</span>
                        </div>
                     </div>
@@ -358,38 +410,37 @@ const TeamContact = () => {
               </div>
 
               {/* Input Area */}
-              <div className="flex flex-col" style={{ gap: '2vh' }}>
-                 <div style={{ height: '0.1vh', backgroundColor: '#1E1D22', width: '100%' }} />
-                  <div className="flex items-center" style={{ gap: '1vw' }}>
+              <div className="input-section" style={{ display: 'flex', flexDirection: 'column', gap: '2vh' }}>
+                 <div className="divider-line" style={{ height: '0.1vh', backgroundColor: '#1E1D22', width: '100%' }} />
+                  <div className="input-controls" style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
                     <input 
                       type="file" 
                       className="hidden" 
                       ref={fileInputRef} 
                       onChange={handleFileSelect} 
                     />
-                    <div className="bg-[#1e1e24] flex-1 flex items-center border border-transparent focus-within:border-[#3457dc] transition-all"
-                         style={{ borderRadius: '0.8vw', padding: '1.2vh 1.2vw' }}>
+                    <div className="text-input-wrapper"
+                         style={{ backgroundColor: '#1e1e24', flex: 1, display: 'flex', alignItems: 'center', border: '1px solid transparent', transition: 'all 0.3s', borderRadius: '0.8vw', padding: '1.2vh 1.2vw' }}>
                        <input 
                            type="text" 
                            value={newMessage}
                            onChange={(e) => setNewMessage(e.target.value)}
                            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                           placeholder="Aa .." 
-                           className="bg-transparent border-none outline-none text-white placeholder-[#a5a5b2] w-full"
-                           style={{ fontSize: '0.85vw' }}
+                           placeholder={t('inputPlaceholder')} 
+                           style={{ background: 'transparent', border: 'none', outline: 'none', color: 'white', width: '100%', fontSize: '0.85vw' }}
                        />
                     </div>
                     <button 
                         onClick={() => handleSendMessage()}
-                        className="bg-[#3457dc] flex items-center justify-center rounded-[0.5vw] hover:bg-[#4a6dec] transition-all"
-                        style={{ padding: '1.2vh 1.2vw' }}
+                        className="send-btn"
+                        style={{ backgroundColor: '#3457dc', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', transition: 'all 0.3s', borderRadius: '0.5vw', padding: '1.2vh 1.2vw' }}
                     >
-                       <svg viewBox="0 0 20 20" fill="white" style={{ width: '1.2vw', height: '1.2vw' }}>
+                       <svg className="send-icon" viewBox="0 0 20 20" fill="white" style={{ width: '1.2vw', height: '1.2vw' }}>
                           <path d={svgPaths.paperPlane} />
                        </svg>
                     </button>
-                    <div className="flex items-center" style={{ borderLeft: '1px solid #2A2A30', paddingLeft: '1vw' }}>
-                       <div className="cursor-pointer hover:opacity-80 transition-opacity" onClick={() => fileInputRef.current?.click()}>
+                    <div className="attachment-box" style={{ display: 'flex', alignItems: 'center', borderLeft: '1px solid #2A2A30', paddingLeft: '1vw' }}>
+                       <div className="clip-icon-wrapper" style={{ cursor: 'pointer', transition: 'opacity 0.2s' }} onClick={() => fileInputRef.current?.click()}>
                           <svg viewBox="0 0 24 24" fill="#3457DC" style={{ width: '1.4vw', height: '1.4vw' }}>
                              <path d={svgPaths.clipFile} />
                           </svg>
@@ -410,4 +461,81 @@ const TeamContact = () => {
     );
 };
 
+const teamContactStyles = `
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #3457DC; border-radius: 10px; }
+
+@media screen and (max-width: 1024px) {
+    .team-contact-container {
+        height: auto !important;
+        min-height: calc(100vh - 100px) !important;
+        gap: 20px !important;
+    }
+    .header-main-title { font-size: 20px !important; }
+    .chats-count-badge { width: 24px !important; height: 24px !important; font-size: 12px !important; }
+    .new-chat-btn { padding: 12px 20px !important; border-radius: 12px !important; gap: 10px !important; }
+    .new-chat-btn .btn-text { font-size: 14px !important; }
+    .new-chat-btn .btn-icon { width: 16px !important; height: 16px !important; }
+
+    .chat-layout-main {
+        gap: 0 !important;
+        position: relative !important;
+    }
+
+    .sidebar-panel {
+        width: 100% !important;
+        border-radius: 16px !important;
+        padding: 20px !important;
+        min-height: 500px !important;
+    }
+    .hidden-mobile { display: none !important; }
+
+    .search-bar-wrapper { padding: 12px 16px !important; border-radius: 12px !important; }
+    .search-bar-wrapper input { font-size: 14px !important; }
+    .search-icon { width: 18px !important; height: 18px !important; }
+
+    .icons-group { gap: 15px !important; }
+    .filter-icon { width: 18px !important; height: 18px !important; }
+    .count-tag { padding: 4px 8px !important; font-size: 12px !important; border-radius: 6px !important; }
+    .unread-toggle-box { gap: 10px !important; }
+    .toggle-label { font-size: 13px !important; }
+    .toggle-switch-container { width: 40px !important; height: 24px !important; }
+
+    /* Chat Items on Mobile */
+    .chat-item-row { padding: 12px !important; border-radius: 12px !important; }
+    .chat-item-row span:first-child { font-size: 15px !important; }
+    .chat-item-row span:last-child { font-size: 13px !important; width: 60vw !important; }
+
+    /* Conversation Area Mobile */
+    .conversation-area {
+        width: 100% !important;
+        border-radius: 16px !important;
+        padding: 20px 15px !important;
+        height: calc(100vh - 120px) !important;
+    }
+    .chat-title { font-size: 16px !important; }
+    .role-text { font-size: 12px !important; }
+    .menu-icon { width: 20px !important; height: 20px !important; }
+
+    /* Messages Mobile */
+    .history-info { font-size: 18px !important; margin-bottom: 25px !important; }
+    .no-chats-msg { font-size: 18px !important; padding: 40px 0 !important; }
+    .doc-message-bubble { max-width: 85% !important; padding: 12px !important; gap: 10px !important; border-radius: 12px !important; }
+    .doc-icon { width: 24px !important; height: 24px !important; }
+    .doc-name { font-size: 13px !important; }
+    .doc-size { font-size: 11px !important; }
+    
+    .text-message-bubble { max-width: 85% !important; padding: 12px 16px !important; border-radius: 12px !important; }
+    .bubble-text { font-size: 14px !important; }
+    .message-meta { width: 85% !important; font-size: 11px !important; }
+
+    /* Input Area Mobile */
+    .text-input-wrapper { padding: 12px 16px !important; border-radius: 12px !important; }
+    .text-input-wrapper input { font-size: 14px !important; }
+    .send-btn { padding: 12px !important; border-radius: 10px !important; }
+    .send-icon { width: 18px !important; height: 18px !important; }
+    .clip-icon-wrapper svg { width: 22px !important; height: 22px !important; }
+}
+`;
 export default TeamContact;

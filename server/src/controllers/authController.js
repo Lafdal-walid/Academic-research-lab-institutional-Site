@@ -400,7 +400,7 @@ exports.getDashboardStats = async (req, res) => {
 
 exports.getMemberSelection = async (req, res) => {
     try {
-        const users = await User.find({}).select('username email team');
+        const users = await User.find({}).select('username email team role');
         res.json(users);
     } catch (error) {
         res.status(500).json({ message: error.message });

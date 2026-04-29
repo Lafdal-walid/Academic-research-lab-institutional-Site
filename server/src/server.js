@@ -65,6 +65,7 @@ app.get('/api/stats/overview', protect, async (req, res) => {
         const views = pubs.reduce((acc, pub) => acc + (pub.views || 0), 0);
         
         const lastProjects = await Project.find(teamId ? { team: teamId } : {}).sort({ createdAt: -1 }).limit(3);
+        const lastPublication = await Publication.findOne(teamId ? { team: teamId } : {}).sort({ createdAt: -1 }).populate('project');
 
         const period = parseInt(req.query.period) || 7;
         const monthlyStats = [];
@@ -106,6 +107,7 @@ app.get('/api/stats/overview', protect, async (req, res) => {
             projects: projectStats.total, 
             views, 
             lastProjects, 
+            lastPublication,
             monthlyStats, 
             avgMonthly, 
             avgViews, 

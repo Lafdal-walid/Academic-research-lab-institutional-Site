@@ -27,9 +27,9 @@ export default function MyAccount() {
     const activeTab = location.pathname.split('/').pop(); // Gets 'profile', 'security', or 'preferences'
 
     const tabs = [
-        { id: 'profile', path: 'profile', label: isRTL ? 'المعلومات الشخصية' : t('personalInfo') },
-        { id: 'security', path: 'security', label: isRTL ? 'الأمان وتسجيل الدخول' : t('securityLogin') },
-        { id: 'preferences', path: 'preferences', label: isRTL ? 'الإعدادات العامة' : t('preferences') }
+        { id: 'profile', path: 'profile', label: t('personalInfo') },
+        { id: 'security', path: 'security', label: t('securityLogin') },
+        { id: 'preferences', path: 'preferences', label: t('preferences') }
     ];
 
     const activeLabel = tabs.find(tab => tab.id === activeTab)?.label || t('personalInfo');

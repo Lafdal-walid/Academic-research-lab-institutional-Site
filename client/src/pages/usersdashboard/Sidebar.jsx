@@ -16,13 +16,13 @@ const Sidebar = ({ isSidebarOpen = true, closeSidebar }) => {
 
   const navItems = useMemo(
     () => [
-      { id: 'overview', path: '/usersdashboard', icon: <img src={iconOverview} alt="Overview" className="object-contain brightness-0 invert" style={{ width: '1vw', height: '1vw' }} />, label: 'Overview' },
-      { id: 'phd-tracker', path: '/usersdashboard/phd-tracker', icon: <img src={iconTracker} alt="PhD Tracker" className="object-contain brightness-0 invert" style={{ width: '1vw', height: '1vw' }} />, label: 'PhD Tracker' },
-      { id: 'publications', path: '/usersdashboard/my-publications', icon: <img src={iconPublications} alt="My Publications" className="object-contain brightness-0 invert" style={{ width: '1vw', height: '1vw' }} />, label: 'My Publications' },
-      { id: 'progress', path: '/usersdashboard/progress', icon: <img src={iconProgress} alt="Progress" className="object-contain brightness-0 invert" style={{ width: '1vw', height: '1vw' }} />, label: 'Progress' },
-      { id: 'notifications', path: '/usersdashboard/notifications', icon: <img src={iconNotification} alt="Notifications" className="object-contain brightness-0 invert" style={{ width: '1vw', height: '1vw' }} />, label: 'Notifications' },
-      { id: 'team-contact', path: '/usersdashboard/team-contact', icon: <img src={iconContact} alt="Team Contact" className="object-contain brightness-0 invert" style={{ width: '1vw', height: '1vw' }} />, label: 'Team Contact' },
-      { id: 'account', path: '/usersdashboard/account', icon: <img src={iconSettings} alt="Account" className="object-contain brightness-0 invert" style={{ width: '1vw', height: '1vw' }} />, label: 'My Account' },
+      { id: 'overview', path: '/usersdashboard', icon: <img src={iconOverview} alt="Overview" className="object-contain brightness-0 invert" style={{ width: '1vw', height: '1vw' }} /> },
+      { id: 'phd-tracker', path: '/usersdashboard/phd-tracker', icon: <img src={iconTracker} alt="PhD Tracker" className="object-contain brightness-0 invert" style={{ width: '1vw', height: '1vw' }} /> },
+      { id: 'publications', path: '/usersdashboard/my-publications', icon: <img src={iconPublications} alt="My Publications" className="object-contain brightness-0 invert" style={{ width: '1vw', height: '1vw' }} /> },
+      { id: 'progress', path: '/usersdashboard/progress', icon: <img src={iconProgress} alt="Progress" className="object-contain brightness-0 invert" style={{ width: '1vw', height: '1vw' }} /> },
+      { id: 'notifications', path: '/usersdashboard/notifications', icon: <img src={iconNotification} alt="Notifications" className="object-contain brightness-0 invert" style={{ width: '1vw', height: '1vw' }} /> },
+      { id: 'team-contact', path: '/usersdashboard/team-contact', icon: <img src={iconContact} alt="Team Contact" className="object-contain brightness-0 invert" style={{ width: '1vw', height: '1vw' }} /> },
+      { id: 'account', path: '/usersdashboard/account', icon: <img src={iconSettings} alt="Account" className="object-contain brightness-0 invert" style={{ width: '1vw', height: '1vw' }} /> },
     ],
     []
   );

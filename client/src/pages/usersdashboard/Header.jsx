@@ -193,15 +193,13 @@ const Header = ({ onToggleSidebar, title, navItems }) => {
     };
 
     const handleLanguageChange = (newLang) => {
+        // Always update the language context and localStorage
+        setLanguage(newLang);
+        
         const currentPath = location.pathname;
-
-        if (currentPath.includes('/admin') || currentPath.startsWith('/support')) {
-            setLanguage(newLang);
-            setOpenLang(false);
-            return;
-        }
-
         const pathParts = currentPath.split('/');
+        
+        // If the URL has a language prefix (e.g., /en/... or /ar/...), update the URL as well
         if (pathParts[1] && ['en', 'ar'].includes(pathParts[1])) {
             pathParts[1] = newLang;
             const newPath = pathParts.join('/');
@@ -320,13 +318,13 @@ const Header = ({ onToggleSidebar, title, navItems }) => {
             ]
             : isUsersDashboard 
                 ? [
-                    { id: 'overview', path: `/usersdashboard/overview`, label: 'Overview', icon: <Overview /> },
-                    { id: 'phd-tracker', path: `/usersdashboard/phd-tracker`, label: 'PhD Tracker', icon: <Billing /> },
-                    { id: 'publications', path: `/usersdashboard/my-publications`, label: 'Publications', icon: <Product /> },
-                    { id: 'progress', path: `/usersdashboard/progress`, label: 'Progress', icon: <Billing /> },
-                    { id: 'notifications', path: `/usersdashboard/notifications`, label: 'Notifications', icon: <Notifications /> },
-                    { id: 'team-contact', path: `/usersdashboard/team-contact`, label: 'Team Contact', icon: <Support /> },
-                    { id: 'account', path: `/usersdashboard/account/profile`, label: 'My Account', icon: <Account /> },
+                    { id: 'overview', path: `/usersdashboard/overview`, label: t('overview'), icon: <Overview /> },
+                    { id: 'phd-tracker', path: `/usersdashboard/phd-tracker`, label: t('phd-tracker'), icon: <Billing /> },
+                    { id: 'publications', path: `/usersdashboard/publications`, label: t('publications'), icon: <Product /> },
+                    { id: 'progress', path: `/usersdashboard/progress`, label: t('progress'), icon: <Billing /> },
+                    { id: 'notifications', path: `/usersdashboard/notifications`, label: t('notifications'), icon: <Notifications /> },
+                    { id: 'team-contact', path: `/usersdashboard/team-contact`, label: t('contact'), icon: <Support /> },
+                    { id: 'account', path: `/usersdashboard/account/profile`, label: t('account'), icon: <Account /> },
                 ]
                 : isLeaderDashboard
                     ? [
@@ -446,7 +444,7 @@ const Header = ({ onToggleSidebar, title, navItems }) => {
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="p-[2vw] text-center text-white/40" style={{ fontSize: '0.9vw' }}>No new notifications</div>
+                                        <div className="p-[2vw] text-center text-white/40" style={{ fontSize: '0.9vw' }}>{t('noNotifications')}</div>
                                     )}
                                 </div>
                                 <div className="p-[0.8vw] border-t border-[#2a2a30] text-center w-full">
@@ -459,7 +457,7 @@ const Header = ({ onToggleSidebar, title, navItems }) => {
                                         className="font-medium text-[#3457DC] hover:text-[#3457DC]/80 w-full outline-none" 
                                         style={{ fontSize: '0.94vw' }}
                                     >
-                                        View All
+                                        {t('viewAll')}
                                     </button>
                                 </div>
                             </div>

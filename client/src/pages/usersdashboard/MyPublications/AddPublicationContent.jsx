@@ -186,15 +186,17 @@ const AddPublicationContent = () => {
     };
 
     return (
-        <div className="add-pub-container" style={{ display: 'flex', flexDirection: 'column', gap: '2.4vh', marginTop: '4vh', width: '100%' }}>
+        <div className="add-pub-main-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '2.4vh', marginTop: '4vh', width: '100%' }}>
             <style dangerouslySetInnerHTML={{ __html: addPubStyles }} />
-            <PublicationEditor
-                langTab={langTab}
-                setLangTab={setLangTab}
-                content={content}
-                setContent={setContent}
-                onImport={() => importInputRef.current?.click()}
-            />
+            <div className="add-pub-editor-section">
+                <PublicationEditor
+                    langTab={langTab}
+                    setLangTab={setLangTab}
+                    content={content}
+                    setContent={setContent}
+                    onImport={() => importInputRef.current?.click()}
+                />
+            </div>
 
             <input 
                 type="file" 
@@ -237,36 +239,38 @@ const AddPublicationContent = () => {
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 style={{
-                                    backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #2a2a30', borderRadius: '0.6vw', padding: '1.5vh 1.2vw', color: '#ffffff', fontSize: '0.9vw', outline: 'none', width: '100%'
+                                    backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #2a2a30', borderRadius: '0.6vw', padding: '1.5vh 1.2vw', color: '#ffffff', fontSize: '0.9vw', outline: 'none', width: '100%', fontFamily: 'inherit'
                                 }}
                             />
                         </div>
 
-                        <div className="add-pub-form-row" style={{ display: 'flex', gap: '1vw' }}>
-                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.8vh', position: 'relative' }}>
-                                <label style={{ color: '#80808a', fontSize: '0.85vw', fontWeight: 500 }}>Authors (Team Members & External)</label>
+                        <div className="add-pub-form-row authors-date-row" style={{ display: 'flex', gap: '1vw' }}>
+                            <div className="author-selection-col" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.8vh', position: 'relative' }}>
+                                <label className="add-pub-label" style={{ color: '#80808a', fontSize: '0.85vw', fontWeight: 500 }}>Authors (Team Members & External)</label>
                                 <div style={{ display: 'flex', gap: '8px' }}>
                                     <input
                                         placeholder="Enter or select authors..."
+                                        className="add-pub-input"
                                         value={authors}
                                         onChange={(e) => setAuthors(e.target.value)}
                                         style={{
-                                            backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #2a2a30', borderRadius: '0.6vw', padding: '1.5vh 1.2vw', color: '#ffffff', fontSize: '0.9vw', outline: 'none', flex: 1
+                                            backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #2a2a30', borderRadius: '0.6vw', padding: '1.5vh 1.2vw', color: '#ffffff', fontSize: '0.9vw', outline: 'none', flex: 1, fontFamily: 'inherit'
                                         }}
                                     />
-                                    <div style={{ position: 'relative' }}>
+                                    <div className="team-dropdown-wrapper" style={{ position: 'relative' }}>
                                         <button 
                                             type="button"
+                                            className="team-select-btn"
                                             onClick={(e) => { e.preventDefault(); setIsMembersDropdownOpen(!isMembersDropdownOpen); }}
                                             style={{
-                                                backgroundColor: '#3457dc', border: 'none', borderRadius: '0.6vw', padding: '0 1.2vw', height: '100%', color: 'white', display: 'flex', alignItems: 'center', gap: '0.5vw', cursor: 'pointer', fontSize: '0.85vw'
+                                                backgroundColor: '#3457dc', border: 'none', borderRadius: '0.6vw', padding: '0 1.2vw', height: '100%', color: 'white', display: 'flex', alignItems: 'center', gap: '0.5vw', cursor: 'pointer', fontSize: '0.85vw', fontWeight: 600
                                             }}
                                         >
                                             <RiCloseLine size={16} style={{ transform: isMembersDropdownOpen ? 'rotate(0deg)' : 'rotate(45deg)', transition: '0.3s' }} />
-                                            Team
+                                            <span>Team</span>
                                         </button>
                                         {isMembersDropdownOpen && (
-                                            <div style={{
+                                            <div className="members-dropdown-list" style={{
                                                 position: 'absolute', top: '105%', right: 0, backgroundColor: '#1e1e24', border: '1px solid #2a2a30', borderRadius: '0.6vw', zIndex: 100, width: '15vw', maxHeight: '25vh', overflowY: 'auto', boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
                                             }}>
                                                 {(() => {
@@ -304,87 +308,96 @@ const AddPublicationContent = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div style={{ width: '12vw', display: 'flex', flexDirection: 'column', gap: '0.8vh' }}>
-                                <label style={{ color: '#80808a', fontSize: '0.85vw', fontWeight: 500 }}>Publication Date</label>
+                            <div className="date-selection-col" style={{ width: '12vw', display: 'flex', flexDirection: 'column', gap: '0.8vh' }}>
+                                <label className="add-pub-label" style={{ color: '#80808a', fontSize: '0.85vw', fontWeight: 500 }}>Publication Date</label>
                                 <input
                                     type="text"
+                                    className="add-pub-input readonly-input"
                                     value={publishedDate}
                                     readOnly
                                     placeholder={new Date().toLocaleDateString()}
                                     style={{
-                                        backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid #2a2a30', borderRadius: '0.6vw', padding: '1.5vh 1.2vw', color: '#3457dc', fontSize: '0.9vw', outline: 'none', width: '100%', cursor: 'default', fontWeight: 600
+                                        backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid #2a2a30', borderRadius: '0.6vw', padding: '1.5vh 1.2vw', color: '#3457dc', fontSize: '0.9vw', outline: 'none', width: '100%', cursor: 'default', fontWeight: 600, fontFamily: 'inherit'
                                     }}
                                 />
                             </div>
                         </div>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2vh' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8vh' }}>
-                            <label style={{ color: '#80808a', fontSize: '0.85vw', fontWeight: 500 }}>Associated Project</label>
-                            <select
-                                value={selectedProject}
-                                onChange={(e) => setSelectedProject(e.target.value)}
-                                style={{
-                                    backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #2a2a30', borderRadius: '0.6vw', padding: '1.5vh 1.2vw', color: selectedProject ? '#ffffff' : '#80808a', fontSize: '0.9vw', outline: 'none', width: '100%', cursor: 'pointer', appearance: 'none'
-                                }}
-                            >
-                                <option value="">Select a project</option>
-                                {projects
-                                    .filter(p => {
-                                        const projectTeamId = p.team?._id || p.team;
-                                        return !currentUserTeamId || projectTeamId === currentUserTeamId;
-                                    })
-                                    .map(p => (
-                                        <option key={p._id} value={p._id} style={{ backgroundColor: '#1e1e24' }}>{p.title}</option>
-                                    ))}
-                            </select>
+                    <div className="add-pub-form-card-right" style={{ display: 'flex', flexDirection: 'column', gap: '2vh' }}>
+                        <div className="add-pub-form-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.8vh' }}>
+                            <label className="add-pub-label" style={{ color: '#80808a', fontSize: '0.85vw', fontWeight: 500 }}>Associated Project</label>
+                            <div style={{ position: 'relative' }}>
+                                <select
+                                    value={selectedProject}
+                                    onChange={(e) => setSelectedProject(e.target.value)}
+                                    className="add-pub-input select-input"
+                                    style={{
+                                        backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #2a2a30', borderRadius: '0.6vw', padding: '1.5vh 1.2vw', color: selectedProject ? '#ffffff' : '#80808a', fontSize: '0.9vw', outline: 'none', width: '100%', cursor: 'pointer', appearance: 'none', fontFamily: 'inherit'
+                                    }}
+                                >
+                                    <option value="">Select a project</option>
+                                    {projects
+                                        .filter(p => {
+                                            const projectTeamId = p.team?._id || p.team;
+                                            return !currentUserTeamId || projectTeamId === currentUserTeamId;
+                                        })
+                                        .map(p => (
+                                            <option key={p._id} value={p._id} style={{ backgroundColor: '#1e1e24' }}>{p.title}</option>
+                                        ))}
+                                </select>
+                                <img src={DropdownIcon} alt="dropdown" style={{ position: 'absolute', right: '1.2vw', top: '50%', transform: 'translateY(-50%)', width: '1vw', pointerEvents: 'none' }} className="select-arrow" />
+                            </div>
                         </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8vh' }}>
-                            <label style={{ color: '#80808a', fontSize: '0.85vw', fontWeight: 500 }}>Publisher / Journal</label>
+                        <div className="add-pub-form-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.8vh' }}>
+                            <label className="add-pub-label" style={{ color: '#80808a', fontSize: '0.85vw', fontWeight: 500 }}>Publisher / Journal</label>
                             <input
                                 placeholder="e.g., IEEE Transactions..."
+                                className="add-pub-input"
                                 value={publisher}
                                 onChange={(e) => setPublisher(e.target.value)}
                                 style={{
-                                    backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #2a2a30', borderRadius: '0.6vw', padding: '1.5vh 1.2vw', color: '#ffffff', fontSize: '0.9vw', outline: 'none', width: '100%'
+                                    backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #2a2a30', borderRadius: '0.6vw', padding: '1.5vh 1.2vw', color: '#ffffff', fontSize: '0.9vw', outline: 'none', width: '100%', fontFamily: 'inherit'
                                 }}
                             />
                         </div>
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8vh' }}>
-                    <label style={{ color: '#80808a', fontSize: '0.85vw', fontWeight: 500 }}>Tags (Comma separated)</label>
+                <div className="add-pub-form-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.8vh' }}>
+                    <label className="add-pub-label" style={{ color: '#80808a', fontSize: '0.85vw', fontWeight: 500 }}>Tags (Comma separated)</label>
                     <input
                         placeholder="Deep Learning, Cloud Computing..."
+                        className="add-pub-input"
                         value={tags}
                         onChange={(e) => setTags(e.target.value)}
                         style={{
-                            backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #2a2a30', borderRadius: '0.6vw', padding: '1.5vh 1.2vw', color: '#ffffff', fontSize: '0.9vw', outline: 'none', width: '100%'
+                            backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #2a2a30', borderRadius: '0.6vw', padding: '1.5vh 1.2vw', color: '#ffffff', fontSize: '0.9vw', outline: 'none', width: '100%', fontFamily: 'inherit'
                         }}
                     />
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8vh' }}>
-                    <label style={{ color: '#80808a', fontSize: '0.85vw', fontWeight: 500 }}>Short Description / Contribution</label>
+                <div className="add-pub-form-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.8vh' }}>
+                    <label className="add-pub-label" style={{ color: '#80808a', fontSize: '0.85vw', fontWeight: 500 }}>Short Description / Contribution</label>
                     <textarea
                         placeholder="Brief summary of the research contribution..."
+                        className="add-pub-input add-pub-textarea"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         style={{
-                            backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #2a2a30', borderRadius: '0.6vw', padding: '1.5vh 1.2vw', color: '#ffffff', fontSize: '0.9vw', outline: 'none', width: '100%', minHeight: '10vh', resize: 'none'
+                            backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #2a2a30', borderRadius: '0.6vw', padding: '1.5vh 1.2vw', color: '#ffffff', fontSize: '0.9vw', outline: 'none', width: '100%', minHeight: '10vh', resize: 'none', fontFamily: 'inherit'
                         }}
                     />
                 </div>
 
-                <div style={{ display: 'flex', gap: '2vw' }}>
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.8vh' }}>
-                        <label style={{ color: '#80808a', fontSize: '0.85vw', fontWeight: 500 }}>Field (Select multiple)</label>
+                <div className="add-pub-form-row bottom-row" style={{ display: 'flex', gap: '2vw' }}>
+                    <div className="field-selection-col" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.8vh' }}>
+                        <label className="add-pub-label" style={{ color: '#80808a', fontSize: '0.85vw', fontWeight: 500 }}>Field (Select multiple)</label>
                         <div style={{ position: 'relative' }}>
                             <div 
                                 onClick={() => setIsFieldDropdownOpen(!isFieldDropdownOpen)}
+                                className="add-pub-input multi-select-box"
                                 style={{
                                     backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #2a2a30', borderRadius: '0.6vw', padding: '1.5vh 1.2vw', color: selectedFields.length > 0 ? '#ffffff' : '#80808a', fontSize: '0.9vw', outline: 'none', width: '100%', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', minHeight: '5.5vh'
                                 }}
@@ -392,7 +405,7 @@ const AddPublicationContent = () => {
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4vw' }}>
                                     {selectedFields.length > 0 ? (
                                         selectedFields.map(f => (
-                                            <span key={f} style={{ backgroundColor: '#3457dc', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75vw', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <span key={f} className="selected-field-tag" style={{ backgroundColor: '#3457dc', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75vw', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                 {f}
                                                 <RiCloseLine size={12} onClick={(e) => { e.stopPropagation(); toggleField(f); }} />
                                             </span>
@@ -401,11 +414,11 @@ const AddPublicationContent = () => {
                                         "Select scientific fields"
                                     )}
                                 </div>
-                                <img src={DropdownIcon} alt="dropdown" style={{ transform: isFieldDropdownOpen ? 'rotate(180deg)' : 'none', transition: '0.3s', width: '1.2vw' }} />
+                                <img src={DropdownIcon} alt="dropdown" style={{ transform: isFieldDropdownOpen ? 'rotate(180deg)' : 'none', transition: '0.3s', width: '1.2vw' }} className="select-arrow" />
                             </div>
                             
                             {isFieldDropdownOpen && (
-                                <div style={{
+                                <div className="fields-dropdown-list" style={{
                                     position: 'absolute', bottom: '110%', left: 0, right: 0, backgroundColor: '#1e1e24', border: '1px solid #2a2a30', borderRadius: '0.6vw', zIndex: 100, maxHeight: '25vh', overflowY: 'auto', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', padding: '0.5vw'
                                 }}>
                                     {teamFields.length > 0 ? (
@@ -413,6 +426,7 @@ const AddPublicationContent = () => {
                                             <div 
                                                 key={f}
                                                 onClick={() => toggleField(f)}
+                                                className="field-dropdown-item"
                                                 style={{ 
                                                     padding: '1vh 1vw', color: selectedFields.includes(f) ? '#3457dc' : 'white', cursor: 'pointer', fontSize: '0.85vw', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: '0.4vw', transition: '0.2s'
                                                 }}
@@ -430,44 +444,47 @@ const AddPublicationContent = () => {
                             )}
                         </div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8vh' }}>
-                    <label style={{ color: '#80808a', fontSize: '0.85vw', fontWeight: 500 }}>File Attachment (PDF / Word)</label>
-                    <div style={{ position: 'relative' }}>
-                        <input
-                            value={selectedFile ? selectedFile.name : 'No file chosen'}
-                            readOnly
-                            style={{
-                                backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #2a2a30', borderRadius: '0.6vw', padding: '1.5vh 5vw 1.5vh 1.2vw', color: selectedFile ? '#ffffff' : '#80808a', fontSize: '0.9vw', outline: 'none', width: '100%'
-                            }}
-                        />
-                        <div style={{ position: 'absolute', right: '1.2vw', top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: '16px', alignItems: 'center' }}>
-                            {selectedFile && (
-                                <div onClick={() => setSelectedFile(null)} style={{ cursor: 'pointer' }}>
-                                    <RiDeleteBin6Line color="#C5432D" size="1.2vw" />
+                    <div className="file-attachment-col" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.8vh' }}>
+                        <label className="add-pub-label" style={{ color: '#80808a', fontSize: '0.85vw', fontWeight: 500 }}>File Attachment (PDF / Word)</label>
+                        <div style={{ position: 'relative' }}>
+                            <input
+                                value={selectedFile ? selectedFile.name : 'No file chosen'}
+                                readOnly
+                                className="add-pub-input readonly-input"
+                                style={{
+                                    backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #2a2a30', borderRadius: '0.6vw', padding: '1.5vh 5vw 1.5vh 1.2vw', color: selectedFile ? '#ffffff' : '#80808a', fontSize: '0.9vw', outline: 'none', width: '100%', fontFamily: 'inherit'
+                                }}
+                            />
+                            <div className="file-actions-wrapper" style={{ position: 'absolute', right: '1.2vw', top: '50%', transform: 'translateY(-50%)', display: 'flex', gap: '16px', alignItems: 'center' }}>
+                                {selectedFile && (
+                                    <div onClick={() => setSelectedFile(null)} style={{ cursor: 'pointer' }}>
+                                        <RiDeleteBin6Line color="#C5432D" size="1.2vw" />
+                                    </div>
+                                )}
+                                <div onClick={() => fileInputRef.current?.click()} style={{ cursor: 'pointer' }}>
+                                    <RiFileWordLine color="#3457DC" size="1.2vw" />
                                 </div>
-                            )}
-                            <div onClick={() => fileInputRef.current?.click()} style={{ cursor: 'pointer' }}>
-                                <RiFileWordLine color="#3457DC" size="1.2vw" />
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '2vh' }}>
-                    <button
-                        onClick={handleSave}
-                        disabled={isLoading}
-                        style={{
-                            backgroundColor: isLoading ? '#1e1e24' : '#3457dc', 
-                            border: 'none', borderRadius: '1vw', padding: '1.8vh 3vw', 
-                            color: '#ffffff', fontSize: '0.9vw', fontWeight: 600, 
-                            cursor: isLoading ? 'not-allowed' : 'pointer', 
-                        }}
-                    >
-                        {isLoading ? 'Saving...' : 'Save Publication'}
-                    </button>
-                </div>
+            <div className="save-btn-container" style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '2vh' }}>
+                <button
+                    onClick={handleSave}
+                    disabled={isLoading}
+                    className="save-pub-btn"
+                    style={{
+                        backgroundColor: isLoading ? '#1e1e24' : '#3457dc', 
+                        border: 'none', borderRadius: '1vw', padding: '1.8vh 3vw', 
+                        color: '#ffffff', fontSize: '0.9vw', fontWeight: 600, 
+                        cursor: isLoading ? 'not-allowed' : 'pointer', 
+                        transition: 'all 0.3s ease'
+                    }}
+                >
+                    {isLoading ? 'Saving...' : 'Save Publication'}
+                </button>
             </div>
         </div>
     );
@@ -475,56 +492,92 @@ const AddPublicationContent = () => {
 
 const addPubStyles = `
 @media screen and (max-width: 1024px) {
+    .add-pub-main-wrapper {
+        gap: 20px !important;
+        margin-top: 20px !important;
+    }
+    .add-pub-editor-section {
+        margin-bottom: 10px !important;
+    }
+    .add-pub-form-card {
+        padding: 24px 16px !important;
+        border-radius: 12px !important;
+        gap: 20px !important;
+    }
+    .add-pub-form-title {
+        font-size: 18px !important;
+        line-height: 1.4 !important;
+    }
     .add-pub-grid-layout {
         grid-template-columns: 100% !important;
-        gap: 24px !important;
+        gap: 20px !important;
     }
     .add-pub-form-row {
         flex-direction: column !important;
-        gap: 24px !important;
+        gap: 20px !important;
     }
-    .add-pub-form-row > div {
+    .add-pub-form-row > div, .date-selection-col, .author-selection-col, .field-selection-col, .file-attachment-col {
         width: 100% !important;
         flex: none !important;
     }
-    .add-pub-form-card {
-        padding: 24px 20px !important;
-        border-radius: 12px !important;
-    }
-    .add-pub-form-title {
-        font-size: 16px !important;
-    }
     .add-pub-label {
         font-size: 14px !important;
+        margin-bottom: 4px !important;
     }
-    .add-pub-input, select, textarea, .add-pub-container input[readonly] {
-        padding: 12px 14px !important;
+    .add-pub-input, .select-input, .add-pub-textarea, .multi-select-box, .readonly-input {
+        padding: 14px 16px !important;
         font-size: 14px !important;
-        border-radius: 8px !important;
-    }
-    .add-pub-container button {
+        border-radius: 10px !important;
+        min-height: unset !important;
         height: auto !important;
-        padding: 12px 20px !important;
-        font-size: 14px !important;
-        border-radius: 8px !important;
     }
-    .add-pub-container textarea {
-        min-height: 120px !important;
+    .multi-select-box {
+        min-height: 50px !important;
     }
-    
-    /* Author selection members dropdown */
-    div[style*="position: absolute"][style*="right: 0"] {
-        width: 200px !important;
-        max-height: 200px !important;
+    .selected-field-tag {
+        font-size: 12px !important;
+        padding: 4px 10px !important;
+        border-radius: 6px !important;
     }
-    div[style*="padding: 1vh 1vw"] {
-        padding: 10px 14px !important;
+    .team-select-btn {
+        padding: 0 15px !important;
         font-size: 13px !important;
+        border-radius: 10px !important;
     }
-    
-    .add-pub-container div[style*="gap: 16px"][style*="alignItems: center"] svg {
-        width: 18px !important;
-        height: 18px !important;
+    .members-dropdown-list, .fields-dropdown-list {
+        width: 100% !important;
+        max-height: 250px !important;
+        position: fixed !important;
+        top: auto !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        border-radius: 20px 20px 0 0 !important;
+        padding: 20px !important;
+        box-shadow: 0 -10px 40px rgba(0,0,0,0.8) !important;
+    }
+    .field-dropdown-item {
+        padding: 12px 16px !important;
+        font-size: 14px !important;
+    }
+    .select-arrow {
+        width: 14px !important;
+        right: 16px !important;
+    }
+    .file-actions-wrapper {
+        right: 16px !important;
+        gap: 20px !important;
+    }
+    .file-actions-wrapper svg {
+        width: 20px !important;
+        height: 20px !important;
+    }
+    .save-pub-btn {
+        width: 100% !important;
+        padding: 16px !important;
+        font-size: 15px !important;
+        border-radius: 12px !important;
+        margin-top: 10px !important;
     }
 }
 `;

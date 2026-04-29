@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RiCheckLine, RiArrowRightSLine, RiArrowLeftSLine, RiSearch2Line, RiArrowDownSLine, RiPencilLine, RiDeleteBinLine, RiAddLine, RiSubtractLine } from 'react-icons/ri';
+import { RiCheckLine, RiArrowRightSLine, RiArrowLeftSLine, RiSearch2Line, RiArrowDownSLine, RiPencilLine, RiDeleteBinLine, RiAddLine, RiSubtractLine, RiFilter3Line } from 'react-icons/ri';
+import { useTranslation } from "@/hooks/useTranslation";
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // --- Assets Icons ---
 import DropdownIcon from "@/assets/svg/userDashboard/PhdTracker/angle-small-down 1.svg";
@@ -116,16 +118,37 @@ const Tab = ({ label, isActive, onClick }) => {
 };
 
 const ReportsHistoryTable = ({ direction = 'ltr', reportsList, setReportsList }) => {
+    const { t } = useTranslation('phdTracker');
+    const { t: tc } = useTranslation('common');
     const isAr = direction === 'rtl';
     const [searchTerm, setSearchTerm] = useState('');
     const [activeDropdown, setActiveDropdown] = useState(null);
-    const [selectedSort, setSelectedSort] = useState('Newest first');
-    const [selectedCategory, setSelectedCategory] = useState('All');
-    const [selectedStatus, setSelectedStatus] = useState('All');
+    const [selectedSort, setSelectedSort] = useState(t('newestFirst'));
+    const [selectedCategory, setSelectedCategory] = useState(tc('all'));
+    const [selectedStatus, setSelectedStatus] = useState(tc('all'));
     const [itemsPerPage, setItemsPerPage] = useState(10);
-    const [currentPage, setCurrentPage] = useState(2);
+    const [currentPage, setCurrentPage] = useState(1);
     const [isPaginationDropdownOpen, setIsPaginationDropdownOpen] = useState(false);
-    const totalPages = 12;
+    const [showFilters, setShowFilters] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth <= 1024);
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    const filteredReports = reportsList.filter(item => {
+        const matchesSearch = item.document.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.university.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = selectedCategory === tc('all') || item.document === selectedCategory;
+        const matchesStatus = selectedStatus === tc('all') || item.status === selectedStatus;
+        return matchesSearch && matchesCategory && matchesStatus;
+    });
+
+    const totalPages = Math.max(1, Math.ceil(filteredReports.length / itemsPerPage));
+    const paginatedReports = filteredReports.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
     const dropdownRef = useRef(null);
 
@@ -170,24 +193,27 @@ const ReportsHistoryTable = ({ direction = 'ltr', reportsList, setReportsList })
 
     const getStatusStyle = (status) => {
         switch (status) {
-            case 'Accepted': return { color: '#27bdad', bg: 'rgba(39, 189, 173, 0.1)' };
-            case 'Refused': return { color: '#eb5757', bg: 'rgba(235, 87, 87, 0.1)' };
-            case 'In Progress': return { color: '#f29339', bg: 'rgba(242, 147, 57, 0.1)' };
+            case 'Accepted':
+            case tc('accepted'): 
+                return { color: '#27bdad', bg: 'rgba(39, 189, 173, 0.1)' };
+            case 'Refused':
+            case tc('refused'):
+                return { color: '#eb5757', bg: 'rgba(235, 87, 87, 0.1)' };
+            case 'In Progress':
+            case tc('inProgress'):
+                return { color: '#f29339', bg: 'rgba(242, 147, 57, 0.1)' };
             default: return { color: '#fff', bg: 'rgba(255, 255, 255, 0.05)' };
         }
     };
 
-    const categories = ['All', 'Doctorat graduation', 'Engineering graduation'];
-    const statuses = ['All', 'Accepted', 'Refused', 'In Progress'];
-    const sortOptions = ['Newest first', 'Oldest first'];
+    const categories = [tc('all'), t('doctoratGraduation'), t('engineeringGraduation')];
+    const statuses = [tc('all'), tc('accepted'), tc('refused'), tc('inProgress')];
+    const sortOptions = [t('newestFirst'), t('oldestFirst')];
 
-    const filteredReports = reportsList.filter(item => {
-        const matchesSearch = item.document.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.university.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesCategory = selectedCategory === 'All' || item.document === selectedCategory;
-        const matchesStatus = selectedStatus === 'All' || item.status === selectedStatus;
-        return matchesSearch && matchesCategory && matchesStatus;
-    });
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, selectedCategory, selectedStatus, itemsPerPage]);
 
     const dropdownMenuStyle = {
         position: 'absolute', top: '100%', left: 0, right: 0,
@@ -206,68 +232,106 @@ const ReportsHistoryTable = ({ direction = 'ltr', reportsList, setReportsList })
 
     return (
         <div dir={direction} style={commonContainerStyle}>
-            {/* Header Section (Filters & Search) */}
-            <div className="tracker-filters-row" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', marginBottom: '3vh' }} ref={dropdownRef}>
-                {/* Search Bar */}
-                <div 
-                    className="tracker-search-container"
-                    style={{ ...filterItemStyle, flex: 1, minWidth: '15vw', backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #1e1d22', padding: '1.1vh 1.2vw' }}>
-                    <input
-                        type="text"
-                        placeholder="/ Search"
-                        style={{ flex: 1, backgroundColor: 'transparent', border: 'none', outline: 'none', color: '#f0f0f2', fontSize: '14px' }}
-                        className="search-input"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                    <img src={SearchIcon} alt="search" style={{ width: '1.2vw', height: '1.2vw' }} />
-                </div>
-
-                {/* Sort Dropdown */}
-                <div 
-                    className="tracker-filter-item"
-                    style={{ ...filterItemStyle, position: 'relative', backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #1e1d22', padding: '1.1vh 1.2vw' }} 
-                    onClick={() => setActiveDropdown(activeDropdown === 'sort' ? null : 'sort')}
-                >
-                    <span style={{ fontSize: '14px', color: '#f0f0f2', flex: 1 }}>{selectedSort}</span>
-                    <img src={DropdownIcon} alt="arrow" style={{ width: '0.8vw', transform: activeDropdown === 'sort' ? 'rotate(180deg)' : 'none', transition: '0.3s' }} />
-                    {activeDropdown === 'sort' && (
-                        <div style={dropdownMenuStyle}>
-                            {['Newest first', 'Oldest first'].map(opt => (
-                                <div key={opt} style={dropdownItemStyle(selectedSort === opt)} onClick={() => { setSelectedSort(opt); setActiveDropdown(null); }}>
-                                    {opt}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* Status Dropdown */}
-                <div 
-                    className="tracker-filter-item"
-                    style={{ ...filterItemStyle, position: 'relative', backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #1e1d22', padding: '1.1vh 1.2vw' }} 
-                    onClick={() => setActiveDropdown(activeDropdown === 'status' ? null : 'status')}
-                >
-                    <span style={{ fontSize: '14px', color: '#f0f0f2', flex: 1 }}>{selectedStatus === 'All' ? 'Status' : selectedStatus}</span>
-                    <img src={DropdownIcon} alt="arrow" style={{ width: '0.8vw', transform: activeDropdown === 'status' ? 'rotate(180deg)' : 'none', transition: '0.3s' }} />
-                    {activeDropdown === 'status' && (
-                        <div style={dropdownMenuStyle}>
-                            {statuses.map(st => (
-                                <div key={st} style={dropdownItemStyle(selectedStatus === st)} onClick={() => { setSelectedStatus(st); setActiveDropdown(null); }}>
-                                    {st}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* Date Picker */}
-                <div style={{ ...filterItemStyle, backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #1e1d22', padding: '1.1vh 1.2vw' }}>
-                    <span style={{ fontSize: '14px', color: '#f0f0f2', flex: 1 }}>Range date</span>
-                    <img src={CalendarIcon} alt="calendar" style={{ width: '16px' }} />
-                    <img src={DropdownIcon} alt="arrow" style={{ width: '0.8vw' }} />
-                </div>
+            {/* Header with Title & Filter Toggle Icon */}
+            <div className="flex items-center justify-between w-full mb-[3vh]" style={{ direction: isAr ? 'rtl' : 'ltr' }}>
+                <h3 className="tracker-table-title" style={{ margin: 0, fontSize: '1.6vw', fontWeight: 700, color: '#fff', fontFamily: 'Gilroy, sans-serif' }}>
+                    {t('reportsHistory')}
+                </h3>
+                {isMobile && (
+                    <div 
+                        onClick={() => setShowFilters(!showFilters)}
+                        className="filter-toggle-btn"
+                        style={{ 
+                            backgroundColor: showFilters ? 'rgba(52, 87, 220, 0.15)' : '#1e1e24', 
+                            padding: '10px', 
+                            borderRadius: '10px', 
+                            cursor: 'pointer', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            border: showFilters ? '1px solid #3457DC' : '1px solid rgba(255,255,255,0.05)',
+                            transition: 'all 0.3s ease'
+                        }}
+                    >
+                        <RiFilter3Line size="22px" color={showFilters ? "#3457DC" : "#a5a5b2"} />
+                    </div>
+                )}
             </div>
+
+            {/* Collapsible Filters Row */}
+            <AnimatePresence initial={false}>
+                {(showFilters || !isMobile) && (
+                    <motion.div 
+                        initial={isMobile ? { height: 0, opacity: 0, marginBottom: 0 } : { height: 'auto', opacity: 1, marginBottom: '3vh' }}
+                        animate={{ height: 'auto', opacity: 1, marginBottom: '3vh' }}
+                        exit={isMobile ? { height: 0, opacity: 0, marginBottom: 0 } : { opacity: 1 }}
+                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                        className="tracker-filters-row overflow-hidden" 
+                        style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }} 
+                        ref={dropdownRef}
+                    >
+                        {/* Search Bar */}
+                        <div 
+                            className="tracker-search-container"
+                            style={{ ...filterItemStyle, flex: 1, minWidth: '15vw', backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #1e1d22', padding: '1.1vh 1.2vw' }}>
+                            <input
+                                type="text"
+                                placeholder={t('search')}
+                                style={{ flex: 1, backgroundColor: 'transparent', border: 'none', outline: 'none', color: '#f0f0f2', fontSize: '14px' }}
+                                className="search-input"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                            <img src={SearchIcon} alt="search" style={{ width: '1.2vw', height: '1.2vw' }} />
+                        </div>
+
+                        {/* Sort Dropdown */}
+                        <div 
+                            className="tracker-filter-item"
+                            style={{ ...filterItemStyle, position: 'relative', backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #1e1d22', padding: '1.1vh 1.2vw' }} 
+                            onClick={() => setActiveDropdown(activeDropdown === 'sort' ? null : 'sort')}
+                        >
+                            <span style={{ fontSize: '14px', color: '#f0f0f2', flex: 1 }}>{selectedSort}</span>
+                            <img src={DropdownIcon} alt="arrow" style={{ width: '0.8vw', transform: activeDropdown === 'sort' ? 'rotate(180deg)' : 'none', transition: '0.3s' }} />
+                            {activeDropdown === 'sort' && (
+                                <div style={dropdownMenuStyle}>
+                                    {sortOptions.map(opt => (
+                                        <div key={opt} style={dropdownItemStyle(selectedSort === opt)} onClick={() => { setSelectedSort(opt); setActiveDropdown(null); }}>
+                                            {opt}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Status Dropdown */}
+                        <div 
+                            className="tracker-filter-item"
+                            style={{ ...filterItemStyle, position: 'relative', backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #1e1d22', padding: '1.1vh 1.2vw' }} 
+                            onClick={() => setActiveDropdown(activeDropdown === 'status' ? null : 'status')}
+                        >
+                            <span style={{ fontSize: '14px', color: '#f0f0f2', flex: 1 }}>{selectedStatus === tc('all') ? t('status') : selectedStatus}</span>
+                            <img src={DropdownIcon} alt="arrow" style={{ width: '0.8vw', transform: activeDropdown === 'status' ? 'rotate(180deg)' : 'none', transition: '0.3s' }} />
+                            {activeDropdown === 'status' && (
+                                <div style={dropdownMenuStyle}>
+                                    {statuses.map(st => (
+                                        <div key={st} style={dropdownItemStyle(selectedStatus === st)} onClick={() => { setSelectedStatus(st); setActiveDropdown(null); }}>
+                                            {st}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Date Picker */}
+                        <div style={{ ...filterItemStyle, backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid #1e1d22', padding: '1.1vh 1.2vw' }}>
+                            <span style={{ fontSize: '14px', color: '#f0f0f2', flex: 1 }}>{t('rangeDate')}</span>
+                            <img src={CalendarIcon} alt="calendar" style={{ width: '16px' }} />
+                            <img src={DropdownIcon} alt="arrow" style={{ width: '0.8vw' }} />
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Table Content */}
             <div className="tracker-table-container" style={{ overflowX: 'auto' }}>
@@ -275,15 +339,15 @@ const ReportsHistoryTable = ({ direction = 'ltr', reportsList, setReportsList })
                     <thead>
                         <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                             <th style={{ padding: '1.5vh 0.5vw', width: '3vw' }}></th>
-                            <th className="table-header-cell" style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, width: '14vw' }}>Date & Time</th>
-                            <th className="table-header-cell" style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, width: '15vw' }}>Document</th>
-                            <th className="table-header-cell" style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, textAlign: 'left' }}>University</th>
-                            <th className="table-header-cell" style={{ padding: '1.5vh 3vw 1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, width: '9vw', textAlign: 'right' }}>Status</th>
-                            <th className="table-header-cell" style={{ padding: '1.5vh 4vw 1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, textAlign: 'right' }}>Action</th>
+                            <th className="table-header-cell" style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, width: '14vw' }}>{t('dateTime')}</th>
+                            <th className="table-header-cell" style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, width: '15vw', textAlign: isAr ? 'right' : 'left' }}>{t('document')}</th>
+                            <th className="table-header-cell" style={{ padding: '1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, textAlign: isAr ? 'right' : 'left' }}>{t('university')}</th>
+                            <th className="table-header-cell" style={{ padding: '1.5vh 3vw 1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, width: '9vw', textAlign: 'right' }}>{t('status')}</th>
+                            <th className="table-header-cell" style={{ padding: '1.5vh 4vw 1.5vh 0.5vw', fontSize: '0.9vw', color: '#a5a5b2', fontWeight: 500, textAlign: 'right' }}>{t('action')}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredReports.map((row) => (
+                        {paginatedReports.map((row) => (
                             <tr key={row.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
                                 <td style={{ padding: '2.8vh 0.5vw' }}>
                                     <div onClick={() => handleToggleRow(row.id)}
@@ -292,8 +356,8 @@ const ReportsHistoryTable = ({ direction = 'ltr', reportsList, setReportsList })
                                     </div>
                                 </td>
                                 <td className="table-cell-text" style={{ padding: '2.8vh 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{row.dateTime}</td>
-                                <td className="table-cell-text" style={{ padding: '2.8vh 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)' }}>{row.document}</td>
-                                <td className="table-cell-text" style={{ padding: '2.8vh 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)', textAlign: 'left' }}>{row.university}</td>
+                                <td className="table-cell-text" style={{ padding: '2.8vh 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)', textAlign: isAr ? 'right' : 'left' }}>{row.document}</td>
+                                <td className="table-cell-text" style={{ padding: '2.8vh 0.5vw', fontSize: '0.85vw', color: 'rgba(255,255,255,0.7)', textAlign: isAr ? 'right' : 'left' }}>{row.university}</td>
                                 <td 
                                     className="table-status-cell"
                                     style={{ padding: '2.8vh 0 2.8vh 6vw', textAlign: 'right' }}>
@@ -320,7 +384,7 @@ const ReportsHistoryTable = ({ direction = 'ltr', reportsList, setReportsList })
                                         style={{ backgroundColor: 'transparent', border: 'none', cursor: row.fileUrl ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', gap: '0.55vw', justifyContent: 'flex-end', marginLeft: 'auto', textDecoration: 'none', opacity: row.fileUrl ? 1 : 0.4 }}
                                     >
                                         <img className="download-icon" src={DownloadIcon} alt="download" style={{ width: '1.1vw' }} />
-                                        <span className="download-text" style={{ color: '#3457DC', fontSize: '0.85vw', fontWeight: 600, marginTop: '0.3vh' }}>Download</span>
+                                        <span className="download-text" style={{ color: '#3457DC', fontSize: '0.85vw', fontWeight: 600, marginTop: '0.3vh' }}>{t('download')}</span>
                                     </a>
                                 </td>
                             </tr>
@@ -331,46 +395,76 @@ const ReportsHistoryTable = ({ direction = 'ltr', reportsList, setReportsList })
 
             {/* Footer Section (Pagination) */}
             <div className="report-pagination tracker-pagination" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginTop: '4vh', flexDirection: isAr ? 'row-reverse' : 'row' }}>
-                <button
-                    className="report-pagination-btn pagination-arrow"
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                    style={{
-                        width: '2.4vw', height: '2.4vw',
-                        backgroundColor: currentPage === 1 ? '#1e1e24' : '#3457DC',
-                        border: 'none', borderRadius: '50%',
-                        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        opacity: currentPage === 1 ? 0.5 : 1
-                    }}
-                >
-                    <svg className="pagination-svg" width="0.45vw" height="0.95vw" viewBox="0 0 7 13" fill="none" style={{ transform: isAr ? 'rotate(180deg)' : 'none' }}>
-                        <path d="M6.5 12L1.5 6.5L6.5 1" stroke={currentPage === 1 ? '#717177' : '#F7F7F7'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                </button>
+                {/* Page Navigation on the Left */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5vw' }}>
+                    <button
+                        className="report-pagination-btn pagination-arrow"
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        style={{
+                            width: '2.4vw', height: '2.4vw',
+                            backgroundColor: currentPage === 1 ? '#1e1e24' : '#3457DC',
+                            border: 'none', borderRadius: '50%',
+                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            opacity: currentPage === 1 ? 0.5 : 1
+                        }}
+                    >
+                        <svg className="pagination-svg" width="0.45vw" height="0.95vw" viewBox="0 0 7 13" fill="none" style={{ transform: isAr ? 'rotate(180deg)' : 'none' }}>
+                            <path d="M6.5 12L1.5 6.5L6.5 1" stroke={currentPage === 1 ? '#717177' : '#F7F7F7'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    </button>
 
-                <div className="pagination-counts-box" style={{ display: 'flex', alignItems: 'center', gap: '0.7vw', flexDirection: 'row' }}>
-                    <div className="pagination-current-page-box" style={{ border: '1px solid #2a2a30', borderRadius: '0.6vw', padding: '1vh 0.6vw', backgroundColor: 'rgba(255,255,255,0.01)', minWidth: '2.5vw', textAlign: 'center' }}>
-                        <span className="pagination-current-text" style={{ fontSize: '0.9vw', color: '#ffffff' }}>{currentPage}</span>
+                    <div className="pagination-counts-box" style={{ display: 'flex', alignItems: 'center', gap: '0.7vw', flexDirection: 'row', margin: '0 10vw' }}>
+                        <div className="pagination-current-page-box" style={{ border: '1px solid #2a2a30', borderRadius: '0.6vw', padding: '1vh 0.6vw', backgroundColor: 'rgba(255,255,255,0.01)', minWidth: '2.5vw', textAlign: 'center' }}>
+                            <span className="pagination-current-text" style={{ fontSize: '0.9vw', color: '#ffffff' }}>{currentPage}</span>
+                        </div>
+                        <span className="pagination-total-text" style={{ fontSize: '0.95vw', color: '#80808a' }}>{t('of')} {totalPages}</span>
                     </div>
-                    <span className="pagination-total-text" style={{ fontSize: '0.95vw', color: '#80808a' }}>of {totalPages}</span>
+
+                    <button
+                        className="report-pagination-btn pagination-arrow"
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        style={{
+                            width: '2.4vw', height: '2.4vw',
+                            backgroundColor: currentPage === totalPages ? '#1e1e24' : '#3457DC',
+                            border: 'none', borderRadius: '50%',
+                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            opacity: currentPage === totalPages ? 0.5 : 1
+                        }}
+                    >
+                        <svg className="pagination-svg" width="0.45vw" height="0.95vw" viewBox="0 0 7 13" fill="none" style={{ transform: isAr ? 'rotate(180deg)' : 'none' }}>
+                            <path d="M1 12L6 6.5L1 1" stroke={currentPage === totalPages ? '#717177' : '#F7F7F7'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    </button>
                 </div>
 
-                <button
-                    className="report-pagination-btn pagination-arrow"
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                    style={{
-                        width: '2.4vw', height: '2.4vw',
-                        backgroundColor: currentPage === totalPages ? '#1e1e24' : '#3457DC',
-                        border: 'none', borderRadius: '50%',
-                        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        opacity: currentPage === totalPages ? 0.5 : 1
-                    }}
-                >
-                    <svg className="pagination-svg" width="0.45vw" height="0.95vw" viewBox="0 0 7 13" fill="none" style={{ transform: isAr ? 'rotate(180deg)' : 'none' }}>
-                        <path d="M1 12L6 6.5L1 1" stroke={currentPage === totalPages ? '#717177' : '#F7F7F7'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                </button>
+                {/* Items Per Page on the Right */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1vw' }}>
+                    <span style={{ fontSize: '13px', color: '#80808a' }}>{t('itemsPerPage')}</span>
+                    <div style={{ position: 'relative' }}>
+                        <div 
+                            onClick={() => setIsPaginationDropdownOpen(!isPaginationDropdownOpen)}
+                            style={{ backgroundColor: '#1e1e24', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid rgba(255,255,255,0.05)' }}
+                        >
+                            <span style={{ fontSize: '13px', color: '#fff' }}>{itemsPerPage}</span>
+                            <RiArrowDownSLine size={14} color="#a5a5b2" />
+                        </div>
+                        {isPaginationDropdownOpen && (
+                            <div style={{ position: 'absolute', bottom: '110%', right: 0, backgroundColor: '#1e1e24', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '4px', zIndex: 100, width: 'fit-content', minWidth: '100%', boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}>
+                                {[5, 10, 20, 50].map(val => (
+                                    <div 
+                                        key={val} 
+                                        onClick={() => { setItemsPerPage(val); setIsPaginationDropdownOpen(false); }}
+                                        style={{ padding: '6px 15px', fontSize: '13px', cursor: 'pointer', color: itemsPerPage === val ? '#3457DC' : '#a5a5b2', backgroundColor: itemsPerPage === val ? 'rgba(52,87,220,0.1)' : 'transparent', borderRadius: '4px', whiteSpace: 'nowrap' }}
+                                    >
+                                        {val}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
 
             <style dangerouslySetInnerHTML={{
@@ -389,6 +483,7 @@ const ReportsHistoryTable = ({ direction = 'ltr', reportsList, setReportsList })
 };
 
 const AcademicPhasesSection = ({ phases }) => {
+    const { t } = useTranslation('phdTracker');
     return (
         <div 
             className="tracker-phase-card"
@@ -402,8 +497,8 @@ const AcademicPhasesSection = ({ phases }) => {
                 className="tracker-phase-header"
                 style={{ display: 'flex', alignItems: 'flex-end', position: 'relative', width: '100%' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <h3 className="tracker-phase-main-title" style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'white', fontFamily: 'Gilroy, sans-serif' }}>Academic Phases</h3>
-                    <p style={{ margin: 0, fontSize: '14px', color: '#a5a5b2' }}>Key Objectives & Milestones.</p>
+                    <h3 className="tracker-phase-main-title" style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'white', fontFamily: 'Gilroy, sans-serif' }}>{t('academicPhases')}</h3>
+                    <p style={{ margin: 0, fontSize: '14px', color: '#a5a5b2' }}>{t('objectivesMilestones')}</p>
                 </div>
 
                 {/* Absolutely Centered Status */}
@@ -413,7 +508,7 @@ const AcademicPhasesSection = ({ phases }) => {
                     position: 'absolute', left: '50%', transform: 'translateX(-50%)',
                     display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center'
                 }}>
-                    <span className="tracker-phase-status-text" style={{ fontSize: '14px', color: '#3457DC', fontWeight: 500 }}>You're Doctorat</span>
+                    <span className="tracker-phase-status-text" style={{ fontSize: '14px', color: '#3457DC', fontWeight: 500 }}>{t('youAreDoctorat')}</span>
                     <div style={{ width: '60px', height: '4px', backgroundColor: '#1e1e24', borderRadius: '400px', overflow: 'hidden' }}>
                         <div style={{ width: '24px', height: '100%', backgroundColor: '#3457DC' }} />
                     </div>
@@ -465,7 +560,7 @@ const AcademicPhasesSection = ({ phases }) => {
                                 backgroundColor: '#1e1e24', padding: '10px 24px', borderRadius: '16px',
                                 color: 'white', fontSize: '14px', fontWeight: 500, cursor: 'pointer'
                             }}>
-                                View Details
+                                {t('viewDetails')}
                             </div>
                         </div>
                     </div>
@@ -499,6 +594,7 @@ const AcademicPhasesSection = ({ phases }) => {
 };
 
 const RestrictionBanner = ({ direction = 'ltr' }) => {
+    const { t } = useTranslation('phdTracker');
     const isRtl = direction === 'rtl';
 
     return (
@@ -530,12 +626,11 @@ const RestrictionBanner = ({ direction = 'ltr' }) => {
                         {/* Content Section */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8vh', textAlign: isRtl ? 'right' : 'left', flex: 1 }}>
                             <h4 style={{ color: 'white', fontSize: '1.1vw', fontWeight: 'bold', margin: 0, fontFamily: 'Poppins, sans-serif' }}>
-                                Please add your degree
+                                {t('addDegreeTitle')}
                             </h4>
                             <div style={{ fontSize: '0.85vw', color: 'rgba(255, 255, 255, 0.7)', lineHeight: '1.6' }}>
                                 <p style={{ margin: 0 }}>
-                                    Your account has been restricted from using the user Dashboard because you did not specify your degree.
-                                    As a result, you won't be able <br /> to post publications.
+                                    {t('restrictionDesc')}
                                 </p>
                             </div>
                         </div>
@@ -545,7 +640,7 @@ const RestrictionBanner = ({ direction = 'ltr' }) => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5vw', paddingLeft: isRtl ? '0' : '0.5vw' }}>
                         <img src={InfoIcon} alt="info" style={{ width: '0.9vw', height: '0.9vw', filter: 'brightness(0) invert(1)' }} />
                         <span style={{ fontSize: '0.8vw', color: '#ffffff' }}>
-                            If you believe this was a mistake, <a href="#" style={{ color: '#3457DC', textDecoration: 'none', fontWeight: 500 }}>contact support</a>.
+                            {t('mistakeText')} <a href="#" style={{ color: '#3457DC', textDecoration: 'none', fontWeight: 500 }}>{t('contactSupport')}</a>.
                         </span>
                     </div>
                 </div>
@@ -560,16 +655,16 @@ const RestrictionBanner = ({ direction = 'ltr' }) => {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <h4 style={{ color: 'white', fontSize: '16px', fontWeight: 'bold', margin: 0 }}>Please add your degree</h4>
+                    <h4 style={{ color: 'white', fontSize: '16px', fontWeight: 'bold', margin: 0 }}>{t('addDegreeTitle')}</h4>
                     <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', lineHeight: '1.6' }}>
                         <p style={{ margin: 0 }}>
-                            Your account has been restricted from using the user Dashboard because you did not specify your degree.
+                            {t('restrictionDesc')}
                         </p>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '4px' }}>
                         <img src={InfoIcon} alt="info" style={{ width: '12px', height: '12px', filter: 'brightness(0) invert(1)' }} />
                         <span style={{ fontSize: '11px', color: '#ffffff' }}>
-                            Believe this was a mistake? <a href="#" style={{ color: '#3457DC', textDecoration: 'none' }}>contact support</a>.
+                            {t('mistakeText')} <a href="#" style={{ color: '#3457DC', textDecoration: 'none' }}>{t('contactSupport')}</a>.
                         </span>
                     </div>
                 </div>
@@ -590,6 +685,7 @@ const RestrictionBanner = ({ direction = 'ltr' }) => {
 };
 
 const CongratsBanner = ({ direction = 'ltr' }) => {
+    const { t } = useTranslation('phdTracker');
     const isRtl = direction === 'rtl';
 
     return (
@@ -621,11 +717,11 @@ const CongratsBanner = ({ direction = 'ltr' }) => {
                         {/* Content Section */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5vh', textAlign: isRtl ? 'right' : 'left', flex: 1 }}>
                             <h4 style={{ color: 'white', fontSize: '1.1vw', fontWeight: 'bold', margin: 0, fontFamily: 'Poppins, sans-serif' }}>
-                                Congratulations! You are now a PhD Researcher
+                                {t('congratsTitle')}
                             </h4>
                             <div style={{ fontSize: '0.85vw', color: 'rgba(255, 255, 255, 0.7)', lineHeight: '1.6' }}>
                                 <p style={{ margin: 0 }}>
-                                    You have been officially accepted as a PhD Researcher. Your 30-day integration period has begun
+                                    {t('congratsDesc')}
                                 </p>
                             </div>
                         </div>
@@ -642,10 +738,10 @@ const CongratsBanner = ({ direction = 'ltr' }) => {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <h4 style={{ color: 'white', fontSize: '16px', fontWeight: 'bold', margin: 0 }}>Congratulations! You are now a PhD Researcher</h4>
+                    <h4 style={{ color: 'white', fontSize: '16px', fontWeight: 'bold', margin: 0 }}>{t('congratsTitle')}</h4>
                     <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', lineHeight: '1.6' }}>
                         <p style={{ margin: 0 }}>
-                            You have been officially accepted as a PhD Researcher. Your 30-day integration period has begun
+                            {t('congratsDesc')}
                         </p>
                     </div>
                 </div>
@@ -1171,7 +1267,10 @@ const EditProgressForm = ({ onSave }) => {
 };
 
 const PhdTracker = () => {
-    const [activeTab, setActiveTab] = useState('Team Tracker');
+    const { t } = useTranslation('phdTracker');
+    const { t: to } = useTranslation('overview');
+    const { language } = useLanguage();
+    const [activeTab, setActiveTab] = useState(t('teamTracker'));
     const [showReportsTable, setShowReportsTable] = useState(false);
     const [teamReports, setTeamReports] = useState([]);
     const [userReports, setUserReports] = useState([]);
@@ -1299,22 +1398,22 @@ const PhdTracker = () => {
 
     const overviewStats = [
         {
-            title: "Team Manager",
-            value: stats.mgr.toString(),
+            title: stats.mgr ? t('teamManager') : to('teamMembers'),
+            value: (stats.mgr || stats.members || 0).toString(),
             icon: <img src={TeamIcon} alt="Team" style={{ width: '1.25vw', height: '1.25vw', objectFit: 'contain' }} />
         },
         {
-            title: "Ph.D Professor",
+            title: t('phdProfessor'),
             value: stats.phd.toString(),
             icon: <img src={TeamIcon} alt="Team" style={{ width: '1.25vw', height: '1.25vw', objectFit: 'contain' }} />
         },
         {
-            title: "Professor",
+            title: t('professor'),
             value: stats.prof.toString(),
             icon: <img src={TeamIcon} alt="Team" style={{ width: '1.25vw', height: '1.25vw', objectFit: 'contain' }} />
         },
         {
-            title: "Engineering Graduate",
+            title: t('engineeringGraduate'),
             value: stats.eng.toString(),
             icon: <img src={TeamIcon} alt="Team" style={{ width: '1.25vw', height: '1.25vw', objectFit: 'contain' }} />
         }
@@ -1322,71 +1421,29 @@ const PhdTracker = () => {
 
     return (
         <div className="w-full text-white font-poppins pb-10 animate-in fade-in duration-500">
-            {/* Tab Navigation */}
-            <div className="flex gap-[10px] items-center pb-[12px] pt-[0px] px-[0px] w-full">
-                <Tab
-                    label="Team Tracker"
-                    isActive={activeTab === 'Team Tracker'}
-                    onClick={() => setActiveTab('Team Tracker')}
-                />
-                <Tab
-                    label="Your Track"
-                    isActive={activeTab === 'Your Track'}
-                    onClick={() => setActiveTab('Your Track')}
-                />
+            {/* Header / Title */}
+            <div className="flex flex-col gap-[1vh] mb-[4vh]">
+                <h2 className="text-[2vw] font-bold text-white" style={{ fontFamily: 'Gilroy, sans-serif' }}>
+                    {t('phdTracker')}
+                </h2>
+                <p className="text-[#a5a5b2] text-[0.9vw]">
+                    {t('trackTeamReports')}
+                </p>
             </div>
 
-            {/* Content Area */}
-            <div className="px-[0px] pt-[30px] pb-[10px] mt-[0px]">
-                <AnimatePresence mode="wait">
-                    {activeTab === 'Team Tracker' ? (
-                        <motion.div
-                            key="team"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.3 }}
-                            className="flex flex-col gap-[2vh]"
-                        >
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[1vw] tracker-stats-grid">
-                                {overviewStats.map((stat, index) => (
-                                    <StatCard
-                                        key={index}
-                                        title={stat.title}
-                                        value={stat.value}
-                                        icon={stat.icon}
-                                    />
-                                ))}
-                            </div>
-
-                            {/* Insert ReportsHistoryTable below the 4 cards */}
-                            <ReportsHistoryTable direction="ltr" reportsList={teamReports} setReportsList={setTeamReports} />
-                        </motion.div>
-                    ) : (
-                        <motion.div
-                            key="your"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.3 }}
-                            className="flex flex-col gap-[3vh]"
-                        >
-                            {userReports.some(r => r.status === 'Accepted') ? (
-                                <CongratsBanner direction="ltr" />
-                            ) : (
-                                <RestrictionBanner direction="ltr" />
-                            )}
-                            <EditProgressForm onSave={handleAddReport} />
-                            {showReportsTable && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-                                    <ReportsHistoryTable direction="ltr" reportsList={userReports} setReportsList={setUserReports} />
-                                    <AcademicPhasesSection phases={academicPhases} />
-                                </div>
-                            )}
-                            {/* Additional Track Content can follow */}
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+            {/* Content Area - Focused only on Reports History */}
+            <div className="px-[0px] pt-[10px] pb-[10px] mt-[0px]">
+                {isLoading ? (
+                    <div className="flex items-center justify-center h-[30vh]">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3457DC]"></div>
+                    </div>
+                ) : (
+                    <ReportsHistoryTable 
+                        direction={language === 'ar' ? 'rtl' : 'ltr'} 
+                        reportsList={teamReports} 
+                        setReportsList={setTeamReports} 
+                    />
+                )}
             </div>
         </div>
     );
@@ -1496,6 +1553,16 @@ const trackerStyles = `
     .tracker-phase-btn { padding: 8px 16px !important; font-size: 12px !important; border-radius: 10px !important; }
 
     /* Pagination Scaling */
+    .tracker-pagination {
+        flex-direction: column !important;
+        gap: 20px !important;
+        align-items: center !important;
+        margin-top: 30px !important;
+    }
+    .pagination-counts-box { 
+        margin: 0 15px !important;
+        gap: 12px !important; 
+    }
     .report-pagination-btn.pagination-arrow {
         width: 44px !important;
         height: 44px !important;
@@ -1511,7 +1578,7 @@ const trackerStyles = `
     }
     .pagination-current-text { font-size: 16px !important; }
     .pagination-total-text { font-size: 16px !important; }
-    .pagination-counts-box { gap: 12px !important; }
+    .tracker-table-title { font-size: 20px !important; }
 }
 
 @media (max-width: 480px) {

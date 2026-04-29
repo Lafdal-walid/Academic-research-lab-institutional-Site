@@ -162,7 +162,7 @@ export default function Preferences() {
     };
 
     return (
-        <>
+        <div className="preferences-root w-full flex-1" dir={language === 'ar' ? 'rtl' : 'ltr'}>
             <style>{`
                 
                 .preferences-root.root-inner {
@@ -312,7 +312,7 @@ export default function Preferences() {
                             <div className="pref-row" style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '1.8vw' }}>
                                 <CheckboxChecked />
                                 <div className="pref-row" style={{ display: 'flex', alignItems: 'center', gap: '0.9vw' }}>
-                                    <p className="pref-checkbox-label" style={{ fontSize: '1.05vw' }}>Lab Activity Alerts</p>
+                                    <p className="pref-checkbox-label" style={{ fontSize: '1.05vw' }}>{t('lab_activity')}</p>
                                     <p className="pref-desc" style={{ fontSize: '1.05vw' }}>( {t('always_enabled')} )</p>
                                 </div>
                             </div>
@@ -320,31 +320,31 @@ export default function Preferences() {
                             {/* Publication Notifications */}
                             <div className="pref-row" style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '1.8vw' }} onClick={() => togglePreference('promotions')}>
                                 {preferences.promotions ? <CheckboxChecked /> : <CheckboxUnchecked />}
-                                <p className="pref-checkbox-label" style={{ fontSize: '1.05vw' }}>Publication & Research Notifications</p>
+                                <p className="pref-checkbox-label" style={{ fontSize: '1.05vw' }}>{t('publication_research')}</p>
                             </div>
 
                             {/* Conference & Event Announcements */}
                             <div className="pref-row" style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '1.8vw' }} onClick={() => togglePreference('giveaways')}>
                                 {preferences.giveaways ? <CheckboxChecked /> : <CheckboxUnchecked />}
-                                <p className="pref-checkbox-label" style={{ fontSize: '1.05vw' }}>Conference & Event Announcements</p>
+                                <p className="pref-checkbox-label" style={{ fontSize: '1.05vw' }}>{t('conference_event')}</p>
                             </div>
 
                             {/* Grant & Funding Opportunities */}
                             <div className="pref-row" style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '1.8vw' }} onClick={() => togglePreference('referral')}>
                                 {preferences.referral ? <CheckboxChecked /> : <CheckboxUnchecked />}
-                                <p className="pref-checkbox-label" style={{ fontSize: '1.05vw' }}>Grant & Funding Opportunities</p>
+                                <p className="pref-checkbox-label" style={{ fontSize: '1.05vw' }}>{t('grant_funding')}</p>
                             </div>
 
                             {/* Lab Meeting Reminders */}
                             <div className="pref-row" style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '1.8vw' }} onClick={() => togglePreference('updates')}>
                                 {preferences.updates ? <CheckboxChecked /> : <CheckboxUnchecked />}
-                                <p className="pref-checkbox-label" style={{ fontSize: '1.05vw' }}>Lab Meeting & Schedule Reminders</p>
+                                <p className="pref-checkbox-label" style={{ fontSize: '1.05vw' }}>{t('lab_meeting')}</p>
                             </div>
 
                             {/* Supervisor Responses */}
                             <div className="pref-row" style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '1.8vw' }} onClick={() => togglePreference('support')}>
                                 {preferences.support ? <CheckboxChecked /> : <CheckboxUnchecked />}
-                                <p className="pref-checkbox-label" style={{ fontSize: '1.05vw' }}>Supervisor & Team Responses</p>
+                                <p className="pref-checkbox-label" style={{ fontSize: '1.05vw' }}>{t('supervisor_team')}</p>
                             </div>
                         </div>
 
@@ -359,6 +359,6 @@ export default function Preferences() {
                     </div>
                 </div>
             </div>
-        </>
+        </div>
     );
 }

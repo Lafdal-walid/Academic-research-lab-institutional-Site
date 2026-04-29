@@ -4,6 +4,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Leavereviewlink from '@/ui/user/Leavereviewlink';
 import { RiArrowRightSLine } from "react-icons/ri";
+import { X } from 'lucide-react';
 
 const SidebarCommon = ({ items, isSidebarOpen = true, closeSidebar, className = "" }) => {
     const { t } = useTranslation('sidebar');
@@ -14,19 +15,28 @@ const SidebarCommon = ({ items, isSidebarOpen = true, closeSidebar, className = 
 
     return (
         <aside
-            className={`sidebar fixed lg:static top-0 bottom-0 z-[50] border-r border-[#2a2a30]/70 w-[280px] lg:w-[15.8vw] shrink-0 min-h-screen flex flex-col transition-all duration-300 ${isSidebarOpen ? 'translate-x-0 opacity-100' : '-translate-x-full lg:translate-x-0 opacity-0 lg:opacity-100 lg:hidden'} ${className}`}
-            style={{ backgroundColor: '#0A070E' }}
+            className={`sidebar fixed lg:static top-0 bottom-0 z-[50] border-r border-[#2a2a30]/70 w-[100vw] lg:w-[15.8vw] shrink-0 min-h-screen flex flex-col transition-all duration-300 ${isSidebarOpen ? 'translate-x-0 opacity-100' : '-translate-x-full lg:translate-x-0 opacity-0 lg:opacity-100 lg:hidden'} ${className}`}
+            style={{ backgroundColor: '#0A070E', listStyle: 'none' }}
             dir={direction}
         >
-            <Link to="/" className="h-[11vh] flex items-center justify-center ml-[0.75vw] shrink-0 mt-[0.5vh] mb-[2.2vh]">
-                <img
-                    src="/Saad Dahlab white.png"
-                    alt="Saad Dahlab Logo"
-                    className="h-[9vh] w-auto object-contain"
-                />
-            </Link>
+            <div className="relative flex items-center justify-center h-[11vh] ml-[0.75vw] shrink-0 mt-[0.5vh] mb-[2.2vh]">
+                <Link to="/">
+                    <img
+                        src="/Saad Dahlab white.png"
+                        alt="Saad Dahlab Logo"
+                        className="h-[9vh] w-auto object-contain"
+                    />
+                </Link>
+                {/* Mobile Close Button */}
+                <button 
+                    onClick={closeSidebar}
+                    className="lg:hidden absolute right-4 top-1/2 -translate-y-1/2 text-white p-2"
+                >
+                    <X size={24} />
+                </button>
+            </div>
 
-            <nav className="nav-links flex-1 px-[0.9vw] flex flex-col gap-[1.5vh]">
+            <nav className="nav-links flex-1 px-[0.9vw] flex flex-col gap-[1.5vh] list-none">
                 {items.map((item) => {
                     const isActive = currentPath === item.path ||
                         (item.path === '/admin' && currentPath === '/admin/overview') ||

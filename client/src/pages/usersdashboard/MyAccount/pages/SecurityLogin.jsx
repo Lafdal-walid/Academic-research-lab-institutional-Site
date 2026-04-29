@@ -85,11 +85,9 @@ export default function SecurityLogin() {
     };
 
     return (
-        <>
+        <div className="security-login-root flex flex-col gap-[4vh] w-full items-stretch" dir={language === 'ar' ? 'rtl' : 'ltr'}>
             <style>{`
                 .btn-save:hover { background-color: rgba(52, 87, 220, 0.8) !important; }
-
-
 
                 /* Responsive Classes for Large Screens */
                 .security-card {
@@ -369,8 +367,15 @@ export default function SecurityLogin() {
                     .tfa-toggle-circle {
                         width: 20px !important;
                         height: 20px !important;
-                        left: ${tfaEnabled ? 'auto' : '4px'} !important;
-                        right: ${tfaEnabled ? '4px' : 'auto'} !important;
+                        transition: 0.3s;
+                    }
+                    .tfa-toggle-circle.enabled {
+                        left: auto !important;
+                        right: 4px !important;
+                    }
+                    .tfa-toggle-circle.disabled {
+                        left: 4px !important;
+                        right: auto !important;
                     }
 
                     .checkbox-box {
@@ -412,10 +417,10 @@ export default function SecurityLogin() {
                 .security-icon-warning { 
                     width: 16px; 
                     height: 16px; 
-                    filter: brightness(0) saturate(100%) invert(21%) sepia(0%) saturate(1209%) hue-rotate(156deg) brightness(97%) contrast(85%); /* #373735 */
+                    filter: brightness(0) saturate(100%) invert(21%) sepia(0%) saturate(1209%) hue-rotate(156deg) brightness(97%) contrast(85%);
                 }
                 .security-icon-warning.active {
-                    filter: brightness(0) saturate(100%) invert(100%); /* white */
+                    filter: brightness(0) saturate(100%) invert(100%);
                 }
 
                 @media (min-width: 1024px) {
@@ -428,7 +433,6 @@ export default function SecurityLogin() {
                     .security-icon-tfa-large { width: 2.5vw !important; height: 2.5vw !important; }
                 }
             `}</style>
-            <div className="flex flex-col gap-[4vh] w-full items-stretch">
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5vh', width: '100%' }}>
                     {/* Change Password & 2FA Container */}
@@ -538,7 +542,7 @@ export default function SecurityLogin() {
                                             }}
                                         >
                                             <div
-                                                className="tfa-toggle-circle"
+                                                className={`tfa-toggle-circle ${tfaEnabled ? 'enabled' : 'disabled'}`}
                                                 style={{
                                                     width: "1.04vw",
                                                     height: "1.04vw",
@@ -546,8 +550,7 @@ export default function SecurityLogin() {
                                                     backgroundColor: tfaEnabled ? "#3457dc" : "white",
                                                     position: "absolute",
                                                     left: tfaEnabled ? "auto" : "0.21vw",
-                                                    right: tfaEnabled ? "0.21vw" : "auto",
-                                                    transition: "0.3s"
+                                                    right: tfaEnabled ? "0.21vw" : "auto"
                                                 }}
                                             ></div>
                                         </button>
@@ -631,6 +634,5 @@ export default function SecurityLogin() {
                     onClose={() => setAccountModalState(MODALS.NONE)}
                 />
             </div>
-        </>
-    );
-}
+        );
+    }

@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from "react-dom";
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useTranslation } from '@/hooks/useTranslation';
 import {
     RiRestartLine, RiDownloadLine, RiArrowGoBackLine, RiArrowGoForwardLine,
     RiArrowRightSLine, RiBold, RiItalic, RiUnderline, RiStrikethrough,
     RiImageLine, RiSeparator, RiDoubleQuotesL, RiLinksLine, RiListOrdered, RiListUnordered,
     RiFormatClear, RiAlignLeft, RiRefreshLine, RiErrorWarningLine, RiFileWordLine, RiCloseLine,
-    RiEdit2Fill, RiDeleteBin6Line, RiCodeSSlashLine, RiCodeView, RiEyeLine, RiDownload2Line
+    RiEdit2Fill, RiDeleteBin6Line, RiCodeSSlashLine, RiCodeView, RiEyeLine, RiDownload2Line,
+    RiFilter3Line
 } from "react-icons/ri";
 import { motion, AnimatePresence } from 'framer-motion';
 import DropdownIcon from "@/assets/svg/userDashboard/PhdTracker/angle-small-down 1.svg";
@@ -81,10 +84,12 @@ const Tab = ({ label, isActive, onClick }) => {
 };
 
 const ResearchPaperCard = ({ title, authors, year, journal, description, tags, link, status }) => {
+    const { t } = useTranslation('myPublications');
+    const { direction } = useLanguage();
     const statusColors = {
-        'Waiting': { bg: 'rgba(255, 193, 7, 0.1)', text: '#ffc107' },
-        'Approved': { bg: 'rgba(40, 167, 69, 0.1)', text: '#28a745' },
-        'Rejected': { bg: 'rgba(220, 53, 69, 0.1)', text: '#dc3545' }
+        'Waiting': { bg: 'rgba(255, 193, 7, 0.1)', text: '#ffc107', label: t('waiting') },
+        'Approved': { bg: 'rgba(40, 167, 69, 0.1)', text: '#28a745', label: t('approved') },
+        'Rejected': { bg: 'rgba(220, 53, 69, 0.1)', text: '#dc3545', label: t('rejected') }
     };
     const currentStatus = status || 'Waiting';
     const color = statusColors[currentStatus] || statusColors['Waiting'];
@@ -101,7 +106,8 @@ const ResearchPaperCard = ({ title, authors, year, journal, description, tags, l
             flexDirection: 'column',
             gap: '1.5vh',
             transition: 'all 0.3s ease',
-            cursor: 'default'
+            cursor: 'default',
+            direction: direction
         }}>
             {/* Header: Title and Link Icon */}
             <div className="pub-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
@@ -116,7 +122,7 @@ const ResearchPaperCard = ({ title, authors, year, journal, description, tags, l
                     }}>
                         {title}
                     </h3>
-                    <div style={{
+                    <div className="pub-card-status" style={{
                         backgroundColor: color.bg,
                         color: color.text,
                         fontSize: '0.7vw',
@@ -127,7 +133,7 @@ const ResearchPaperCard = ({ title, authors, year, journal, description, tags, l
                         textTransform: 'uppercase',
                         letterSpacing: '0.05vw'
                     }}>
-                        {currentStatus}
+                        {color.label}
                     </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8vw' }}>
@@ -174,9 +180,9 @@ const ResearchPaperCard = ({ title, authors, year, journal, description, tags, l
             </p>
 
             {/* Tags / Categories */}
-            <div style={{ display: 'flex', gap: '0.8vw', marginTop: '0.5vh' }}>
+            <div style={{ display: 'flex', gap: '0.8vw', marginTop: '0.5vh', flexWrap: 'wrap' }}>
                 {tags.map((tag, idx) => (
-                    <div key={idx} style={{
+                    <div key={idx} className="pub-card-tag" style={{
                         backgroundColor: 'rgba(57, 94, 213, 0.1)',
                         padding: '0.6vh 1vw',
                         borderRadius: '100px',
@@ -194,19 +200,31 @@ const ResearchPaperCard = ({ title, authors, year, journal, description, tags, l
 };
 
 const TeamPublicationContent = () => {
+    const { t } = useTranslation('myPublications');
+    const { t: tc } = useTranslation('common');
+    const { language, direction } = useLanguage();
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [isPaginationDropdownOpen, setIsPaginationDropdownOpen] = useState(false);
     const totalPages = 12;
-    const isAr = false;
+    const isAr = language === 'ar';
 
     // Search and Dropdown States
     const [searchTerm, setSearchTerm] = useState('');
     const [activeDropdown, setActiveDropdown] = useState(null);
-    const [selectedSort, setSelectedSort] = useState('sort by recent');
-    const [selectedCategory, setSelectedCategory] = useState('All');
-    const [selectedTag, setSelectedTag] = useState('All');
+    const [selectedSort, setSelectedSort] = useState(t('sortByRecent'));
+    const [selectedCategory, setSelectedCategory] = useState(t('category'));
+    const [selectedTag, setSelectedTag] = useState(t('all'));
+    const [showFilters, setShowFilters] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
     const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth <= 1024);
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -253,11 +271,11 @@ const TeamPublicationContent = () => {
             pub.authors.some(auth => auth.toLowerCase().includes(searchTerm.toLowerCase())) ||
             (pub.tags && pub.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
         
-        const categoryMatch = selectedCategory === 'Categorie' || selectedCategory === 'All' ||
+        const categoryMatch = selectedCategory === t('category') || selectedCategory === t('all') ||
             (pub.activeFilds && pub.activeFilds.some(f => f.toLowerCase() === selectedCategory.toLowerCase())) ||
             (pub.field && pub.field.toLowerCase() === selectedCategory.toLowerCase());
             
-        const tagMatch = selectedTag === 'Tags' || selectedTag === 'All' ||
+        const tagMatch = selectedTag === t('tags') || selectedTag === t('all') ||
             (pub.tags && pub.tags.some(tag => tag.toLowerCase() === selectedTag.toLowerCase()));
             
         return matchesSearch && categoryMatch && tagMatch;
@@ -265,9 +283,9 @@ const TeamPublicationContent = () => {
         const dateA = a.publishedDate ? new Date(a.publishedDate) : new Date(a.year, 0, 1);
         const dateB = b.publishedDate ? new Date(b.publishedDate) : new Date(b.year, 0, 1);
         
-        if (selectedSort === 'sort by recent') {
+        if (selectedSort === t('sortByRecent')) {
             return dateB - dateA;
-        } else if (selectedSort === 'sort by oldest') {
+        } else if (selectedSort === t('sortByOldest')) {
             return dateA - dateB;
         }
         return 0;
@@ -290,158 +308,195 @@ const TeamPublicationContent = () => {
     });
 
     return (
-        <div className="publication-team-content" style={{ marginTop: '30px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {/* Header / Filter Bar - No Background */}
-            <div className="publication-filter-bar" style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '20px',
-                width: '100%',
-                padding: '0 0 10px 0'
-            }}>
-                {/* Full Width Search Bar */}
-                <div className="publication-search-container" style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    padding: '9px 16px',
-                    border: '1px solid #1e1d22',
-                    borderRadius: '16px',
-                    backgroundColor: '#1e1e24',
-                    flex: 2
-                }}>
-                    <input
-                        type="text"
-                        placeholder="/ Search"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{
-                            background: 'transparent',
-                            border: 'none',
-                            outline: 'none',
-                            color: '#f0f0f2',
-                            fontSize: '14px',
-                            width: '100%'
+        <div className="publication-team-content" style={{ marginTop: '30px', display: 'flex', flexDirection: 'column', gap: '20px', direction: direction }}>
+            {/* Header with Title & Filter Toggle Icon */}
+            <div className="flex items-center justify-between w-full mb-[10px]">
+                <h3 className="publication-table-title" style={{ margin: 0, fontSize: '1.6vw', fontWeight: 700, color: '#fff', fontFamily: 'Gilroy, sans-serif' }}>
+                    {t('teamPublicationsTitle')}
+                </h3>
+                {isMobile && (
+                    <div 
+                        onClick={() => setShowFilters(!showFilters)}
+                        className="filter-toggle-btn"
+                        style={{ 
+                            backgroundColor: showFilters ? 'rgba(52, 87, 220, 0.15)' : '#1e1e24', 
+                            padding: '10px', 
+                            borderRadius: '10px', 
+                            cursor: 'pointer', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            border: showFilters ? '1px solid #3457DC' : '1px solid rgba(255,255,255,0.05)',
+                            transition: 'all 0.3s ease'
                         }}
-                    />
-                    <img src={SearchIcon} alt="Search" style={{ width: '18px', height: '18px' }} />
-                </div>
-
-                {/* Flexible Filters Row */}
-                <div className="publication-dropdown-group" style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 3 }} ref={dropdownRef}>
-                    {/* Sort Dropdown */}
-                    <div
-                        onClick={() => setActiveDropdown(activeDropdown === 'sort' ? null : 'sort')}
-                        style={{
-                            position: 'relative',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            gap: '8px',
-                            padding: '9px 16px',
-                            border: '1px solid #1e1d22',
-                            borderRadius: '16px',
-                            backgroundColor: '#1e1e24',
-                            cursor: 'pointer',
-                            flex: 1
-                        }}>
-                        <span style={{ fontSize: '14px', color: '#f0f0f2' }}>{selectedSort}</span>
-                        <img src={DropdownIcon} alt="arrow" style={{ width: '14px', height: '14px', transform: activeDropdown === 'sort' ? 'rotate(180deg)' : 'none', transition: '0.3s' }} />
-                        {activeDropdown === 'sort' && (
-                            <div style={dropdownMenuStyle}>
-                                {['sort by recent', 'sort by oldest'].map(opt => (
-                                    <div
-                                        key={opt}
-                                        style={dropdownItemStyle(selectedSort === opt)}
-                                        onClick={(e) => { e.stopPropagation(); setSelectedSort(opt); setActiveDropdown(null); }}
-                                        onMouseOver={(e) => { if (selectedSort !== opt) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)' }}
-                                        onMouseOut={(e) => { if (selectedSort !== opt) e.currentTarget.style.backgroundColor = 'transparent' }}
-                                    >
-                                        {opt}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                    >
+                        <RiFilter3Line size="22px" color={showFilters ? "#3457DC" : "#a5a5b2"} />
                     </div>
-
-                    {/* Status Dropdown */}
-                    <div
-                        onClick={() => setActiveDropdown(activeDropdown === 'category' ? null : 'category')}
-                        style={{
-                            position: 'relative',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            gap: '8px',
-                            padding: '9px 16px',
-                            border: '1px solid #1e1d22',
-                            borderRadius: '16px',
-                            backgroundColor: '#1e1e24',
-                            cursor: 'pointer',
-                            flex: 1
-                        }}>
-                        <span style={{ fontSize: '14px', color: '#f0f0f2' }}>{selectedCategory === 'Categorie' ? 'Categorie' : selectedCategory}</span>
-                        <img src={DropdownIcon} alt="arrow" style={{ width: '14px', height: '14px', transform: activeDropdown === 'category' ? 'rotate(180deg)' : 'none', transition: '0.3s' }} />
-                        {activeDropdown === 'category' && (
-                            <div style={dropdownMenuStyle}>
-                                {[ 'All', ...allFields].map(opt => (
-                                    <div
-                                        key={opt}
-                                        style={dropdownItemStyle(selectedCategory === opt)}
-                                        onClick={(e) => { e.stopPropagation(); setSelectedCategory(opt); setActiveDropdown(null); }}
-                                        onMouseOver={(e) => { if (selectedCategory !== opt) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)' }}
-                                        onMouseOut={(e) => { if (selectedCategory !== opt) e.currentTarget.style.backgroundColor = 'transparent' }}
-                                    >
-                                        {opt}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Tags Dropdown */}
-                    <div
-                        onClick={() => setActiveDropdown(activeDropdown === 'tags' ? null : 'tags')}
-                        style={{
-                            position: 'relative',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            gap: '8px',
-                            padding: '9px 16px',
-                            border: '1px solid #1e1d22',
-                            borderRadius: '16px',
-                            backgroundColor: '#1e1e24',
-                            cursor: 'pointer',
-                            flex: 1.5
-                        }}>
-                        <span style={{ fontSize: '14px', color: '#f0f0f2' }}>{selectedTag === 'All' ? 'Tags' : selectedTag}</span>
-                        <img src={DropdownIcon} alt="arrow" style={{ width: '14px', height: '14px', transform: activeDropdown === 'tags' ? 'rotate(180deg)' : 'none', transition: '0.3s' }} />
-                        {activeDropdown === 'tags' && (
-                            <div style={{ ...dropdownMenuStyle, maxHeight: '250px', overflowY: 'auto' }}>
-                                {['All', ...allTags].map(opt => (
-                                    <div
-                                        key={opt}
-                                        style={dropdownItemStyle(selectedTag === opt)}
-                                        onClick={(e) => { e.stopPropagation(); setSelectedTag(opt); setActiveDropdown(null); }}
-                                        onMouseOver={(e) => { if (selectedTag !== opt) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)' }}
-                                        onMouseOut={(e) => { if (selectedTag !== opt) e.currentTarget.style.backgroundColor = 'transparent' }}
-                                    >
-                                        {opt}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </div>
+                )}
             </div>
+
+            {/* Collapsible Filter Bar */}
+            <AnimatePresence initial={false}>
+                {(showFilters || !isMobile) && (
+                    <motion.div 
+                        initial={isMobile ? { height: 0, opacity: 0, marginBottom: 0 } : { height: 'auto', opacity: 1, marginBottom: '10px' }}
+                        animate={{ height: 'auto', opacity: 1, marginBottom: '10px' }}
+                        exit={isMobile ? { height: 0, opacity: 0, marginBottom: 0 } : { opacity: 1 }}
+                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                        className="publication-filter-bar overflow-hidden" 
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '20px',
+                            width: '100%',
+                            padding: '0 0 10px 0'
+                        }}
+                    >
+                        {/* Full Width Search Bar */}
+                        <div className="publication-search-container" style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            padding: '9px 16px',
+                            border: '1px solid #1e1d22',
+                            borderRadius: '16px',
+                            backgroundColor: '#1e1e24',
+                            flex: 2
+                        }}>
+                            <input
+                                type="text"
+                                placeholder={t('searchPlaceholder')}
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                style={{
+                                    background: 'transparent',
+                                    border: 'none',
+                                    outline: 'none',
+                                    color: '#f0f0f2',
+                                    fontSize: '14px',
+                                    width: '100%'
+                                }}
+                            />
+                            <img src={SearchIcon} alt="Search" style={{ width: '18px', height: '18px' }} />
+                        </div>
+
+                        {/* Flexible Filters Row */}
+                        <div className="publication-dropdown-group" style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 3 }} ref={dropdownRef}>
+                            {/* Sort Dropdown */}
+                            <div
+                                onClick={() => setActiveDropdown(activeDropdown === 'sort' ? null : 'sort')}
+                                style={{
+                                    position: 'relative',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: '8px',
+                                    padding: '9px 16px',
+                                    border: '1px solid #1e1d22',
+                                    borderRadius: '16px',
+                                    backgroundColor: '#1e1e24',
+                                    cursor: 'pointer',
+                                    flex: 1
+                                }}>
+                                <span style={{ fontSize: '14px', color: '#f0f0f2' }}>{selectedSort}</span>
+                                <img src={DropdownIcon} alt="arrow" style={{ width: '14px', height: '14px', transform: activeDropdown === 'sort' ? 'rotate(180deg)' : 'none', transition: '0.3s' }} />
+                                {activeDropdown === 'sort' && (
+                                    <div style={dropdownMenuStyle}>
+                                        {[t('sortByRecent'), t('sortByOldest')].map(opt => (
+                                            <div
+                                                key={opt}
+                                                style={dropdownItemStyle(selectedSort === opt)}
+                                                onClick={(e) => { e.stopPropagation(); setSelectedSort(opt); setActiveDropdown(null); }}
+                                                onMouseOver={(e) => { if (selectedSort !== opt) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)' }}
+                                                onMouseOut={(e) => { if (selectedSort !== opt) e.currentTarget.style.backgroundColor = 'transparent' }}
+                                            >
+                                                {opt}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Status Dropdown */}
+                            <div
+                                onClick={() => setActiveDropdown(activeDropdown === 'category' ? null : 'category')}
+                                style={{
+                                    position: 'relative',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: '8px',
+                                    padding: '9px 16px',
+                                    border: '1px solid #1e1d22',
+                                    borderRadius: '16px',
+                                    backgroundColor: '#1e1e24',
+                                    cursor: 'pointer',
+                                    flex: 1
+                                }}>
+                                <span style={{ fontSize: '14px', color: '#f0f0f2' }}>{selectedCategory === 'Categorie' ? 'Categorie' : selectedCategory}</span>
+                                <img src={DropdownIcon} alt="arrow" style={{ width: '14px', height: '14px', transform: activeDropdown === 'category' ? 'rotate(180deg)' : 'none', transition: '0.3s' }} />
+                                {activeDropdown === 'category' && (
+                                    <div style={dropdownMenuStyle}>
+                                        {[ t('all'), ...allFields].map(opt => (
+                                            <div
+                                                key={opt}
+                                                style={dropdownItemStyle(selectedCategory === opt)}
+                                                onClick={(e) => { e.stopPropagation(); setSelectedCategory(opt); setActiveDropdown(null); }}
+                                                onMouseOver={(e) => { if (selectedCategory !== opt) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)' }}
+                                                onMouseOut={(e) => { if (selectedCategory !== opt) e.currentTarget.style.backgroundColor = 'transparent' }}
+                                            >
+                                                {opt}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Tags Dropdown */}
+                            <div
+                                onClick={() => setActiveDropdown(activeDropdown === 'tags' ? null : 'tags')}
+                                style={{
+                                    position: 'relative',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: '8px',
+                                    padding: '9px 16px',
+                                    border: '1px solid #1e1d22',
+                                    borderRadius: '16px',
+                                    backgroundColor: '#1e1e24',
+                                    cursor: 'pointer',
+                                    flex: 1.5
+                                }}>
+                                <span style={{ fontSize: '14px', color: '#f0f0f2' }}>{selectedTag === 'All' ? 'Tags' : selectedTag}</span>
+                                <img src={DropdownIcon} alt="arrow" style={{ width: '14px', height: '14px', transform: activeDropdown === 'tags' ? 'rotate(180deg)' : 'none', transition: '0.3s' }} />
+                                {activeDropdown === 'tags' && (
+                                    <div style={{ ...dropdownMenuStyle, maxHeight: '250px', overflowY: 'auto' }}>
+                                        {[t('all'), ...allTags].map(opt => (
+                                            <div
+                                                key={opt}
+                                                style={dropdownItemStyle(selectedTag === opt)}
+                                                onClick={(e) => { e.stopPropagation(); setSelectedTag(opt); setActiveDropdown(null); }}
+                                                onMouseOver={(e) => { if (selectedTag !== opt) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)' }}
+                                                onMouseOut={(e) => { if (selectedTag !== opt) e.currentTarget.style.backgroundColor = 'transparent' }}
+                                            >
+                                                {opt}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Publications List */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                 {isLoading ? (
-                    <div style={{ color: '#a5a5b2', textAlign: 'center', padding: '10vh' }}>Loading research papers...</div>
+                    <div style={{ color: '#a5a5b2', textAlign: 'center', padding: '10vh' }}>{t('loading')}</div>
                 ) : filteredPublications.length === 0 ? (
-                    <div style={{ color: '#a5a5b2', textAlign: 'center', padding: '10vh' }}>No publications found.</div>
+                    <div style={{ color: '#a5a5b2', textAlign: 'center', padding: '10vh' }}>{t('noPublicationsFound')}</div>
                 ) : (
                     filteredPublications.map((pub, idx) => (
                         <ResearchPaperCard 
@@ -482,7 +537,7 @@ const TeamPublicationContent = () => {
                     <div className="pagination-current-page-box" style={{ border: '1px solid #2a2a30', borderRadius: '0.6vw', padding: '1vh 0.6vw', backgroundColor: 'rgba(255,255,255,0.01)', minWidth: '2.5vw', textAlign: 'center' }}>
                         <span style={{ fontSize: '0.9vw', color: '#ffffff' }}>{currentPage}</span>
                     </div>
-                    <span style={{ fontSize: '0.95vw', color: '#80808a' }}>of {totalPages}</span>
+                    <span style={{ fontSize: '0.95vw', color: '#80808a' }}>{tc('of')} {totalPages}</span>
                 </div>
 
                 <button
@@ -510,6 +565,7 @@ import AddPublicationContent from './AddPublicationContent';
 import API_BASE_URL from '@/config';
 
 const MyPublications = () => {
+    const { t } = useTranslation('myPublications');
     const [activeTab, setActiveTab] = useState('Team Publication');
     const [isPublishPopupOpen, setIsPublishPopupOpen] = useState(false);
 
@@ -520,21 +576,21 @@ const MyPublications = () => {
             <div className="publication-tab-nav flex justify-between items-center pb-[12px] pt-[0px] px-[0px] w-full">
                 <div className="flex gap-[24px] items-center">
                     <Tab
-                        label="Team Publication"
+                        label={t('teamPublicationTab')}
                         isActive={activeTab === 'Team Publication'}
                         onClick={() => setActiveTab('Team Publication')}
                     />
                     <Tab
-                        label="Add Publication"
+                        label={t('addPublicationTab')}
                         isActive={activeTab === 'Add Publication'}
                         onClick={() => setActiveTab('Add Publication')}
                     />
                 </div>
                 <button 
                     onClick={() => setIsPublishPopupOpen(true)}
-                    className="flex items-center justify-center gap-[6px] bg-[#3457dc] text-white px-[18px] py-[8px] rounded-[12px] hover:bg-[#3457dc]/90 transition-colors"
+                    className="publication-publish-btn flex items-center justify-center gap-[6px] bg-[#3457dc] text-white px-[18px] py-[8px] rounded-[12px] hover:bg-[#3457dc]/90 transition-colors"
                 >
-                    <span className="font-['Poppins',sans-serif] font-medium text-[13px]">publish</span>
+                    <span className="font-['Poppins',sans-serif] font-medium text-[13px]">{t('publish')}</span>
                     <img src={PublishIcon} alt="publish" style={{ width: '16px', height: '16px' }} />
                 </button>
             </div>
@@ -583,6 +639,9 @@ const publicationStyles = `
         gap: 16px !important;
         padding-bottom: 24px !important;
     }
+    .publication-publish-btn { display: none !important; }
+    .publication-table-title { font-size: 20px !important; }
+
     .publication-tab-nav > button {
         width: 100% !important;
         padding: 12px !important;
@@ -632,9 +691,15 @@ const publicationStyles = `
         font-size: 14px !important;
         max-width: 100% !important;
     }
-    .publication-paper-card div[style*="backgroundColor: rgba(57, 94, 213, 0.1)"] {
-        padding: 6px 12px !important;
+    .pub-card-tag {
+        padding: 8px 16px !important;
+        font-size: 13px !important;
+        border-radius: 50px !important;
+    }
+    .pub-card-status {
         font-size: 12px !important;
+        padding: 6px 12px !important;
+        border-radius: 8px !important;
     }
 
     .report-pagination {

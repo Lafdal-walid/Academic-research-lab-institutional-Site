@@ -180,7 +180,7 @@ export default function PersonalInfo() {
     };
 
     return (
-        <div className="w-full flex-1">
+        <div className="personal-info-root w-full flex-1" dir={language === 'ar' ? 'rtl' : 'ltr'}>
             <style>{`
                 .personal-info-root .btn-hover:hover { background-color: ${theme.hoverBg}; }
                 
@@ -210,43 +210,52 @@ export default function PersonalInfo() {
                     }
                     .profile-section, .connected-accounts-section {
                         padding: 24px 16px !important;
-                        max-width: 358px;
+                        width: 100% !important;
+                        max-width: none !important;
                         margin: 0 auto;
                     }
                     .profile-pic-wrapper {
-                        justify-content: flex-start;
-                        gap: 16%;
+                        justify-content: space-between;
+                        gap: 16px;
                     }
                     .profile-btn-group {
                         flex-direction: row-reverse;
-                        gap: 16px;
+                        gap: 12px;
+                        flex-wrap: wrap;
+                        justify-content: flex-end;
                     }
                     .change-btn p {
                         font-size: 13px !important;
                     }
                     .change-btn {
                         padding: 10px 12px !important;
-                        width: 160px;
+                        min-width: 120px;
+                        flex: 1;
                     }
                     .del-btn {
                         padding: 10px !important;
+                        width: 40px;
+                        height: 40px;
+                        justify-content: center;
                     }
                     .del-btn p {
                         display: none;
                     }
                     .edit-btn-container {
                         flex-direction: column-reverse;
-                        gap: 24px;
+                        gap: 20px;
                     }
                     .edit-btn {
                         width: 100%;
+                        padding: 14px !important;
                     }
                     .form-grid {
                         width: 100% !important;
+                        gap: 20px !important;
                     }
                     .name-row, .country-row {
                         flex-direction: column;
-                        gap: 1px;
+                        gap: 20px !important;
                     }
 
                     /* Hide desktop tabs, show mobile trigger */
@@ -349,7 +358,8 @@ export default function PersonalInfo() {
 
                 @media (max-width: 1023px) {
                     .form-grid {
-                        width: 630px;
+                        width: 100% !important;
+                        max-width: 630px;
                     }
                 }
                 @media (max-width: 767px) {
@@ -1126,14 +1136,14 @@ height: 1.92vh;                    }
 
                     {/* Profile Picture */}
                     <div className="profile-header">
-                        <p className="field-label">{isRTL ? 'صورة الحساب' : t('profilePicture')}</p>
+                        <p className="field-label">{t('profilePicture')}</p>
                         <div className="profile-pic-wrapper">
                             <div className="profile-img-container" onClick={() => setActiveModal('changePic')} style={{ cursor: 'pointer' }}>
                                 <img src={profileImageUrl} alt="Profile" className="profile-img" />
                             </div>
                             <div className="profile-btn-group">
                                 <button type="button" className="profile-btn change-btn" onClick={() => setActiveModal('changePic')}>
-                                    <p>{isRTL ? 'تغيير الصورة' : t('changePicture')}</p>
+                                    <p>{t('changePicture')}</p>
                                 </button>
                                 <button
                                     type="button"
@@ -1141,7 +1151,7 @@ height: 1.92vh;                    }
                                     onClick={() => setActiveModal('removePhoto')}
                                     disabled={profileImageUrl === profilePic}
                                 >
-                                    <p>{isRTL ? 'حذف' : t('delete')}</p>
+                                    <p>{t('delete')}</p>
                                     <img src={trashIcon} alt="Delete" />
                                 </button>
                             </div>
@@ -1149,7 +1159,7 @@ height: 1.92vh;                    }
                     </div>
 
                     {/* Divider */}
-                    <div className="divider-h" />
+                    <div className="divider-h" style={{ height: '1px', width: '100%', backgroundColor: '#222127', margin: '24px 0' }} />
 
                     {/* Form Section */}
                     <div className="edit-btn-container">
@@ -1185,7 +1195,7 @@ height: 1.92vh;                    }
 
                             {/* Username */}
                             <div className="field-group">
-                                <p className="field-label">{isRTL ? 'اسم المستخدم' : t('username')}</p>
+                                <p className="field-label">{t('username')}</p>
                                 <div className="custom-input">
                                     <input
                                         type="text"
@@ -1199,7 +1209,7 @@ height: 1.92vh;                    }
 
                             {/* Email */}
                             <div className="field-group">
-                                <p className="field-label">{isRTL ? 'بريدك الإلكتروني' : t('yourEmail')}</p>
+                                <p className="field-label">{t('yourEmail')}</p>
                                 <div onClick={() => setActiveModal('add')} className="custom-input email-input">
                                     <p className="input-text" style={{ minHeight: '1.2em' }}>{formData.email}</p>
                                     {!formData.email && <img src={exclamationIcon} alt="Warning" className="info-icon" />}
@@ -1209,7 +1219,7 @@ height: 1.92vh;                    }
                             {/* Country + Phone */}
                             <div className="country-row form-row">
                                 <div className="field-group">
-                                    <p className="field-label">{isRTL ? 'رقم الجوال' : t('phoneNumber')}</p>
+                                    <p className="field-label">{t('phoneNumber')}</p>
                                     <div className="custom-input phone-field">
                                         <p className="input-text">{formData.countryCode}</p>
                                         <div className="divider-v" />
@@ -1223,14 +1233,14 @@ height: 1.92vh;                    }
                                     </div>
                                 </div>
                                 <div className="field-group">
-                                    <p className="field-label">{isRTL ? 'الدولة' : t('country')}</p>
+                                    <p className="field-label">{t('country')}</p>
                                     <div className="dropdown-container">
                                         <div
                                             className="custom-input select-wrapper"
                                             style={{ cursor: 'pointer' }}
                                             onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
                                         >
-                                            <p className="input-text">{isRTL && formData.countryCode === '+966' ? 'السعودية' : displayCountry}</p>
+                                            <p className="input-text">{formData.country === 'Saudi Arabia' && isRTL ? 'السعودية' : displayCountry}</p>
                                             <img src={arrowIcon} alt="Dropdown" className="select-arrow" style={{ transform: isCountryDropdownOpen ? 'rotate(180deg)' : 'none' }} />
                                         </div>
 
@@ -1288,7 +1298,7 @@ height: 1.92vh;                    }
                             className={`edit-btn ${showSavedFeedback ? 'success' : ''}`}
                             onClick={handleSaveProfile}
                         >
-                            <p>{showSavedFeedback ? (isRTL ? 'تم الحفظ' : t('edited')) : (isRTL ? 'تعديل' : t('edit'))}</p>
+                            <p>{showSavedFeedback ? t('edited') : t('edit')}</p>
                             <img src={showSavedFeedback ? trueIcon : editIcon} alt="Edit" />
                         </button>
                     </div>

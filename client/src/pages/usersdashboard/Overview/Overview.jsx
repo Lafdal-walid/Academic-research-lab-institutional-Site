@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTranslation } from "@/hooks/useTranslation";
 
 // --- Asset Icons Imports ---
 import TeamIcon from "@/assets/svg/userDashboard/Overview/users-alt (7) 1.svg";
@@ -9,8 +10,6 @@ import EngagementIcon from "@/assets/svg/userDashboard/Overview/dashboard (4) 1.
 import InfoIcon from "@/assets/svg/userDashboard/Overview/info_(1)_5.svg";
 import ScienceIcon from "@/assets/svg/userDashboard/Overview/science.png";
 import Project1Img from "@/assets/svg/userDashboard/Overview/images (1) 1.svg";
-import Project2Img from "@/assets/svg/userDashboard/Overview/5a30797ac91abd1c88194b924cf3eaa9 2.svg";
-import Project3Img from "@/assets/svg/userDashboard/Overview/01-ai-cover-mar2024-static_(2) (2) 1.svg";
 import API_BASE_URL from '@/config';
 
 // --- SVGs Icons ---
@@ -85,15 +84,20 @@ const LocalStatCard = ({ icon, title, value, subValue, width = '100%' }) => {
 
 // --- ActivePlans Component ---
 const ActivePlans = ({ language = 'en', projectStats }) => {
+    const { t } = useTranslation('overview');
+    const { t: tc } = useTranslation('common');
     const [statsMode, setStatsMode] = useState("M");
     const [currentDate, setCurrentDate] = useState(new Date(2026, 3)); // Starting at April 2026
 
     const today = new Date(2026, 3); // Capping at April 2026 (User's current system date)
 
-    const monthsEN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    const monthsAR = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+    const months = [
+        tc('january'), tc('february'), tc('march'), tc('april'),
+        tc('may'), tc('june'), tc('july'), tc('august'),
+        tc('september'), tc('october'), tc('november'), tc('december')
+    ];
 
-    const displayMonth = language === 'ar' ? monthsAR[currentDate.getMonth()] : monthsEN[currentDate.getMonth()];
+    const displayMonth = months[currentDate.getMonth()];
     const displayYear = currentDate.getFullYear();
 
     const isCurrentMonth = currentDate.getFullYear() === today.getFullYear() && currentDate.getMonth() === today.getMonth();
@@ -108,32 +112,13 @@ const ActivePlans = ({ language = 'en', projectStats }) => {
         setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1));
     };
 
-    const t = {
-        en: {
-            projectHub: 'Project Hub',
-            totalValue: (projectStats?.total || 0).toString(),
-            totalLabel: 'Total',
-            subLabel: 'Projects',
-            trendText: 'Average Institutional Progress',
-            plans: { completed: 'Completed', closed: 'Closed / Cancelled', inProgress: 'In Progress' }
-        },
-        ar: {
-            projectHub: 'بروجكت هوب',
-            totalValue: (projectStats?.total || 0).toString(),
-            totalLabel: 'إجمالي',
-            subLabel: 'المشاريع',
-            trendText: 'متوسط التقدم المؤسسي',
-            plans: { completed: 'مكتمل', closed: 'مغلق / ملغي', inProgress: 'قيد التنفيذ' }
-        }
-    }[language];
-
     const data = {
         total: projectStats?.total || 0,
         trend: `${projectStats?.avgProgress || 0}%`,
         plans: [
-            { label: t.plans.completed, count: projectStats?.completed || 0, color: "#F4C63D" },
-            { label: t.plans.closed, count: projectStats?.canceled || 0, color: "#3457DC" },
-            { label: t.plans.inProgress, count: projectStats?.ongoing || 0, color: "#11CFC3" },
+            { label: t('completed'), count: projectStats?.completed || 0, color: "#F4C63D" },
+            { label: t('closedCanceled'), count: projectStats?.canceled || 0, color: "#3457DC" },
+            { label: t('inProgress'), count: projectStats?.ongoing || 0, color: "#11CFC3" },
         ]
     };
 
@@ -161,7 +146,9 @@ const ActivePlans = ({ language = 'en', projectStats }) => {
     }, [activePlans, data.total, circumference]);
 
     return (
-        <div style={{
+        <div 
+            className="active-plans-container"
+            style={{
             backgroundColor: '#151519',
             borderRadius: '1.5vw',
             padding: '1.8vw',
@@ -173,7 +160,9 @@ const ActivePlans = ({ language = 'en', projectStats }) => {
             color: 'white'
         }}>
             {/* Header: Project Hub + Date/Mode Toggles */}
-            <div style={{
+            <div 
+                className="active-plans-header"
+                style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
@@ -185,7 +174,7 @@ const ActivePlans = ({ language = 'en', projectStats }) => {
                 <h4 
                     className="project-hub-title"
                     style={{ fontSize: '1.1vw', fontWeight: 600, color: 'white', margin: 0, fontFamily: "'Poppins', sans-serif" }}>
-                    {t.projectHub}
+                    {t('projectHub')}
                 </h4>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8vw' }}>
@@ -271,15 +260,17 @@ const ActivePlans = ({ language = 'en', projectStats }) => {
                             />
                         ))}
                         <g style={{ transform: language === 'ar' ? 'scaleX(-1)' : 'none', transformOrigin: 'center' }}>
-                            <text x="50%" y="47%" textAnchor="middle" fill="#FFFFFF" fontSize="22" fontWeight="700" className="chart-total-value" style={{ fontFamily: 'Poppins' }}>{t.totalValue}</text>
-                            <text x="50%" y="56%" textAnchor="middle" fill="#A5A5B2" fontSize="14" fontWeight="400" className="chart-label-text" style={{ fontFamily: 'Poppins' }}>{t.totalLabel}</text>
-                            <text x="50%" y="63%" textAnchor="middle" fill="#A5A5B2" fontSize="14" fontWeight="400" className="chart-label-text" style={{ fontFamily: 'Poppins' }}>{t.subLabel}</text>
+                            <text x="50%" y="47%" textAnchor="middle" fill="#FFFFFF" fontSize="22" fontWeight="700" className="chart-total-value" style={{ fontFamily: 'Poppins' }}>{data.total}</text>
+                            <text x="50%" y="56%" textAnchor="middle" fill="#A5A5B2" fontSize="14" fontWeight="400" className="chart-label-text" style={{ fontFamily: 'Poppins' }}>{t('total')}</text>
+                            <text x="50%" y="63%" textAnchor="middle" fill="#A5A5B2" fontSize="14" fontWeight="400" className="chart-label-text" style={{ fontFamily: 'Poppins' }}>{t('projects')}</text>
                         </g>
                     </svg>
                 </div>
 
                 {/* Legend */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '2.1vw', marginTop: '2vw' }}>
+                <div 
+                    className="legend-container"
+                    style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '2.1vw', marginTop: '2vw' }}>
                     {data.plans.map(plan => (
                         <div key={plan.label} style={{ display: 'flex', alignItems: 'center', gap: '0.6vw' }}>
                             <div style={{ width: '0.6vw', height: '0.6vw', minWidth: '8px', minHeight: '8px', borderRadius: '50%', backgroundColor: plan.color }}></div>
@@ -292,7 +283,9 @@ const ActivePlans = ({ language = 'en', projectStats }) => {
             </div>
 
             {/* Footer Trend */}
-            <div style={{
+            <div 
+                className="trend-footer"
+                style={{
                 marginTop: '2vw',
                 paddingTop: '1.5vw',
                 borderTop: '1px solid rgba(255, 255, 255, 0.05)',
@@ -316,7 +309,7 @@ const ActivePlans = ({ language = 'en', projectStats }) => {
                         style={{ fontSize: '1.2vw', fontWeight: 700, color: '#ffffff' }}>{data.trend}</span>
                     <span 
                         className="trend-text-span"
-                        style={{ fontWeight: 400, marginLeft: '0.95vw' }}>{t.trendText}</span>
+                        style={{ fontWeight: 400, marginLeft: '0.95vw' }}>{t('institutionalProgress')}</span>
                 </p>
             </div>
         </div>
@@ -326,60 +319,44 @@ const ActivePlans = ({ language = 'en', projectStats }) => {
 
 // --- LastProjects Component ---
 const LastProjects = ({ language = 'en', style = {}, data = [] }) => {
-    const t = {
-        en: {
-            lastProjects: 'Last Projects',
-            search: 'Search',
-            name: 'Name',
-            complet: 'complet',
-            approval: 'aproval',
-            outOf: `out of ${data.length || 0}`
-        },
-        ar: {
-            lastProjects: 'المشاريع الأخيرة',
-            search: 'بحث',
-            name: 'الاسم',
-            complet: 'اكتمال',
-            approval: 'موافقة',
-            outOf: `من ${data.length || 0}`
-        }
-    }[language];
+    const { t } = useTranslation('overview');
+    const { t: tc } = useTranslation('common');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 3;
 
     const projects = data.map(p => {
-        let completLabel = 'Pending';
-        let approvalLabel = 'Review';
-        if (p.status === 'Completed') { completLabel = 'Done'; approvalLabel = 'Approved'; }
-        if (p.status === 'Suspended') { completLabel = 'Canceled'; approvalLabel = 'Denied'; }
-        if (p.status === 'Ongoing') { completLabel = 'Active'; approvalLabel = 'Processing'; }
+        let completLabel = tc('pending');
+        let approvalLabel = tc('review');
+        if (p.status === 'Completed') { completLabel = tc('done'); approvalLabel = tc('approved'); }
+        if (p.status === 'Suspended') { completLabel = tc('canceled'); approvalLabel = tc('denied'); }
+        if (p.status === 'Ongoing') { completLabel = tc('active'); approvalLabel = tc('processing'); }
 
         return {
             id: p._id,
             name: p.title,
-            date: new Date(p.createdAt).toLocaleDateString(),
+            date: new Date(p.createdAt).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US'),
             complet: completLabel,
             approval: approvalLabel,
             img: p.imageUrl ? `${API_BASE_URL}${p.imageUrl}` : Project1Img
         };
     });
 
+    const totalPages = Math.ceil(projects.length / itemsPerPage) || 1;
+    const paginatedProjects = projects.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
     return (
-        <div className="bg-[#151519] flex flex-col relative" style={{ padding: '2.22vh 1.25vw', borderRadius: '0.83vw', width: '100%', border: '1px solid #1E1D22', fontFamily: "'Poppins', sans-serif", ...style }}>
-            {/* Header: Title + Search */}
+        <div className="bg-[#151519] flex flex-col relative last-project-container" style={{ padding: '2.22vh 1.25vw', borderRadius: '0.83vw', width: '100%', border: '1px solid #1E1D22', fontFamily: "'Poppins', sans-serif", ...style }}>
             <div className="flex items-center justify-between w-full mb-[2.22vh]" style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}>
-                <p className="font-bold text-white whitespace-nowrap last-project-header-title" style={{ fontSize: '0.91vw' }}>
-                    {t.lastProjects}
-                </p>
-                <div className="flex flex-col items-start justify-center relative shrink-0" style={{ width: '10.73vw' }}>
+                <p className="font-bold text-white whitespace-nowrap last-project-header-title" style={{ fontSize: '0.91vw' }}>{t('lastProjects')}</p>
+                <div className="flex flex-col items-start justify-center relative shrink-0 last-project-search-container" style={{ width: '10.73vw' }}>
                     <div className="bg-[#1e1e24] relative shrink-0 w-full" style={{ borderRadius: '0.83vw' }}>
                         <div className="flex flex-row items-center size-full">
                             <div className="content-stretch flex items-center justify-between relative w-full" style={{ padding: '0.93vh 0.83vw' }}>
-                                <p className="text-[#a5a5b2] whitespace-nowrap" style={{ fontSize: '0.8vw' }}>
-                                    {t.search}
-                                </p>
+                                <p className="text-[#a5a5b2] whitespace-nowrap" style={{ fontSize: '0.8vw' }}>{t('search')}</p>
                                 <div className="relative shrink-0" style={{ width: '1.04vw', height: '1.04vw' }}>
                                     <svg className="absolute block inset-0 size-full" fill="none" viewBox="0 0 20 20">
                                         <g id="search-normal">
-                                            <path d="M9.58333 17.5C13.9556 17.5 17.5 13.9556 17.5 9.58333C17.5 5.21108 13.9556 1.66667 9.58333 1.66667C5.21108 1.66667 1.66667 5.21108 1.66667 9.58333C1.66667 13.9556 5.21108 17.5 9.58333 17.5Z" stroke="#3457DC" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                                            <path d="M9.58333 17.5C13.9556 17.5 17.5 13.9556 17.5 9.58333C17.5 5.21108 13.9556 1.66667 17.5 9.58333C17.5 5.21108 13.9556 1.66667 9.58333 1.66667C5.21108 1.66667 1.66667 5.21108 1.66667 9.58333C1.66667 13.9556 5.21108 17.5 9.58333 17.5Z" stroke="#3457DC" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
                                             <path d="M18.3333 18.3333L16.6667 16.6667" stroke="#3457DC" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
                                         </g>
                                     </svg>
@@ -390,24 +367,22 @@ const LastProjects = ({ language = 'en', style = {}, data = [] }) => {
                 </div>
             </div>
 
-            {/* Table Header */}
             <div className="flex items-center justify-between w-full mb-[1.48vh]" style={{ height: '1.94vh', direction: language === 'ar' ? 'rtl' : 'ltr' }}>
                 <div className="flex flex-col items-start justify-center relative shrink-0" style={{ width: '12.92vw' }}>
-                    <p className="text-[#80808a] last-project-header-text" style={{ fontSize: '0.8vw' }}>{t.name}</p>
+                    <p className="text-[#80808a] last-project-header-text" style={{ fontSize: '0.8vw' }}>{t('name')}</p>
                 </div>
                 <div className="flex flex-[1_0_0] flex-col items-center justify-center relative">
-                    <p className="text-[#80808a] text-center w-full last-project-header-text" style={{ fontSize: '0.8vw' }}>{t.complet}</p>
+                    <p className="text-[#80808a] text-center w-full last-project-header-text" style={{ fontSize: '0.8vw' }}>{t('completion')}</p>
                 </div>
                 <div className="flex flex-[1_0_0] flex-col items-start relative">
-                    <p className="text-[#80808a] text-center w-full last-project-header-text" style={{ fontSize: '0.8vw' }}>{t.approval}</p>
+                    <p className="text-[#80808a] text-center w-full last-project-header-text" style={{ fontSize: '0.8vw' }}>{t('approval')}</p>
                 </div>
             </div>
 
             <div className="w-full mb-[1.48vh]" style={{ height: '1px', backgroundColor: '#1E1D22' }} />
 
-            {/* Project List */}
             <div className="flex flex-col items-start w-full" style={{ gap: '2.22vh', direction: language === 'ar' ? 'rtl' : 'ltr' }}>
-                {projects.map((project) => (
+                {paginatedProjects.map((project) => (
                     <div key={project.id} className="flex items-center w-full">
                         <div className="relative shrink-0 last-project-img-container" style={{ width: '1.72vw', height: '4.72vh', borderRadius: '0.21vw', backgroundColor: '#2a2a30', overflow: 'hidden' }}>
                             <img src={project.img} alt={project.name} className="w-full h-full object-cover" />
@@ -432,32 +407,30 @@ const LastProjects = ({ language = 'en', style = {}, data = [] }) => {
 
             <div className="w-full mt-[1.48vh] mb-[2.22vh]" style={{ height: '1px', backgroundColor: '#1E1D22' }} />
 
-            {/* Pagination */}
             <div className="flex items-center justify-between w-full" style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}>
-                <div className="flex items-center justify-center relative shrink-0 cursor-pointer hover:brightness-150 transition-all last-project-pagination-btn">
+                <div onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} className="flex items-center justify-center relative shrink-0 cursor-pointer hover:brightness-150 transition-all last-project-pagination-btn">
                     <div className={language === 'ar' ? "" : "-scale-y-100 rotate-180"}>
                         <div className="relative" style={{ width: '1.67vw', height: '1.67vw' }}>
                             <svg className="absolute block inset-0 size-full" fill="none" viewBox="0 0 32 32">
                                 <path d="M0 16C0 19.1645 0.938384 22.2579 2.69649 24.8891C4.45459 27.5203 6.95345 29.5711 9.87706 30.7821C12.8007 31.9931 16.0177 32.3099 19.1214 31.6926C22.2251 31.0752 25.0761 29.5513 27.3137 27.3137C29.5513 25.0761 31.0752 22.2251 31.6926 19.1214C32.3099 16.0177 31.9931 12.8007 30.7821 9.87706C29.5711 6.95345 27.5203 4.45459 24.8891 2.69649C22.2579 0.938384 19.1645 0 16 0C11.7579 0.00458811 7.69095 1.69177 4.69136 4.69136C1.69177 7.69095 0.00458811 11.7579 0 16ZM21.3333 16C21.3343 16.976 20.9776 17.9185 20.3307 18.6493C19.9427 19.0853 19.5653 19.4987 19.2947 19.7693L15.5293 23.6C15.4088 23.7332 15.2625 23.8406 15.0994 23.9158C14.9363 23.9911 14.7597 24.0326 14.5801 24.0378C14.4006 24.0431 14.2218 24.0121 14.0546 23.9465L17.4 17.8933C17.6493 17.6427 17.988 17.2693 18.3333 16.8813C18.5482 16.6378 18.6667 16.3241 18.6667 15.9993C18.6667 15.6745 18.5482 15.3609 18.3333 15.1173L17.4093 14.1147L13.628 10.2667L19.3013 12.2387C19.568 12.5053 19.9413 12.9147 20.3267 13.3493C20.9757 14.0797 21.3339 15.0229 21.3333 16Z" fill="#3457DC" />
                                 <path d="M21.3333 16C21.3343 15.024 20.9776 14.0815 20.3307 13.3507C19.9427 12.9147 19.5653 12.5013 19.2947 12.2307L15.5293 8.4C15.4088 8.26685 15.2625 8.15942 15.0994 8.08418C14.9363 8.00894 14.7597 7.96743 14.5801 7.96215C14.4006 7.95687 14.2218 7.98793 14.0546 8.05346C13.8873 8.11898 13.735 8.21763 13.6068 8.34347C13.4787 8.46931 13.3772 8.61976 13.3086 8.78578C13.2401 8.95179 13.2057 9.12996 13.2077 9.30958C13.2097 9.4892 13.2479 9.66656 13.3201 9.83103C13.3924 9.9955 13.4971 10.1437 13.628 10.2667L17.4 14.1067C17.6493 14.3573 17.988 14.7307 18.3333 15.1187C18.5482 15.3622 18.6667 15.6759 18.6667 16.0007C18.6667 16.3255 18.5482 16.6391 18.3333 16.8827C17.9893 17.2693 17.6507 17.6427 17.4093 17.8853L13.628 21.7333C13.4971 21.8563 13.3924 22.0045 13.3201 22.169C13.2479 22.3334 13.2097 22.5108 13.2077 22.6904C13.2057 22.87 13.2401 23.0482 13.3086 23.2142C13.3772 23.3802 13.4787 23.5307 13.6068 23.6565Z" fill="white" />
-
                             </svg>
                         </div>
                     </div>
                 </div>
                 <div className="flex items-center" style={{ gap: '0.52vw' }}>
                     <div className="bg-[rgba(255,255,255,0.01)] flex flex-col items-center justify-center relative last-project-pagination-box" style={{ padding: '0.41vh 0.23vw', borderRadius: '0.46vw', width: '1.95vw', border: '1px solid #1e1d22' }}>
-                        <p className="text-center text-white w-full last-project-pagination-text" style={{ fontSize: '0.88vw' }}>01</p>
+                        <p className="text-center text-white w-full last-project-pagination-text" style={{ fontSize: '0.88vw' }}>{currentPage.toString().padStart(2, '0')}</p>
                     </div>
-                    <p className="text-[#a5a5b2] whitespace-nowrap" style={{ fontSize: '0.76vw' }}>
-                        {t.outOf}
+                    <p className="text-[#a5a5b2] whitespace-nowrap out-of-text" style={{ fontSize: '0.76vw' }}>
+                        {t('outOf')} {totalPages}
                     </p>
                 </div>
-                <div className="flex items-center justify-center relative shrink-0 cursor-pointer hover:brightness-150 transition-all last-project-pagination-btn">
+                <div onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} className="flex items-center justify-center relative shrink-0 cursor-pointer hover:brightness-150 transition-all last-project-pagination-btn">
                     <div className={language === 'ar' ? "-scale-y-100 rotate-180" : ""}>
                         <div className="relative" style={{ width: '1.67vw', height: '1.67vw' }}>
                             <svg className="absolute block inset-0 size-full" fill="none" viewBox="0 0 32 32">
-                                <path d="M0 16C0 19.1645 0.938384 22.2579 2.69649 24.8891C4.45459 27.5203 6.95345 29.5711 9.87706 30.7821C12.8007 31.9931 16.0177 32.3099 19.1214 31.6926C22.2251 31.0752 25.0761 29.5513 27.3137 27.3137C29.5513 25.0761 31.0752 22.2251 31.6926 19.1214C32.3099 16.0177 31.9931 12.8007 30.7821 9.87706C29.5711 6.95345 27.5203 4.45459 24.8891 2.69649C22.2579 0.938384 19.1645 0 16 0C11.7579 0.00458811 7.69095 1.69177 4.69136 4.69136C1.69177 7.69095 0.00458811 11.7579 0 16ZM21.3333 16C21.3343 16.976 20.9776 17.9185 20.3307 18.6493C19.9427 19.0853 19.5653 19.4987 19.2947 19.7693L15.5293 23.6C15.4088 23.7332 15.2625 23.8406 15.0994 23.9158C14.9363 23.9911 14.7597 24.0326 14.5801 24.0378C14.4006 24.0431 14.2218 24.0121 14.0546 23.9465C13.8873 23.881 13.735 23.7824 13.6068 23.6565C13.4787 23.5307 13.3772 23.3802 13.3086 23.2142C13.2401 23.0482 13.2057 22.87 13.2077 22.6904C13.2097 22.5108 13.2479 22.3334 13.3201 22.169C13.3924 22.0045 13.4971 21.8563 13.628 21.7333L17.4 17.8933C17.6493 17.6427 17.988 17.2693 18.3333 16.8813C18.5482 16.6378 18.6667 16.3241 18.6667 15.9993C18.6667 15.6745 18.5482 15.3609 18.3333 15.1173C17.9893 14.7307 17.6507 14.3573 17.4093 14.1147L13.628 10.2667C13.4971 10.1437 13.3924 9.99549 13.3201 9.83103C13.2479 9.66656 13.2097 9.48919 13.2077 9.30957C13.2057 9.12995 13.2401 8.95179 13.3086 8.78577C13.3772 8.61975 13.4787 8.46931 13.6068 8.34347C13.735 8.21762 13.8873 8.11898 14.0546 8.05345C14.2218 7.98793 14.4006 7.95687 14.5801 7.96215C14.7597 7.96743 14.9363 8.00894 15.0994 8.08418C15.2625 8.15942 15.4088 8.26684 15.5293 8.4L19.3013 12.2387C19.568 12.5053 19.9413 12.9147 20.3267 13.3493C20.9757 14.0797 21.3339 15.0229 21.3333 16Z" fill="#3457DC" />
+                                <path d="M0 16C0 19.1645 0.938384 22.2579 2.69649 24.8891C4.45459 27.5203 6.95345 29.5711 9.87706 30.7821C12.8007 31.9931 16.0177 32.3099 19.1214 31.6926C22.2251 31.0752 25.0761 29.5513 27.3137 27.3137C29.5513 25.0761 31.0752 22.2251 31.6926 19.1214C32.3099 16.0177 31.9931 12.8007 30.7821 9.87706C29.5711 6.95345 27.5203 4.45459 24.8891 2.69649C22.2579 0.938384 19.1645 0 16 0C11.7579 0.00458811 7.69095 1.69177 4.69136 4.69136C1.69177 7.69095 0.00458811 11.7579 0 16ZM21.3333 16C21.3343 16.976 20.9776 17.9185 20.3307 18.6493C19.9427 19.0853 19.5653 19.4987 19.2947 19.7693L15.5293 23.6C15.4088 23.7332 15.2625 23.8406 15.0994 23.9158C14.9363 23.9911 14.7597 24.0326 14.5801 24.0378C14.4006 24.0431 14.2218 24.0121 14.0546 23.9465L17.4 17.8933C17.6493 17.6427 17.988 17.2693 18.3333 16.8813C18.5482 16.6378 18.6667 16.3241 18.6667 15.9993C18.6667 15.6745 18.5482 15.3609 18.3333 15.1173L17.4093 14.1147L13.628 10.2667L19.3013 12.2387C19.568 12.5053 19.9413 12.9147 20.3267 13.3493C20.9757 14.0797 21.3339 15.0229 21.3333 16Z" fill="#3457DC" />
                                 <path d="M21.3333 16C21.3343 15.024 20.9776 14.0815 20.3307 13.3507C19.9427 12.9147 19.5653 12.5013 19.2947 12.2307L15.5293 8.4C15.4088 8.26685 15.2625 8.15942 15.0994 8.08418C14.9363 8.00894 14.7597 7.96743 14.5801 7.96215C14.4006 7.95687 14.2218 7.98793 14.0546 8.05346C13.8873 8.11898 13.735 8.21763 13.6068 8.34347C13.4787 8.46931 13.3772 8.61976 13.3086 8.78578C13.2401 8.95179 13.2057 9.12996 13.2077 9.30958C13.2097 9.4892 13.2479 9.66656 13.3201 9.83103C13.3924 9.9955 13.4971 10.1437 13.628 10.2667L17.4 14.1067C17.6493 14.3573 17.988 14.7307 18.3333 15.1187C18.5482 15.3622 18.6667 15.6759 18.6667 16.0007C18.6667 16.3255 18.5482 16.6391 18.3333 16.8827C17.9893 17.2693 17.6507 17.6427 17.4093 17.8853L13.628 21.7333C13.4971 21.8563 13.3924 22.0045 13.3201 22.169C13.2479 22.3334 13.2097 22.5108 13.2077 22.6904C13.2057 22.87 13.2401 23.0482 13.3086 23.2142C13.3772 23.3802 13.4787 23.5307 13.6068 23.6565Z" fill="white" />
                             </svg>
                         </div>
@@ -467,28 +440,15 @@ const LastProjects = ({ language = 'en', style = {}, data = [] }) => {
         </div>
     );
 };
+
 const LastPublication = ({ language = 'en', data, avgViews = 0 }) => {
-    const t = {
-        en: {
-            lastPublication: 'Last Publication',
-            science: 'Science',
-            title: data?.title || 'No recent publication',
-            date: data ? new Date(data.createdAt).toLocaleString() : '',
-            views: 'views',
-            avgViews: 'Avg Views'
-        },
-        ar: {
-            lastPublication: 'آخر منشور',
-            science: 'علوم',
-            title: data?.title || 'لا توجد منشورات حديثة',
-            date: data ? new Date(data.createdAt).toLocaleString() : '',
-            views: 'مشاهدات',
-            avgViews: 'متوسط المشاهدات'
-        }
-    }[language];
+    const { t } = useTranslation('overview');
+
+    const title = data?.title || t('noRecentPub');
+    const date = data ? new Date(data.createdAt).toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US') : '';
 
     return (
-        <div style={{
+        <div className="last-pub-container" style={{
             backgroundColor: '#151519',
             display: 'flex',
             flexDirection: 'column',
@@ -503,7 +463,7 @@ const LastPublication = ({ language = 'en', data, avgViews = 0 }) => {
         }}>
             <div className="flex items-center justify-between w-full">
                 <p className="text-white font-bold last-pub-header-title" style={{ fontSize: '0.91vw' }}>
-                    {t.lastPublication}
+                    {t('lastPublication')}
                 </p>
             </div>
 
@@ -512,29 +472,29 @@ const LastPublication = ({ language = 'en', data, avgViews = 0 }) => {
             <div className="flex items-center w-full" style={{ gap: '1.375vw' }}>
                 <div className="flex items-center justify-center bg-[#1E1E24] rounded-[0.52vw] last-pub-img-container" style={{ width: '3.6vw', height: '10.58vh', overflow: 'hidden' }}>
                     <img
-                        src={ScienceIcon}
+                        src={data?.project?.imageUrl ? `${API_BASE_URL}${data.project.imageUrl}` : ScienceIcon}
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         alt="Thumbnail"
                     />
                 </div>
                 <div className="flex flex-col flex-1" style={{ gap: '0.91vw' }}>
-                    <div className="flex items-start" style={{ gap: '0.91vw' }}>
+                    <div className="flex items-start last-pub-title-container" style={{ gap: '0.91vw' }}>
                         <p className="font-bold text-[#f5f5f5] last-pub-title" style={{ fontSize: '0.91vw', lineHeight: '1.375' }}>
-                            {t.title}
+                            {title}
                         </p>
                         <p className="text-[#a5a5b2] last-pub-date" style={{ fontSize: '0.8vw' }}>
-                            {t.date}
+                            {date}
                         </p>
                     </div>
                     <div className="flex items-center justify-between w-full">
                         <div className="flex items-center" style={{ gap: '2.75vw' }}>
-                            <p className="text-white font-medium last-pub-stats-label" style={{ fontSize: '0.8vw' }}>{t.views}</p>
+                            <p className="text-white font-medium last-pub-stats-label" style={{ fontSize: '0.8vw' }}>{t('views')}</p>
                             <div className="bg-[#1e1e24] flex items-center justify-center rounded-full px-2" style={{ height: '2vw', minHeight: '20px' }}>
                                 <p className="text-white last-pub-stats-value" style={{ fontSize: '0.8vw' }}>{data?.views || 0}</p>
                             </div>
                         </div>
                         <div className="flex items-center" style={{ gap: '2.75vw' }}>
-                            <p className="text-white font-medium last-pub-stats-label" style={{ fontSize: '0.8vw' }}>{t.avgViews}</p>
+                            <p className="text-white font-medium last-pub-stats-label" style={{ fontSize: '0.8vw' }}>{t('avgViews')}</p>
                             <div className="bg-[#043d37] flex items-center justify-center rounded-full px-2" style={{ height: '2vw', minHeight: '20px' }}>
                                 <p className="text-[#01cbb1] last-pub-stats-value" style={{ fontSize: '0.69vw' }}>{avgViews}</p>
                             </div>
@@ -549,25 +509,16 @@ const LastPublication = ({ language = 'en', data, avgViews = 0 }) => {
 
 // --- PublicationsAnalysis Component ---
 const PublicationsAnalysis = ({ language = 'en', data = [], avg = 0, currentPeriod = 6 }) => {
+    const { t } = useTranslation('overview');
+    const { t: tc } = useTranslation('common');
     const [showDropdown, setShowDropdown] = useState(false);
     const [selectedBar, setSelectedBar] = useState(0);
 
-    const t = {
-        en: {
-            title: 'Publications',
-            subtitle: `${avg} Publications ( Monthly average )`,
-            label: ' Publications',
-            months: data.map(d => d.month),
-            periods: { 3: 'Last 3 Months', 6: 'Last 6 Months', 12: 'Last Year' }
-        },
-        ar: {
-            title: 'المنشورات',
-            subtitle: `${avg} منشورات (متوسط شهري)`,
-            label: ' منشورات',
-            months: data.map(d => d.month),
-            periods: { 3: 'آخر 3 أشهر', 6: 'آخر 6 أشهر', 12: 'آخر سنة' }
-        }
-    }[language];
+    const periods = { 
+        3: t('last3Months'), 
+        6: t('last6Months'), 
+        12: t('lastYear') 
+    };
 
     const maxCount = Math.max(...data.map(d => d.count), 1);
     const barData = data.map(d => ({
@@ -576,20 +527,20 @@ const PublicationsAnalysis = ({ language = 'en', data = [], avg = 0, currentPeri
     }));
 
     return (
-        <div className="bg-[#151519] flex flex-col relative" style={{ padding: '2.78vh 1.25vw', borderRadius: '0.83vw', width: '100%', border: '1px solid #1E1D22', fontFamily: "'Poppins', sans-serif" }}>
+        <div className="bg-[#151519] flex flex-col relative pub-analysis-container" style={{ padding: '2.78vh 1.25vw', borderRadius: '0.83vw', width: '100%', border: '1px solid #1E1D22', fontFamily: "'Poppins', sans-serif" }}>
             {/* Header */}
             <div className="flex items-center justify-between w-full mb-[3.13vh]" style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}>
                 <div className="flex flex-col items-start justify-center" style={{ gap: '0.93vh' }}>
                     <p className="font-bold text-white pub-analysis-title" style={{ fontSize: '0.91vw' }}>
-                        {t.title}
+                        {t('publications')}
                     </p>
                     <p className="text-[#a5a5b2] pub-analysis-subtitle" style={{ fontSize: '0.8vw' }}>
-                        {t.subtitle}
+                        {avg} {t('publications')} ( {t('monthlyAvg')} )
                     </p>
                 </div>
                 <div className="relative">
                     <div 
-                        className="bg-[#1e1e24] flex items-center relative cursor-pointer hover:bg-[#2a2a30] transition-colors" 
+                        className="bg-[#1e1e24] flex items-center relative cursor-pointer hover:bg-[#2a2a30] transition-colors pub-analysis-period-btn" 
                         style={{ gap: '0.625vw', padding: '1.16vh 0.83vw', borderRadius: '0.625vw' }}
                         onClick={() => setShowDropdown(!showDropdown)}
                     >
@@ -599,7 +550,7 @@ const PublicationsAnalysis = ({ language = 'en', data = [], avg = 0, currentPeri
                             </svg>
                         </div>
                         <p className="text-white whitespace-nowrap" style={{ fontSize: '0.8vw' }}>
-                            {t.periods[currentPeriod] || t.periods[6]}
+                            {periods[currentPeriod] || periods[6]}
                         </p>
                         <div className="flex items-center justify-center -rotate-90" style={{ width: '1.04vw', height: '1.04vw' }}>
                             <svg className="size-full" fill="none" viewBox="0 0 20 20">
@@ -619,7 +570,7 @@ const PublicationsAnalysis = ({ language = 'en', data = [], avg = 0, currentPeri
                                         setShowDropdown(false);
                                     }}
                                 >
-                                    {t.periods[p]}
+                                    {periods[p]}
                                 </div>
                             ))}
                         </div>
@@ -652,7 +603,7 @@ const PublicationsAnalysis = ({ language = 'en', data = [], avg = 0, currentPeri
                             {selectedBar === i && (
                                 <div className="absolute bg-[#1e1e24] flex items-center justify-center py-[0.7vh] px-[0.625vw] animate-in fade-in zoom-in duration-200" style={{ left: '50%', transform: 'translateX(-50%)', bottom: `${100 - data.h + 2}%`, borderRadius: '0.625vw', border: '1px solid #1e1d22', zIndex: 10 }}>
                                     <p className="text-[#fafafa] whitespace-nowrap" style={{ fontSize: '0.69vw' }}>
-                                        {data.value}{t.label}
+                                        {data.value} {t('publications')}
                                     </p>
                                 </div>
                             )}
@@ -663,7 +614,7 @@ const PublicationsAnalysis = ({ language = 'en', data = [], avg = 0, currentPeri
 
             {/* X-Axis */}
             <div className="w-full flex items-start" style={{ marginTop: '1.25vh' }}>
-                {t.months.map((m, i) => (
+                {(tc('monthsShort', { returnObjects: true }) || []).map((m, i) => (
                     <div key={i} className="flex-1 text-center">
                         <p className="text-[#80808a] pub-analysis-month-text" style={{ fontSize: '0.69vw' }}>{m}</p>
                     </div>
@@ -676,6 +627,8 @@ const PublicationsAnalysis = ({ language = 'en', data = [], avg = 0, currentPeri
 
 const Overview = () => {
     const { language } = useLanguage();
+    const { t } = useTranslation('overview');
+    const { t: tc } = useTranslation('common');
     const [period, setPeriod] = useState(6);
     const [stats, setStats] = useState({
         members: 0,
@@ -725,33 +678,33 @@ const Overview = () => {
                 minHeight: 'fit-content'
             }}>
                 <LocalStatCard
-                    title={stats.teamName || "Team members"}
+                    title={stats.teamName || t('teamMembers')}
                     value={stats.members.toString()}
-                    subValue="Members"
+                    subValue={tc('members')}
                     icon={<img src={TeamIcon} alt="Team" className="w-[1.25vw] h-[1.25vw] object-contain" />}
                 />
                 <LocalStatCard
-                    title="Publications"
+                    title={t('publications')}
                     value={stats.publications.toString()}
                     icon={<img src={PublicationsIcon} alt="Publications" className="w-[1.25vw] h-[1.25vw] object-contain" />}
                 />
                 <LocalStatCard
-                    title="Projects"
+                    title={t('projects')}
                     value={stats.projects.toString()}
                     icon={<img src={ProjectsIcon} alt="Projects" className="w-[1.25vw] h-[1.25vw] object-contain" />}
                 />
                 <LocalStatCard
-                    title="Engagement"
-                    value={`${stats.views} Views`}
+                    title={t('engagement')}
+                    value={`${stats.views} ${tc('views')}`}
                     icon={<img src={EngagementIcon} alt="Engagement" className="w-[1.25vw] h-[1.25vw] object-contain" />}
                 />
             </div>
 
             {/* Info Line */}
-            <div className="mt-[2.5vh] flex items-center gap-[0.5vw] px-[0.2vw]">
+            <div className="mt-[2.5vh] flex items-center gap-[0.5vw] px-[0.2vw]" style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}>
                 <img src={InfoIcon} alt="Info" className="w-[0.9vw] h-[0.9vw] brightness-0 invert" />
                 <span className="info-text-span text-[0.9vw] font-[400] text-white">
-                    This data is based on your team.
+                    {t('infoText')}
                 </span>
             </div>
 
@@ -775,7 +728,7 @@ const Overview = () => {
                 @media (max-width: 1024px) {
                     div[style*="grid-template-columns"] { 
                         grid-template-columns: repeat(2, 1fr) !important; 
-                        gap: 12px !important;
+                        gap: 20px !important;
                     }
                     span[style*="font-size: 0.9vw"] { font-size: 14px !important; }
                     h3[style*="font-size: 1.8vw"] { font-size: 24px !important; }
@@ -784,21 +737,23 @@ const Overview = () => {
                      div[style*="width: 2.5vw"] img { width: 20px !important; height: 20px !important; }
 
                     /* New mobile refinements */
-                    .info-text-span { font-size: 16px !important; }
-                    .project-hub-title { font-size: 18px !important; }
-                    .chart-container-donut { max-width: 85% !important; margin-top: 20px !important; }
-                    .chart-total-value { font-size: 42px !important; }
-                    .chart-label-text { font-size: 22px !important; }
-                    .legend-label-span { font-size: 10px !important; }
-                    .trend-percentage-span { font-size: 22px !important; }
-                    .trend-text-span { font-size: 17px !important; }
-
+                    .info-text-span { font-size: 14px !important; }
+                    .active-plans-header { justify-content: center !important; gap: 16px !important; text-align: center !important; }
+                    .project-hub-title { font-size: 16px !important; width: 100% !important; margin-bottom: 8px !important; }
+                    .active-plans-container { padding: 20px !important; border-radius: 16px !important; }
+                    .chart-container-donut { max-width: 180px !important; margin: 20px auto !important; }
+                    .chart-total-value { font-size: 40px !important; }
+                    .chart-label-text { font-size: 14px !important; }
+                    .legend-container { gap: 12px !important; margin-top: 20px !important; }
+                    .legend-label-span { font-size: 12px !important; }
+                    .trend-footer { display: none !important; }
+                    
                     /* Date and Toggle refinements */
-                    .date-toggle-box { min-width: 150px !important; height: 40px !important; border-radius: 8px !important; }
-                    .date-display-text { font-size: 14px !important; min-width: 90px !important; }
-                    .stats-mode-btn p { font-size: 16px !important; }
-                    .stats-mode-btn { padding: 0 12px !important; }
-                    .stats-mode-container { height: 35px !important; width: fit-content !important; min-width: 90px !important; }
+                    .date-toggle-box { min-width: 130px !important; height: 36px !important; border-radius: 8px !important; }
+                    .date-display-text { font-size: 12px !important; min-width: 80px !important; }
+                    .stats-mode-btn p { font-size: 13px !important; }
+                    .stats-mode-btn { padding: 0 10px !important; }
+                    .stats-mode-container { height: 32px !important; min-width: 80px !important; }
 
                     /* Trend icon enlargement */
                     .trend-icon-circle { width: 44px !important; height: 44px !important; }
@@ -806,31 +761,45 @@ const Overview = () => {
 
                     /* Last Projects refinements */
                     .last-project-header-title { font-size: 18px !important; }
-                    .last-project-header-text { font-size: 13px !important; }
-                    .last-project-img-container { width: 50px !important; height: 50px !important; border-radius: 6px !important; }
-                    .last-project-name-container { width: 45% !important; margin-left: 15px !important; }
-                    .last-project-name { font-size: 15px !important; }
-                    .last-project-date { font-size: 12px !important; }
-                    .last-project-status-text { font-size: 13px !important; }
-
-                    /* Last Publication refinements */
-                    .last-pub-header-title { font-size: 18px !important; }
-                    .last-pub-img-container { width: 85px !important; height: 85px !important; border-radius: 10px !important; }
-                    .last-pub-title { font-size: 16px !important; }
-                    .last-pub-date { font-size: 13px !important; }
-                    .last-pub-stats-label { font-size: 14px !important; }
-                    .last-pub-stats-value { font-size: 14px !important; }
-
-                    /* Publication Analysis refinements */
-                    .pub-analysis-title { font-size: 18px !important; }
-                    .pub-analysis-subtitle { font-size: 14px !important; }
-                    .pub-analysis-month-text { font-size: 12px !important; }
-
-                    /* Pagination and Layout refinements */
-                    .last-project-pagination-box { width: 45px !important; height: 36px !important; border-radius: 8px !important; }
-                    .last-project-pagination-text { font-size: 16px !important; }
-                    .last-project-pagination-btn div[style*="width: 1.67vw"] { width: 36px !important; height: 36px !important; }
-                    .main-sections-grid { gap: 32px !important; }
+                    .last-project-search-container { display: none !important; }
+                    .last-project-header-text { font-size: 12px !important; }
+                    .last-project-img-container { width: 44px !important; height: 44px !important; border-radius: 6px !important; }
+                    .last-project-name-container { width: 42% !important; margin-left: 12px !important; overflow: hidden; }
+                    .last-project-name { font-size: 14px !important; line-height: 1.2 !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%; }
+                    .last-project-date { font-size: 11px !important; }
+                    .last-project-status-text { font-size: 12px !important; }
+                    div[style*="width: 12.92vw"] { width: 42% !important; }
+                    div[style*="gap: 2.22vh"] { gap: 20px !important; }
+                    div[style*="padding: 2.22vh 1.25vw"] { padding: 20px !important; }
+ 
+                     /* Last Publication refinements */
+                     .last-pub-header-title { font-size: 18px !important; }
+                     .last-pub-img-container { width: 70px !important; height: 70px !important; border-radius: 10px !important; }
+                     .last-pub-title { font-size: 15px !important; white-space: normal !important; overflow: visible !important; text-overflow: clip !important; max-width: none !important; margin-bottom: 4px !important; }
+                     .last-pub-date { font-size: 12px !important; display: block !important; margin-top: 4px !important; }
+                     .last-pub-stats-label { font-size: 13px !important; }
+                     .last-pub-stats-value { font-size: 13px !important; }
+                     div[style*="gap: 1.375vw"] { gap: 16px !important; align-items: center !important; }
+                     div[style*="gap: 0.91vw"] { gap: 12px !important; }
+                     .last-pub-title-container { flex-direction: column !important; align-items: flex-start !important; gap: 4px !important; }
+ 
+                     /* Publication Analysis refinements */
+                     .pub-analysis-title { font-size: 18px !important; }
+                     .pub-analysis-subtitle { font-size: 14px !important; }
+                     .pub-analysis-month-text { font-size: 11px !important; }
+                     .pub-analysis-period-btn { height: 40px !important; padding: 0 12px !important; border-radius: 8px !important; }
+                     .pub-analysis-period-btn p { font-size: 13px !important; }
+                     .pub-analysis-period-btn div { width: 16px !important; height: 16px !important; }
+                     div[style*="height: 30.33vh"] { height: 200px !important; }
+ 
+                     /* Pagination and Layout refinements */
+                     .last-project-pagination-box { width: 55px !important; height: 42px !important; border-radius: 8px !important; }
+                     .last-project-pagination-text { font-size: 18px !important; }
+                     .out-of-text { font-size: 14px !important; }
+                     .last-project-pagination-btn div[style*="width: 1.67vw"] { width: 42px !important; height: 42px !important; }
+                     .main-sections-grid { gap: 2.5vh !important; }
+                     div[style*="flex-direction: column"][style*="gap: 1vw"] { gap: 2.5vh !important; }
+                     .active-plans-container, .last-project-container, .last-pub-container, .pub-analysis-container { margin-bottom: 2.5vh !important; }
                 }
             `}</style>
         </div>
