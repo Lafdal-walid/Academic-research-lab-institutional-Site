@@ -42,7 +42,9 @@ exports.getProjects = async (req, res) => {
         } 
         // Otherwise, if user is authenticated, handle dashboard filtering
         else if (req.user) {
-            if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
+            // Only superadmin sees all projects. 
+            // Admin and regular users see their own team's projects and projects they are members of.
+            if (req.user.role !== 'superadmin') {
                 query = {
                     $or: [
                         { members: req.user._id },
@@ -68,10 +70,14 @@ exports.createProject = async (req, res) => {
             imageUrl = `/uploads/projects/${req.file.filename}`;
         }
 
+        // Only superadmin can assign a project to an arbitrary team. 
+        // Admins and regular users must use their own team.
+        const finalTeam = req.user.role === 'superadmin' ? (team || req.user.team) : req.user.team;
+
         const project = await Project.create({
             title,
             description,
-            team: team || req.user.team,
+            team: finalTeam,
             members: typeof members === 'string' ? members.split(',').filter(m => m) : members,
             timeline: typeof timeline === 'string' ? JSON.parse(timeline) : timeline,
             startDate: startDate || Date.now(),
@@ -92,7 +98,7 @@ exports.updateProject = async (req, res) => {
         const updateData = {};
         if (title) updateData.title = title;
         if (description) updateData.description = description;
-        if (team) updateData.team = team;
+        if (req.user.role === 'superadmin' && team) updateData.team = team;
         if (leader) updateData.leader = leader;
         if (members) updateData.members = typeof members === 'string' ? members.split(',').filter(m => m) : members;
         if (status) updateData.status = status;

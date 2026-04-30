@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RiSearch2Line, RiArrowLeftSLine, RiArrowRightSLine, RiCheckLine } from 'react-icons/ri';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Assets
 import ProjectsIcon from "@/assets/svg/LeaderDashboard/users/Vector-1.svg";
@@ -1914,6 +1915,7 @@ const ProjectHub = () => {
         }
     };
 
+    const { user } = useAuth();
     return (
         <div className="w-full text-white font-poppins pb-10">
             {/* Header with Tabs */}
@@ -1929,11 +1931,13 @@ const ProjectHub = () => {
                         isActive={activeTab === 'Add Project'}
                         onClick={() => setActiveTab('Add Project')}
                     />
-                    <Tab
-                        label="Add Team"
-                        isActive={activeTab === 'Add Team'}
-                        onClick={() => setActiveTab('Add Team')}
-                    />
+                    {user?.role === 'superadmin' && (
+                        <Tab
+                            label="Add Team"
+                            isActive={activeTab === 'Add Team'}
+                            onClick={() => setActiveTab('Add Team')}
+                        />
+                    )}
                 </div>
             </div>
 

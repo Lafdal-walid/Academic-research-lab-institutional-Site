@@ -12,10 +12,12 @@ exports.createGalleryItem = async (req, res) => {
             return res.status(400).json({ message: 'Please upload an image' });
         }
 
+        const finalTeam = req.user.role === 'superadmin' ? (team || null) : req.user.team;
+
         const galleryItem = await Gallery.create({
             title,
             imageUrl,
-            team: team || null,
+            team: finalTeam,
             project: project || null,
             category: category || 'General',
             uploadedBy: req.user._id
@@ -48,6 +50,10 @@ exports.deleteGalleryItem = async (req, res) => {
     try {
         const item = await Gallery.findById(req.params.id);
         if (!item) return res.status(404).json({ message: 'Item not found' });
+
+        if (req.user.role !== 'superadmin' && item.team?.toString() !== req.user.team?.toString()) {
+            return res.status(403).json({ message: 'Not authorized to delete this team\'s gallery item' });
+        }
 
         // Delete file from filesystem
         if (item.imageUrl) {

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RiCheckLine, RiSearch2Line, RiArrowLeftSLine, RiArrowRightSLine, RiArrowDownSLine, RiInformationLine, RiImageAddLine, RiNewspaperLine, RiDeleteBin6Line, RiEdit2Line, RiExternalLinkLine } from 'react-icons/ri';
 import API_BASE_URL from '@/config';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Asset imports
 import TrashIcon from "@/assets/svg/LeaderDashboard/notification/trash 3.svg";
@@ -274,21 +275,39 @@ const AddContentForm = ({ onComplete, editData, type = 'news' }) => {
     const [image, setImage] = useState(null);
     const [preview, setPreview] = useState(editData?.imageUrl ? `${API_BASE_URL}${editData.imageUrl}` : null);
     
+    const { user } = useAuth();
+    
     const [teams, setTeams] = useState([]);
     const [projects, setProjects] = useState([]);
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         const fetchMeta = async () => {
+            const token = localStorage.getItem('token');
             const [t, p] = await Promise.all([
-                fetch(`${API_BASE_URL}/api/teams`),
-                fetch(`${API_BASE_URL}/api/projects`)
+                fetch(`${API_BASE_URL}/api/teams`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`${API_BASE_URL}/api/projects`, { headers: { 'Authorization': `Bearer ${token}` } })
             ]);
             if (t.ok) setTeams(await t.json());
             if (p.ok) setProjects(await p.json());
         };
         fetchMeta();
     }, []);
+
+    // Filter teams based on role
+    const availableTeams = user?.role === 'superadmin' 
+        ? [{ _id: '', name: 'General Lab' }, ...teams] 
+        : teams.filter(t => t._id === user?.team || t._id === user?.team?._id);
+
+    // Filter projects based on role - though backend might already filter
+    const availableProjects = [{ _id: '', title: 'No Project' }, ...projects];
+
+    useEffect(() => {
+        // Automatically set team for admin
+        if (user?.role !== 'superadmin' && availableTeams.length === 1 && !editData) {
+            setTeamId(availableTeams[0]._id);
+        }
+    }, [user, availableTeams, editData]);
 
     const handleImage = (e) => {
         const file = e.target.files[0];
@@ -306,7 +325,14 @@ const AddContentForm = ({ onComplete, editData, type = 'news' }) => {
             const formData = new FormData();
             formData.append('title', title);
             if (description) formData.append('description', description);
-            if (teamId) formData.append('team', teamId);
+            
+            // For admin, ensure their team is sent if not superadmin
+            let finalTeamId = teamId;
+            if (user?.role !== 'superadmin') {
+                finalTeamId = user?.team?._id || user?.team;
+            }
+            if (finalTeamId) formData.append('team', finalTeamId);
+            
             if (projectId) formData.append('project', projectId);
             if (category) formData.append('category', category);
             if (image) formData.append('image', image);
@@ -329,8 +355,8 @@ const AddContentForm = ({ onComplete, editData, type = 'news' }) => {
         finally { setIsSaving(false); }
     };
 
-    const selectedTeamName = teams.find(t => t._id === teamId)?.name || 'General Lab';
-    const selectedProjectName = projects.find(p => p._id === projectId)?.title || 'No Project';
+    const selectedTeamName = availableTeams.find(t => t._id === teamId)?.name || (user?.role !== 'superadmin' ? (availableTeams[0]?.name || 'Your Team') : 'General Lab');
+    const selectedProjectName = availableProjects.find(p => p._id === projectId)?.title || 'No Project';
 
     return (
         <div className="bg-[#151519] border border-[#1e1d22] rounded-[16px] p-8 mt-6 w-full shadow-2xl relative">
@@ -363,13 +389,13 @@ const AddContentForm = ({ onComplete, editData, type = 'news' }) => {
                         <FormSelect 
                             label="Research Team" 
                             value={selectedTeamName} 
-                            options={[{ _id: '', name: 'General Lab' }, ...teams].map(t => ({ label: t.name, value: t._id }))}
+                            options={availableTeams.map(t => ({ label: t.name, value: t._id }))}
                             onSelect={(opt) => setTeamId(opt.value)}
                         />
                         <FormSelect 
                             label="Linked Project" 
                             value={selectedProjectName} 
-                            options={[{ _id: '', title: 'No Project' }, ...projects].map(p => ({ label: p.title, value: p._id }))}
+                            options={availableProjects.map(p => ({ label: p.title, value: p._id }))}
                             onSelect={(opt) => setProjectId(opt.value)}
                         />
                     </div>
