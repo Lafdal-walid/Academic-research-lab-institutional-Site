@@ -420,10 +420,17 @@ exports.getDashboardStats = async (req, res) => {
         const totalPublications = await Publication.countDocuments(pubQuery);
         const totalProjects = await Project.countDocuments(projQuery);
         
+        const totalViewsResult = await Publication.aggregate([
+            { $match: pubQuery },
+            { $group: { _id: null, totalViews: { $sum: "$views" } } }
+        ]);
+        const totalViews = totalViewsResult.length > 0 ? totalViewsResult[0].totalViews : 0;
+        
         res.json({
             totalUsers,
             totalPublications,
-            totalProjects
+            totalProjects,
+            totalViews
         });
     } catch (error) {
         res.status(500).json({ message: error.message });

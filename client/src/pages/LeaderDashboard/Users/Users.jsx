@@ -1427,7 +1427,7 @@ const UsersTrackManager = () => {
 const Users = () => {
     const { user: currentUser } = useAuth();
     const [activeTab, setActiveTab] = useState('Users list');
-    const [stats, setStats] = useState({ totalUsers: 0, totalPublications: 0, totalProjects: 0 });
+    const [stats, setStats] = useState({ totalUsers: 0, totalPublications: 0, totalProjects: 0, totalViews: 0 });
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -1465,7 +1465,7 @@ const Users = () => {
         },
         {
             title: "Growth ( views )",
-            value: "342",
+            value: stats.totalViews?.toString() || "0",
             icon: <img src={GrowthIcon} alt="Growth" style={{ width: '1.25vw', height: '1.25vw', objectFit: 'contain' }} />,
             growth: { label: "+10%", icon: TrendUpIcon }
         }
