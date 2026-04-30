@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ChevronDown, ChevronLeft, ChevronRight, Users as UsersIcon, Calendar as CalendarIcon, Eye, Download, Briefcase, ArrowRight } from 'lucide-react';
+import { Search, ChevronDown, ChevronLeft, ChevronRight, Users as UsersIcon, Calendar as CalendarIcon, Eye, Download, Briefcase, ArrowRight, Quote, X, Copy } from 'lucide-react';
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { Link } from 'react-router-dom';
@@ -8,6 +8,9 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import API_BASE_URL from '@/config';
 
 const ResearchPaperCard = ({ id, title, authors, year, journal, description, tags, link, isRTL, activeFilds, projectName, views, onView }) => {
+    const [showCitation, setShowCitation] = useState(false);
+    const [copied, setCopied] = useState(false);
+
     const handleView = async () => {
         if (!id) return;
         if (onView) onView(id);
@@ -20,18 +23,41 @@ const ResearchPaperCard = ({ id, title, authors, year, journal, description, tag
         }
     };
 
+    const generateBibTeX = () => {
+        return `@article{${authors.split(',')[0].split(' ').pop().toLowerCase()}${year},
+  title={${title}},
+  author={${authors}},
+  journal={${journal || 'Institutional Lab'}},
+  year={${year}},
+  url={${link}}
+}`;
+    };
+
+    const generateAPA = () => {
+        return `${authors}. (${year}). ${title}. ${journal || 'Institutional Lab'}. Retrieved from ${link}`;
+    };
+
+    const copyToClipboard = (text) => {
+        navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
     return (
         <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className={`bg-[#151519] border border-white/5 rounded-2xl p-5 md:p-6 flex flex-col gap-5 group hover:border-[#3457DC]/30 transition-all duration-300 ${isRTL ? 'text-right' : 'text-left'}`}
+            className={`bg-[#151519] border border-white/5 rounded-2xl p-5 md:p-6 flex flex-col gap-5 group hover:border-[#3457DC]/30 transition-all duration-300 relative ${isRTL ? 'text-right' : 'text-left'}`}
         >
             <div className={`flex flex-col sm:flex-row justify-between items-start gap-4 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
                 <h3 className="text-lg md:text-xl font-bold text-white font-gilroy leading-tight group-hover:text-[#3457DC] transition-colors flex-1">
                     {title}
                 </h3>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 relative">
+                    <button onClick={() => setShowCitation(!showCitation)} className="text-[#3457DC] hover:text-white transition-colors p-2 rounded-lg hover:bg-[#3457DC]/20 bg-[#3457DC]/10" title="Cite Publication">
+                        <Quote size={18} />
+                    </button>
                     <a href={link} target="_blank" rel="noopener noreferrer" onClick={handleView} className="text-white/20 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/5" title="View Publication">
                         <Eye size={18} />
                     </a>
@@ -40,6 +66,50 @@ const ResearchPaperCard = ({ id, title, authors, year, journal, description, tag
                     </a>
                 </div>
             </div>
+
+            <AnimatePresence>
+                {showCitation && (
+                    <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden bg-[#1e1e24] rounded-xl border border-white/10 mt-2 mb-4"
+                    >
+                        <div className="p-4 flex flex-col gap-4">
+                            <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                                <h4 className="text-white font-bold text-sm">Cite this publication</h4>
+                                <button onClick={() => setShowCitation(false)} className="text-white/40 hover:text-white">
+                                    <X size={16} />
+                                </button>
+                            </div>
+                            
+                            <div className="flex flex-col gap-2">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-[#3457DC] text-xs font-bold uppercase">APA Format</span>
+                                    <button onClick={() => copyToClipboard(generateAPA())} className="text-white/40 hover:text-white flex items-center gap-1 text-xs">
+                                        <Copy size={12} /> {copied ? 'Copied!' : 'Copy'}
+                                    </button>
+                                </div>
+                                <div className="bg-[#0f0f13] p-3 rounded-lg text-white/70 text-xs font-mono break-all">
+                                    {generateAPA()}
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-[#3457DC] text-xs font-bold uppercase">BibTeX Format</span>
+                                    <button onClick={() => copyToClipboard(generateBibTeX())} className="text-white/40 hover:text-white flex items-center gap-1 text-xs">
+                                        <Copy size={12} /> {copied ? 'Copied!' : 'Copy'}
+                                    </button>
+                                </div>
+                                <div className="bg-[#0f0f13] p-3 rounded-lg text-white/70 text-xs font-mono whitespace-pre-wrap">
+                                    {generateBibTeX()}
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             <div className={`flex flex-wrap items-center gap-x-4 md:gap-x-6 gap-y-3 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                 <div className="flex items-center gap-2 text-white/40 text-xs md:text-sm">
