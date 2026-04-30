@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '@/contexts/AuthContext';
 import ChangeRoleModal from './ChangeRoleModal';
 import AssignTeamModal from './AssignTeamModal';
 import { RiCheckLine, RiArrowRightSLine, RiSearch2Line, RiArrowDownSLine, RiUserAddLine, RiArrowLeftSLine, RiDeleteBinLine, RiUserSettingsLine, RiTeamLine } from 'react-icons/ri';
@@ -134,6 +135,7 @@ const Tab = ({ label, isActive, onClick }) => {
 };
 
 const ManageUsersTable = () => {
+    const { user: currentUser } = useAuth();
     const [searchTerm, setSearchTerm] = useState('');
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [selectedSort, setSelectedSort] = useState('Newest first');
@@ -341,7 +343,9 @@ const ManageUsersTable = () => {
         }}>
             {/* 1. Header Section */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3.5vh' }}>
-                <h2 style={{ fontSize: '1.2vw', fontWeight: 600, color: 'white', margin: 0, fontFamily: ' Giloy, Poppins, sans-serif' }}>Manage Users</h2>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4vh' }}>
+                    <h2 style={{ fontSize: '1.2vw', fontWeight: 600, color: 'white', margin: 0, fontFamily: ' Giloy, Poppins, sans-serif' }}>Manage Users</h2>
+                </div>
                 <button style={{
                     backgroundColor: 'rgba(255,255,255,0.03)',
                     border: '1px solid #2a2a30',
@@ -1421,6 +1425,7 @@ const UsersTrackManager = () => {
 };
 
 const Users = () => {
+    const { user: currentUser } = useAuth();
     const [activeTab, setActiveTab] = useState('Users list');
     const [stats, setStats] = useState({ totalUsers: 0, totalPublications: 0, totalProjects: 0 });
 

@@ -13,12 +13,13 @@ import { Navigate } from 'react-router-dom';
 
 const LeaderApp = () => {
   const { user } = useAuth();
+  const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
   const isSuper = user?.role === 'superadmin';
 
   return (
     <Layoutleader>
       <Routes>
-        <Route path="/" element={isSuper ? <Users /> : <Navigate to="project-hub" replace />} />
+        <Route path="/" element={isAdmin ? <Users /> : <Navigate to="project-hub" replace />} />
         <Route path="project-hub" element={<ProjectHub />} />
         <Route path="notifications" element={<Notifications />} />
         <Route path="manage-content" element={<ManageNewsGallery />} />

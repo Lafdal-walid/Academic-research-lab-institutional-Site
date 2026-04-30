@@ -3,7 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const { createReport, getReports, updateReport } = require('../controllers/reportController');
-const { protect } = require('../midddlewares/authMiddleware');
+const { protect, authorize } = require('../midddlewares/authMiddleware');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -29,6 +29,6 @@ const upload = multer({
 
 router.post('/', protect, upload.single('benchmarkFile'), createReport);
 router.get('/', getReports);
-router.put('/:id', protect, updateReport);
+router.put('/:id', protect, authorize('admin', 'superadmin'), updateReport);
 
 module.exports = router;

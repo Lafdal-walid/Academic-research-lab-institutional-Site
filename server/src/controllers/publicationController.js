@@ -91,7 +91,16 @@ exports.getPublications = async (req, res) => {
         
         // Default to Approved for public view, unless status is explicitly requested (e.g. from dashboard)
         if (req.query.status) {
-            if (req.query.status !== 'all') query.status = req.query.status;
+            if (req.query.status !== 'all') {
+                query.status = req.query.status;
+            } else if (req.user && req.user.role === 'admin') {
+                // Restriction: Admin can only see all publications from their own team
+                if (req.user.team) {
+                    query.team = req.user.team;
+                } else {
+                    return res.json([]);
+                }
+            }
         } else {
             query.status = 'Approved';
         }
@@ -112,6 +121,13 @@ exports.deletePublication = async (req, res) => {
         const publication = await Publication.findById(req.params.id);
         if (!publication) return res.status(404).json({ message: 'Publication not found' });
         
+        // Restriction: Admin can only delete publications from their own team
+        if (req.user.role === 'admin') {
+            if (!req.user.team || !publication.team || publication.team.toString() !== req.user.team.toString()) {
+                return res.status(403).json({ message: 'Access denied: You can only manage publications from your own team' });
+            }
+        }
+
         await publication.deleteOne();
         res.json({ message: 'Publication removed' });
     } catch (error) {
@@ -122,13 +138,20 @@ exports.deletePublication = async (req, res) => {
 exports.updatePublicationStatus = async (req, res) => {
     try {
         const { status } = req.body;
-        const publication = await Publication.findByIdAndUpdate(
-            req.params.id,
-            { status },
-            { new: true }
-        );
+        const publication = await Publication.findById(req.params.id);
+        
         if (!publication) return res.status(404).json({ message: 'Publication not found' });
-        res.json(publication);
+
+        // Restriction: Admin can only update publications from their own team
+        if (req.user.role === 'admin') {
+            if (!req.user.team || !publication.team || publication.team.toString() !== req.user.team.toString()) {
+                return res.status(403).json({ message: 'Access denied: You can only manage publications from your own team' });
+            }
+        }
+
+        publication.status = status;
+        const updatedPublication = await publication.save();
+        res.json(updatedPublication);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

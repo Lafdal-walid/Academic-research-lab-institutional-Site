@@ -25,10 +25,18 @@ const Sidebar = ({ isSidebarOpen = true, closeSidebar }) => {
       { id: 'admin-tools', path: '/leaderdashboard/admin-tools', icon: <img src={iconAdminTools} alt="Admin Tools" className="object-contain brightness-0 invert" style={{ width: '1vw', height: '1vw' }} />, label: 'Admin Tools' },
     ];
     
-    // Only superadmin can see Users and Admin Tools
-    if (user?.role !== 'superadmin') {
-      return items.filter(item => item.id !== 'users' && item.id !== 'admin-tools');
+    // Only superadmin can see Admin Tools
+    if (user?.role === 'superadmin') {
+      return items;
     }
+    
+    // Admins can see everything except Admin Tools
+    if (user?.role === 'admin') {
+      return items.filter(item => item.id !== 'admin-tools');
+    }
+    
+    // Others (like leaders) see restricted list
+    return items.filter(item => item.id !== 'users' && item.id !== 'admin-tools');
     
     return items;
   }, [user]);

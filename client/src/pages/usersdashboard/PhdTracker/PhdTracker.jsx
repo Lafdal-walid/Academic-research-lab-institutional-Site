@@ -21,66 +21,7 @@ import ProjectsIcon from "@/assets/svg/userDashboard/Overview/Vector-1.svg";
 import EngagementIcon from "@/assets/svg/userDashboard/Overview/dashboard (4) 1.svg";
 import API_BASE_URL from '@/config';
 
-const StatCard = ({ icon, title, value }) => {
-    return (
-        <div 
-            className="stat-card"
-            style={{
-            width: '100%',
-            backgroundColor: '#151519',
-            border: '1px solid rgba(255, 255, 255, 0.05)',
-            borderRadius: '1.2vw',
-            padding: '1vh 1.2vw',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            height: '20vh',
-            position: 'relative',
-            overflow: 'hidden',
-            transition: 'all 0.3s ease',
-            cursor: 'default'
-        }}>
-            {/* Background Glow */}
-            <div style={{
-                position: 'absolute', top: -1, right: -1, bottom: -1, left: -1,
-                background: 'radial-gradient(43.95% 65.1% at 100% 0%, #3457DC 0%, rgba(21,21,25,0) 100%)',
-                pointerEvents: 'none', opacity: 0.45, zIndex: 1
-            }} />
 
-            {/* Top Part: Icon & Title */}
-            <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', gap: '1.2vh' }}>
-                <div 
-                    className="stat-card-icon-container"
-                    style={{
-                    width: '2.5vw', height: '2.5vw', minWidth: '35px', minHeight: '35px',
-                    backgroundColor: 'rgba(52, 87, 220, 0.12)', borderRadius: '0.7vw',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white'
-                }}>
-                    <span className="stat-card-icon-wrapper">
-                        {icon}
-                    </span>
-                </div>
-                <span 
-                    className="stat-card-title-text"
-                    style={{
-                    fontSize: '0.9vw', fontWeight: 600, color: '#A5A5B2',
-                    textTransform: 'capitalize', letterSpacing: '0.01vw', fontFamily: "'Poppins', sans-serif"
-                }}>
-                    {title}
-                </span>
-            </div>
-
-            {/* Bottom Part: Value */}
-            <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'end', justifyContent: 'space-between', marginTop: '0.3vh' }}>
-                <h3 
-                    className="stat-card-value-text"
-                    style={{ fontSize: '1.8vw', fontWeight: 500, color: 'white', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5vw' }}>
-                    {value}
-                </h3>
-            </div>
-        </div>
-    );
-};
 
 const Tab = ({ label, isActive, onClick }) => {
     return (
@@ -369,7 +310,10 @@ const ReportsHistoryTable = ({ direction = 'ltr', reportsList, setReportsList })
                                         fontSize: '0.8vw', backgroundColor: getStatusStyle(row.status).bg, color: getStatusStyle(row.status).color,
                                         fontWeight: 600
                                     }}>
-                                        {row.status}
+                                        {row.status === 'Accepted' ? tc('accepted') : 
+                                         row.status === 'Refused' ? tc('refused') : 
+                                         row.status === 'In Progress' ? tc('inProgress') : 
+                                         row.status}
                                     </span>
                                 </td>
                                 <td 
@@ -1269,6 +1213,7 @@ const EditProgressForm = ({ onSave }) => {
 const PhdTracker = () => {
     const { t } = useTranslation('phdTracker');
     const { t: to } = useTranslation('overview');
+    const { t: tc } = useTranslation('common');
     const { language } = useLanguage();
     const [activeTab, setActiveTab] = useState(t('teamTracker'));
     const [showReportsTable, setShowReportsTable] = useState(false);
@@ -1396,53 +1341,71 @@ const PhdTracker = () => {
         }
     };
 
-    const overviewStats = [
-        {
-            title: stats.mgr ? t('teamManager') : to('teamMembers'),
-            value: (stats.mgr || stats.members || 0).toString(),
-            icon: <img src={TeamIcon} alt="Team" style={{ width: '1.25vw', height: '1.25vw', objectFit: 'contain' }} />
-        },
-        {
-            title: t('phdProfessor'),
-            value: stats.phd.toString(),
-            icon: <img src={TeamIcon} alt="Team" style={{ width: '1.25vw', height: '1.25vw', objectFit: 'contain' }} />
-        },
-        {
-            title: t('professor'),
-            value: stats.prof.toString(),
-            icon: <img src={TeamIcon} alt="Team" style={{ width: '1.25vw', height: '1.25vw', objectFit: 'contain' }} />
-        },
-        {
-            title: t('engineeringGraduate'),
-            value: stats.eng.toString(),
-            icon: <img src={TeamIcon} alt="Team" style={{ width: '1.25vw', height: '1.25vw', objectFit: 'contain' }} />
-        }
-    ];
+
 
     return (
         <div className="w-full text-white font-poppins pb-10 animate-in fade-in duration-500">
             {/* Header / Title */}
-            <div className="flex flex-col gap-[1vh] mb-[4vh]">
-                <h2 className="text-[2vw] font-bold text-white" style={{ fontFamily: 'Gilroy, sans-serif' }}>
-                    {t('phdTracker')}
-                </h2>
-                <p className="text-[#a5a5b2] text-[0.9vw]">
-                    {t('trackTeamReports')}
-                </p>
+
+
+            {/* Tabs Header */}
+            <div className="flex items-center mb-[4vh]" style={{ gap: '40px' }}>
+                <Tab 
+                    label={t('teamTracker')} 
+                    isActive={activeTab === t('teamTracker')} 
+                    onClick={() => setActiveTab(t('teamTracker'))} 
+                />
+                <Tab 
+                    label={t('yourTrack')} 
+                    isActive={activeTab === t('yourTrack')} 
+                    onClick={() => setActiveTab(t('yourTrack'))} 
+                />
             </div>
 
-            {/* Content Area - Focused only on Reports History */}
+            {/* Content Area */}
             <div className="px-[0px] pt-[10px] pb-[10px] mt-[0px]">
                 {isLoading ? (
                     <div className="flex items-center justify-center h-[30vh]">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3457DC]"></div>
                     </div>
-                ) : (
+                ) : activeTab === t('teamTracker') ? (
                     <ReportsHistoryTable 
                         direction={language === 'ar' ? 'rtl' : 'ltr'} 
                         reportsList={teamReports} 
                         setReportsList={setTeamReports} 
                     />
+                ) : (
+                    <div className="flex flex-col gap-[4vh]">
+                        {/* Check if user has any accepted graduation degree */}
+                        {userReports.some(r => r.status === 'Accepted' || r.status === tc('accepted')) ? (
+                            <>
+                                <CongratsBanner direction={language === 'ar' ? 'rtl' : 'ltr'} />
+                                <div className="flex flex-col gap-[4vh]">
+                                    <AcademicPhasesSection phases={academicPhases} />
+                                    <ReportsHistoryTable 
+                                        direction={language === 'ar' ? 'rtl' : 'ltr'} 
+                                        reportsList={userReports} 
+                                        setReportsList={setUserReports} 
+                                    />
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <RestrictionBanner direction={language === 'ar' ? 'rtl' : 'ltr'} />
+                                <div className="flex flex-col gap-[4vh]">
+                                    <EditProgressForm onSave={handleAddReport} />
+                                    {userReports.length > 0 && (
+                                        <ReportsHistoryTable 
+                                            direction={language === 'ar' ? 'rtl' : 'ltr'} 
+                                            reportsList={userReports} 
+                                            setReportsList={setUserReports} 
+                                        />
+                                    )}
+                                    <AcademicPhasesSection phases={academicPhases} />
+                                </div>
+                            </>
+                        )}
+                    </div>
                 )}
             </div>
         </div>

@@ -25,14 +25,20 @@ exports.getReports = async (req, res) => {
         if (req.query.user) {
             query.user = req.query.user;
         } else if (req.user) {
-            // If the user has a team, only show reports from that team
-            const user = await User.findById(req.user._id);
-            if (user && user.team) {
-                const teamUsers = await User.find({ team: user.team }).select('_id');
-                const userIds = teamUsers.map(u => u._id);
-                query.user = { $in: userIds };
+            // Restriction: Admin can see reports from their own team
+            if (req.user.role === 'admin') {
+                if (req.user.team) {
+                    const teamUsers = await User.find({ team: req.user.team }).select('_id');
+                    const userIds = teamUsers.map(u => u._id);
+                    query.user = { $in: userIds };
+                } else {
+                    return res.json([]);
+                }
+            } else if (req.user.role === 'superadmin') {
+                // Superadmin sees everything
+                query = {};
             } else {
-                // If no team, only show their own reports
+                // Regular users only see their own reports
                 query.user = req.user._id;
             }
         }
@@ -46,8 +52,18 @@ exports.getReports = async (req, res) => {
 
 exports.updateReport = async (req, res) => {
     try {
-        const report = await Report.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        res.json(report);
+        const report = await Report.findById(req.params.id).populate('user');
+        if (!report) return res.status(404).json({ message: 'Report not found' });
+
+        // Restriction: Admin can only update reports from their own team
+        if (req.user.role === 'admin') {
+            if (!req.user.team || !report.user?.team || report.user.team.toString() !== req.user.team.toString()) {
+                return res.status(403).json({ message: 'Access denied: You can only manage reports from your own team' });
+            }
+        }
+
+        const updatedReport = await Report.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        res.json(updatedReport);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

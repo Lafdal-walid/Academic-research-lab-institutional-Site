@@ -75,15 +75,16 @@ const Register: React.FC = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: formData.email })
             });
+            const data = await res.json();
             if (res.ok) {
                 setOtp(['', '', '', '']);
                 setStep(2); // email verification first
             } else {
-                const data = await res.json();
                 alert(data.message || 'Error sending email code');
             }
         } catch (error) {
-            console.error(error);
+            console.error('Registration Error:', error);
+            alert('Failed to connect to server. Please ensure the backend is running.');
         } finally {
             setIsSubmitting(false);
         }
@@ -235,7 +236,26 @@ const Register: React.FC = () => {
                             onOtpKeyDown={handleOtpKeyDown} 
                             onSubmit={handleEmailVerify} 
                             onBack={() => setStep(1)} 
-                            onResend={() => {}}
+                            onResend={async () => {
+                                setIsSubmitting(true);
+                                try {
+                                    const res = await fetch(`${API_BASE_URL}/api/auth/send-email-otp`, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ email: formData.email })
+                                    });
+                                    if (res.ok) {
+                                        alert('Code resent successfully');
+                                    } else {
+                                        const data = await res.json();
+                                        alert(data.message || 'Error resending code');
+                                    }
+                                } catch (error) {
+                                    console.error(error);
+                                } finally {
+                                    setIsSubmitting(false);
+                                }
+                            }}
                             isSubmitting={isSubmitting} 
                             buttonText="Verify Email" 
                         />
@@ -268,7 +288,26 @@ const Register: React.FC = () => {
                             onOtpKeyDown={handleOtpKeyDown} 
                             onSubmit={handlePhoneVerify} 
                             onBack={() => setStep(3)} 
-                            onResend={() => {}}
+                            onResend={async () => {
+                                setIsSubmitting(true);
+                                try {
+                                    const res = await fetch(`${API_BASE_URL}/api/auth/send-phone-otp`, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ phoneNumber: selectedCountry.code + phoneNumber })
+                                    });
+                                    if (res.ok) {
+                                        alert('SMS code resent successfully');
+                                    } else {
+                                        const data = await res.json();
+                                        alert(data.message || 'Error resending SMS');
+                                    }
+                                } catch (error) {
+                                    console.error(error);
+                                } finally {
+                                    setIsSubmitting(false);
+                                }
+                            }}
                             isSubmitting={isSubmitting} 
                             buttonText="Verify Phone & Create Account" 
                         />

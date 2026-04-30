@@ -294,8 +294,9 @@ const AddContentForm = ({ onComplete, editData, type = 'news' }) => {
         fetchMeta();
     }, []);
 
-    // Filter teams based on role
-    const availableTeams = user?.role === 'superadmin' 
+    // Filter teams based on role - both superadmin and admin can manage all teams
+    const isFullAdmin = user?.role === 'superadmin' || user?.role === 'admin';
+    const availableTeams = isFullAdmin 
         ? [{ _id: '', name: 'General Lab' }, ...teams] 
         : teams.filter(t => t._id === user?.team || t._id === user?.team?._id);
 
@@ -326,9 +327,9 @@ const AddContentForm = ({ onComplete, editData, type = 'news' }) => {
             formData.append('title', title);
             if (description) formData.append('description', description);
             
-            // For admin, ensure their team is sent if not superadmin
+            // For admin, ensure their team is sent if not full admin
             let finalTeamId = teamId;
-            if (user?.role !== 'superadmin') {
+            if (!isFullAdmin) {
                 finalTeamId = user?.team?._id || user?.team;
             }
             if (finalTeamId) formData.append('team', finalTeamId);
@@ -355,7 +356,7 @@ const AddContentForm = ({ onComplete, editData, type = 'news' }) => {
         finally { setIsSaving(false); }
     };
 
-    const selectedTeamName = availableTeams.find(t => t._id === teamId)?.name || (user?.role !== 'superadmin' ? (availableTeams[0]?.name || 'Your Team') : 'General Lab');
+    const selectedTeamName = availableTeams.find(t => t._id === teamId)?.name || (!isFullAdmin ? (availableTeams[0]?.name || 'Your Team') : 'General Lab');
     const selectedProjectName = availableProjects.find(p => p._id === projectId)?.title || 'No Project';
 
     return (

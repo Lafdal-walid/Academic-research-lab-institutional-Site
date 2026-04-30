@@ -76,42 +76,41 @@ exports.requestEmailOtp = async (req, res) => {
         
         // Send real email via Nodemailer
         const nodemailer = require('nodemailer');
+        
+        // Simplified transporter configuration
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
+                user: process.env.EMAIL_USER.trim(),
+                pass: process.env.EMAIL_PASS.trim()
             }
         });
         
-        const mailOptions = {
-            from: `"Research Lab" <${process.env.EMAIL_USER}>`,
-            to: email,
-            subject: 'Your Verification Code - Research Lab',
-            html: `
-                <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 32px; background: #0f0f13; border-radius: 16px; color: #fff;">
-                    <h2 style="color:#3457DC; margin-bottom: 8px;">Verify your email</h2>
-                    <p style="color:#aaa; margin-bottom: 24px;">Enter the code below to verify your email address.</p>
-                    <div style="background:#1a1a24; border-radius: 12px; padding: 24px; text-align: center; letter-spacing: 12px; font-size: 36px; font-weight: bold; color: #fff; border: 1px solid #3457DC33;">
-                        ${otp}
-                    </div>
-                    <p style="color:#666; font-size:12px; margin-top:24px; text-align:center;">This code expires in 10 minutes. Do not share it with anyone.</p>
-                </div>
-            `
-        };
-        
         try {
-            await transporter.sendMail(mailOptions);
+            await transporter.sendMail({
+                from: `"Research Lab" <${process.env.EMAIL_USER}>`,
+                to: email,
+                subject: 'Your Verification Code - Research Lab',
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 32px; background: #0f0f13; border-radius: 16px; color: #fff;">
+                        <h2 style="color:#3457DC; margin-bottom: 8px;">Verify your email</h2>
+                        <p style="color:#aaa; margin-bottom: 24px;">Enter the code below to verify your email address.</p>
+                        <div style="background:#1a1a24; border-radius: 12px; padding: 24px; text-align: center; letter-spacing: 12px; font-size: 36px; font-weight: bold; color: #fff; border: 1px solid #3457DC33;">
+                            ${otp}
+                        </div>
+                        <p style="color:#666; font-size:12px; margin-top:24px; text-align:center;">This code expires in 10 minutes. Do not share it with anyone.</p>
+                    </div>
+                `
+            });
             console.log(`[EMAIL] OTP sent to ${email}: ${otp}`);
+            res.json({ success: true, message: 'Verification code sent to email' });
         } catch (emailErr) {
-            // Fallback to terminal if email not configured
-            console.log(`\n============= EMAIL MOCK =============`);
-            console.log(`To: ${email}\nYour email verification code is: ${otp}`);
-            console.log(`======================================\n`);
-            console.warn('[EMAIL] Could not send real email:', emailErr.message);
+            console.error('[EMAIL] Failed to send real email:', emailErr.message);
+            res.status(500).json({ 
+                success: false, 
+                message: 'Failed to send email. Please check your email configuration.' 
+            });
         }
-        
-        res.json({ message: 'Verification code sent to email' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -174,7 +173,8 @@ exports.register = async (req, res) => {
         });
 
         if (user) {
-            otpStore.delete(email); // consume OTP
+            otpStore.delete(phoneNumber); // consume Phone OTP
+            otpStore.delete(email); // also consume Email OTP if it exists
             res.status(201).json({
                 _id: user._id,
                 username: user.username,
@@ -332,7 +332,17 @@ exports.changePassword = async (req, res) => {
 
 exports.getAllUsers = async (req, res) => {
     try {
-        const users = await User.find({}).populate('team').select('-password');
+        let query = {};
+        
+        // Restriction: Admin can only see users from their own team
+        if (req.user.role === 'admin') {
+            if (!req.user.team) {
+                return res.json([]);
+            }
+            query = { team: req.user.team };
+        }
+        
+        const users = await User.find(query).populate('team').select('-password');
         res.json(users);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -345,6 +355,13 @@ exports.updateUser = async (req, res) => {
         
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Restriction: Admin can only manage users from their own team
+        if (req.user.role === 'admin') {
+            if (!req.user.team || !user.team || user.team.toString() !== req.user.team.toString()) {
+                return res.status(403).json({ message: 'Access denied: You can only manage users from your own team' });
+            }
         }
 
         if (role) user.role = role;
@@ -384,9 +401,24 @@ exports.updateUser = async (req, res) => {
 };
 exports.getDashboardStats = async (req, res) => {
     try {
-        const totalUsers = await User.countDocuments();
-        const totalPublications = await Publication.countDocuments();
-        const totalProjects = await Project.countDocuments();
+        let userQuery = {};
+        let pubQuery = {};
+        let projQuery = {};
+
+        if (req.user.role === 'admin') {
+            const teamId = req.user.team;
+            if (teamId) {
+                userQuery = { team: teamId };
+                pubQuery = { team: teamId };
+                projQuery = { team: teamId };
+            } else {
+                return res.json({ totalUsers: 0, totalPublications: 0, totalProjects: 0 });
+            }
+        }
+
+        const totalUsers = await User.countDocuments(userQuery);
+        const totalPublications = await Publication.countDocuments(pubQuery);
+        const totalProjects = await Project.countDocuments(projQuery);
         
         res.json({
             totalUsers,
