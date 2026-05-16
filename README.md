@@ -2,7 +2,8 @@
 
 A modern, high-performance institutional portal and management dashboard designed for Academic Research Laboratories. Built with the **MERN Stack**, this platform centralizes the management of research teams, scientific publications, ongoing projects, and lab news, providing a seamless experience for both the public and laboratory administrators.
 
-![Lab Portal Preview](https://via.placeholder.com/1000x500?text=Academic+Research+Lab+Portal) <!-- Replace with your actual project screenshot -->
+test website :
+https://incredible-caramel-a35490.netlify.app/
 
 ## ✨ Key Features
 
